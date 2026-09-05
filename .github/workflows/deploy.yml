@@ -2,9 +2,9 @@ name: Deploy modules
 
 # On merge to master, publish every module whose files changed.
 #
-# Runs on the self-hosted runner because the marketplace API is only reachable
-# on the internal network (traefik on docker.local.arcanine.io), the same place
-# woofx3-marketplace-api deploys itself from.
+# The marketplace API is public (Railway), so this runs on a GitHub-hosted
+# runner. woofx3-marketplace-api's self-hosted Portainer workflow is
+# workflow_dispatch-only; railway-deploy.yml is the live path.
 
 on:
   push:
@@ -28,9 +28,9 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, docker-local]
+    runs-on: ubuntu-latest
     env:
-      API: ${{ vars.MARKETPLACE_API_URL || 'http://marketplace.dev.woofx3.tv' }}
+      API: ${{ vars.MARKETPLACE_API_URL || 'https://woofx3-marketplace-api-production.up.railway.app' }}
     steps:
       - uses: actions/checkout@v4
         with:

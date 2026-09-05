@@ -115,10 +115,10 @@ changed ones: each needs an `id`, `name` and `version`, the `id` must match
 | `.github/workflows/precheck.yml` | PR to `master` | Runs the version check, then a dry-run publish of each changed module so a malformed manifest fails here rather than mid-deploy |
 | `.github/workflows/deploy.yml` | Push to `master` | Publishes each changed module, then tags `<id>@<version>` |
 
-Deploy runs on the `[self-hosted, docker-local]` runner because the marketplace
-API is only reachable on the internal network. The API base URL comes from the
-`MARKETPLACE_API_URL` repo variable, defaulting to
-`http://marketplace.dev.woofx3.tv`.
+Both workflows run on GitHub-hosted runners — the marketplace API is public
+(Railway). The base URL comes from the `MARKETPLACE_API_URL` repo variable,
+defaulting to `https://woofx3-marketplace-api-production.up.railway.app`; set
+that variable to point at a different environment.
 
 **Neither workflow needs a secret.** Both get the publishing tool from
 `ghcr.io/wolfymaster/marketplace-cli:latest` — a public GHCR package holding a
