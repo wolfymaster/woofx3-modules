@@ -5,12 +5,12 @@
 # Factored out of the hook and the workflows so "what counts as changed" has one
 # definition. Override the branch with BASE_BRANCH.
 #
-# Usage: scripts/base-ref.sh [rev]
+# Usage: ci/scripts/base-ref.sh [rev]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/lib.sh
+# shellcheck source=ci/scripts/lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
 rev="${1:-HEAD}"

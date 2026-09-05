@@ -6,8 +6,9 @@ Merging to `master` publishes every module whose files changed.
 ## What counts as a module
 
 **A module is any directory containing a `manifest.json`.** That's the whole
-rule. Modules can sit at any depth, and the top-level folders (`platform/`,
-`custom/`) are for humans — no tooling keys off them.
+rule. Modules live under `modules/` and can sit at any depth beneath it; the
+grouping folders (`platform/`, `custom/`) are for humans — no tooling keys off
+them, and `modules/` itself isn't special-cased either.
 
 Identity comes from the manifest, not the path:
 
@@ -19,7 +20,7 @@ Identity comes from the manifest, not the path:
 }
 ```
 
-`platform/twitch/` publishes as `twitch_platform`. Renaming or moving the
+`modules/platform/twitch/` publishes under the id its manifest declares. Renaming or moving the
 directory changes nothing; renaming the `id` creates a different module.
 
 ## Making a change
@@ -27,13 +28,13 @@ directory changes nothing; renaming the `id` creates a different module.
 ```bash
 # 1. branch and edit
 git checkout -b feat/spotify-device-picker
-$EDITOR platform/spotify/functions/song_request.js
+$EDITOR modules/platform/spotify/functions/song_request.js
 
 # 2. commit with a conventional-commit message
 git commit -am "feat(spotify): let viewers pick the playback device"
 
 # 3. bump — the level is derived from your commit messages
-./scripts/bump.sh
+./ci/scripts/bump.sh
 #   spotify   1.0.0 -> 1.1.0  (minor: feat(spotify): let viewers pick the playback device)
 
 # 4. commit the version and push
@@ -54,7 +55,7 @@ exactly one version per module — a change shipped under an unchanged version i
 invisible to everyone downstream, because installed copies never learn there's
 something new.
 
-`./scripts/bump.sh` does the arithmetic, deriving the level from the
+`./ci/scripts/bump.sh` does the arithmetic, deriving the level from the
 conventional-commit messages on your branch that touched each module:
 
 | Commit on your branch | Bump |
@@ -67,10 +68,10 @@ A module still on `0.x` gets a minor bump for a breaking change rather than
 being pushed to `1.0.0` on your behalf (semver §4).
 
 ```bash
-./scripts/bump.sh                          # every changed module, level from commits
-./scripts/bump.sh minor                    # every changed module, forced level
-./scripts/bump.sh patch platform/spotify   # one module, forced level
-./scripts/bump.sh --dry-run                # show what would change
+./ci/scripts/bump.sh                          # every changed module, level from commits
+./ci/scripts/bump.sh minor                    # every changed module, forced level
+./ci/scripts/bump.sh patch modules/platform/spotify   # one module, forced level
+./ci/scripts/bump.sh --dry-run                # show what would change
 ```
 
 Because levels come from commit messages scoped by path, **keep a commit to one
@@ -84,7 +85,7 @@ in the PR diff is the version that actually ships.
 ## Local setup
 
 ```bash
-./scripts/install-hooks.sh
+./ci/scripts/install-hooks.sh
 ```
 
 Points `core.hooksPath` at `.githooks/`, so `pre-push` runs the same version
@@ -95,12 +96,13 @@ check CI does and you find out before opening the PR. Bypass once with
 
 | Script | Purpose |
 |---|---|
-| `scripts/bump.sh` | Increment versions for changed modules |
-| `scripts/check-versions.sh` | The gate — fails if a changed module wasn't bumped |
-| `scripts/list-changed.sh` | Modules changed between two revisions (`--json` for a matrix) |
-| `scripts/base-ref.sh` | The revision "changed" is measured against |
-| `scripts/manifest.py` | Read/write top-level manifest fields |
-| `scripts/lib.sh` | Shared discovery, attribution and semver helpers |
+| `ci/scripts/bump.sh` | Increment versions for changed modules |
+| `ci/scripts/check-versions.sh` | The gate — fails if a changed module wasn't bumped |
+| `ci/scripts/list-changed.sh` | Modules changed between two revisions (`--json` for a matrix) |
+| `ci/scripts/base-ref.sh` | The revision "changed" is measured against |
+| `ci/scripts/manifest.py` | Read/write top-level manifest fields |
+| `ci/scripts/lib.sh` | Shared discovery, attribution and semver helpers |
+| `ci/scripts/install-hooks.sh` | Point this clone's hooks at `.githooks/` |
 
 `check-versions.sh` also validates every manifest in the repo, not just the
 changed ones: each needs an `id`, `name` and `version`, the `id` must match
@@ -144,5 +146,5 @@ The marketplace stores only each module's current version, so the git tags
 
 ```bash
 git tag -l 'spotify@*'          # every released version of one module
-git log --oneline spotify@1.0.0..spotify@1.1.0 -- platform/spotify
+git log --oneline spotify@1.0.0..spotify@1.1.0 -- modules/platform/spotify
 ```

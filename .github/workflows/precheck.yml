@@ -33,10 +33,10 @@ jobs:
           if [ -n "${BASE_SHA:-}" ]; then
             base="$BASE_SHA"
           else
-            base="$(./scripts/base-ref.sh)"
+            base="$(./ci/scripts/base-ref.sh)"
           fi
           echo "Comparing against $base"
-          ./scripts/check-versions.sh "$base"
+          ./ci/scripts/check-versions.sh "$base"
 
       - name: Summarise what would deploy
         if: success()
@@ -44,11 +44,11 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          base="${BASE_SHA:-$(./scripts/base-ref.sh)}"
+          base="${BASE_SHA:-$(./ci/scripts/base-ref.sh)}"
           {
             echo "### Modules this PR would publish"
             echo
-            changed="$(./scripts/list-changed.sh "$base" HEAD)"
+            changed="$(./ci/scripts/list-changed.sh "$base" HEAD)"
             if [ -z "$changed" ]; then
               echo "_None — no module files changed._"
             else
@@ -57,8 +57,8 @@ jobs:
               while IFS= read -r mod; do
                 [ -z "$mod" ] && continue
                 printf '| `%s` | %s |\n' \
-                  "$(./scripts/manifest.py get "$mod/manifest.json" id)" \
-                  "$(./scripts/manifest.py get "$mod/manifest.json" version)"
+                  "$(./ci/scripts/manifest.py get "$mod/manifest.json" id)" \
+                  "$(./ci/scripts/manifest.py get "$mod/manifest.json" version)"
               done <<< "$changed"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
@@ -84,8 +84,8 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          base="${BASE_SHA:-$(./scripts/base-ref.sh)}"
-          changed="$(./scripts/list-changed.sh "$base" HEAD)"
+          base="${BASE_SHA:-$(./ci/scripts/base-ref.sh)}"
+          changed="$(./ci/scripts/list-changed.sh "$base" HEAD)"
           if [ -z "$changed" ]; then
             echo "No module changes to validate."
             exit 0

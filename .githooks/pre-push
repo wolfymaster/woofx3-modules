@@ -2,7 +2,7 @@
 # Run the module version check before pushing, so the PR check isn't the first
 # place you find out a version wasn't bumped.
 #
-# Installed by scripts/install-hooks.sh (which points core.hooksPath here).
+# Installed by ci/scripts/install-hooks.sh (which points core.hooksPath here).
 # Skip a single push with: git push --no-verify
 
 set -euo pipefail
@@ -20,12 +20,12 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
 
 	if [[ "$remote_sha" == "$zero" ]]; then
 		# New branch: compare against where it diverged from the integration branch.
-		base="$("$repo_root/scripts/base-ref.sh" "$local_sha")" || continue
+		base="$("$repo_root/ci/scripts/base-ref.sh" "$local_sha")" || continue
 	else
 		base="$remote_sha"
 	fi
 
-	if ! "$repo_root/scripts/check-versions.sh" "$base"; then
+	if ! "$repo_root/ci/scripts/check-versions.sh" "$base"; then
 		status=1
 	fi
 done

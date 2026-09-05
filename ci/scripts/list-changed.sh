@@ -5,14 +5,14 @@
 # see what a merge would ship.
 #
 # Usage:
-#   scripts/list-changed.sh [--json] [base-ref] [head-ref]
+#   ci/scripts/list-changed.sh [--json] [base-ref] [head-ref]
 #
 #   --json   emit a GitHub Actions matrix array: [{"id":…,"path":…,"version":…}]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/lib.sh
+# shellcheck source=ci/scripts/lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
 cd "$(repo_root)"
@@ -35,16 +35,17 @@ fi
 
 # Build the matrix with python so ids and paths are correctly escaped rather
 # than glued together with printf.
-printf '%s\n' "${changed[@]:-}" | python3 -c '
-import json, subprocess, sys
+printf '%s\n' "${changed[@]:-}" | MANIFEST_TOOL="$MANIFEST_TOOL" python3 -c '
+import json, os, subprocess, sys
 
+tool = os.environ["MANIFEST_TOOL"]
 entries = []
 for path in (line.strip() for line in sys.stdin):
     if not path:
         continue
     def field(name):
         return subprocess.run(
-            ["scripts/manifest.py", "get", f"{path}/manifest.json", name],
+            [tool, "get", f"{path}/manifest.json", name],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
     entries.append({"id": field("id"), "path": path, "version": field("version")})

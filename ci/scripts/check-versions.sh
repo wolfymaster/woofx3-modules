@@ -7,12 +7,12 @@
 # module, so a change that ships under an unchanged version is invisible to
 # everyone downstream — installed copies never learn there's something new.
 #
-# Usage: scripts/check-versions.sh [base-ref]
+# Usage: ci/scripts/check-versions.sh [base-ref]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/lib.sh
+# shellcheck source=ci/scripts/lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
 cd "$(repo_root)"
@@ -104,7 +104,7 @@ for mod in "${changed[@]}"; do
 	0)
 		printf '  %s✗%s %-24s %s %s(unchanged, but files were modified)%s\n' \
 			"$red" "$reset" "$id" "$old" "$yellow" "$reset"
-		printf '      %srun: ./scripts/bump.sh patch %s%s\n' "$dim" "$mod" "$reset"
+		printf '      %srun: ./ci/scripts/bump.sh patch %s%s\n' "$dim" "$mod" "$reset"
 		failed=1
 		;;
 	-1)
@@ -122,8 +122,8 @@ if [[ "$failed" -ne 0 ]]; then
 
 		Every module you touch needs its manifest.json "version" incremented, because
 		the marketplace keeps one version per module and the deploy job publishes
-		whatever changed. Run ./scripts/bump.sh to bump everything you've changed, or
-		./scripts/bump.sh <patch|minor|major> <module-dir> for one module.
+		whatever changed. Run ./ci/scripts/bump.sh to bump everything you've changed, or
+		./ci/scripts/bump.sh <patch|minor|major> <module-dir> for one module.
 	EOF
 	exit 1
 fi

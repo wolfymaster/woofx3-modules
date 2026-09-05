@@ -17,19 +17,20 @@ Related repos (siblings under `/home/wolfy/code`):
 
 ## The one structural rule
 
-**A module is any directory containing a `manifest.json`.** Modules may nest at
-any depth. `platform/` and `custom/` are human organisation and nothing keys off
-them — don't write tooling, docs or CI that assumes a `<category>/<module>/`
-layout.
+**A module is any directory containing a `manifest.json`.** Modules live under
+`modules/` and may nest at any depth beneath it. `platform/` and `custom/` are
+human organisation and nothing keys off them — don't write tooling, docs or CI
+that assumes a `modules/<category>/<module>/` layout, or that treats `modules/`
+itself as a marker. Discovery is purely "does this directory hold a manifest".
 
-Identity is the manifest's `id`, never the path. `platform/twitch/` publishes as
-`twitch_platform`. The server re-validates this on `/complete` and returns
+Identity is the manifest's `id`, never the path. `modules/platform/twitch/`
+publishes under whatever id its manifest declares. The server re-validates this on `/complete` and returns
 `409 id_mismatch` if the uploaded manifest's `id` doesn't match the slug it was
 uploaded under.
 
 Attribution of a changed file to a module is **deepest-wins**, which is what
 makes nesting work: a file under a child module belongs to the child, not the
-enclosing parent. `owning_module` in `scripts/lib.sh` is the single
+enclosing parent. `owning_module` in `ci/scripts/lib.sh` is the single
 implementation; use it rather than re-deriving.
 
 ## The manifest is always `manifest.json`
@@ -51,7 +52,7 @@ greater `manifest.json` version.** The marketplace keeps exactly one version per
 module, so shipping a change under an unchanged version is silently invisible
 downstream.
 
-Version bumps are made by the author, not by CI. `scripts/bump.sh` derives the
+Version bumps are made by the author, not by CI. `ci/scripts/bump.sh` derives the
 level from conventional-commit subjects scoped to each module's path
 (`feat!`/`BREAKING CHANGE` → major, `feat` → minor, else patch; a `0.x` module
 takes minor for breaking, per semver §4). Nothing commits to `master` on the
@@ -59,21 +60,32 @@ user's behalf — if you're tempted to add a release bot, that was considered an
 deliberately rejected, because it makes the version in a PR diff differ from what
 ships.
 
+## Layout
+
+```
+modules/         module sources, grouped however humans like
+  platform/…
+  custom/…
+ci/scripts/      the toolchain below
+.githooks/       pre-push, installed via core.hooksPath
+.github/         workflows + the marketplace-cli composite action
+```
+
 ## Scripts
 
-`scripts/lib.sh` holds the shared primitives — `discover_modules`,
+`ci/scripts/lib.sh` holds the shared primitives — `discover_modules`,
 `owning_module`, `changed_modules`, `semver_cmp`, `semver_bump`. Source it;
 don't duplicate its logic in a new script.
 
 | Script | Purpose |
 |---|---|
-| `bump.sh` | Increment versions for changed modules |
-| `check-versions.sh` | The gate; also validates every manifest and rejects duplicate ids |
-| `list-changed.sh` | Changed modules between two revisions (`--json` for an Actions matrix) |
-| `base-ref.sh` | The single definition of what "changed" is measured against |
-| `manifest.py` | Read/write top-level manifest fields |
+| `ci/scripts/bump.sh` | Increment versions for changed modules |
+| `ci/scripts/check-versions.sh` | The gate; also validates every manifest and rejects duplicate ids |
+| `ci/scripts/list-changed.sh` | Changed modules between two revisions (`--json` for an Actions matrix) |
+| `ci/scripts/base-ref.sh` | The single definition of what "changed" is measured against |
+| `ci/scripts/manifest.py` | Read/write top-level manifest fields |
 
-`manifest.py set-version` splices only the bytes of the version value rather than
+`ci/scripts/manifest.py set-version` splices only the bytes of the version value rather than
 re-encoding the JSON, so a bump doesn't reformat the whole manifest and bury the
 real change in whitespace. It locates the **top-level** `version` with a
 depth-aware scan, so a `version` nested inside a widget or action is never
@@ -106,7 +118,7 @@ marketplace entirely.
   version; `<id>@<version>` tags pushed by the deploy job are the record of what
   shipped when.
 - **Assets are referenced from the manifest**, with paths relative to the module
-  directory (see `custom/wolfy_profile`'s `assets[]` and `${asset:id}` step
+  directory (see `modules/custom/wolfy_profile`'s `assets[]` and `${asset:id}` step
   parameters).
 - **Cross-module references use canonical ids** — `{moduleId}:trigger:{manifestId}`,
   e.g. `twitch_platform:trigger:cheer.channel.twitch`. A module that references

@@ -3,14 +3,20 @@
 # Source this; don't execute it.
 #
 # The organising rule of this repo: a module is any directory containing a
-# manifest.json, at any depth. Nothing keys off the top-level folder names
-# (platform/, custom/) — those are for humans. Identity comes from the
-# manifest's "id" field, which is also what the marketplace stores and what
-# /complete validates the upload against.
+# manifest.json, at any depth. Nothing keys off the folder names under modules/
+# (platform/, custom/) — those are for humans, and modules/ itself is not
+# special-cased either. Identity comes from the manifest's "id" field, which is
+# also what the marketplace stores and what /complete validates the upload
+# against.
 
 set -euo pipefail
 
 MANIFEST_NAME="manifest.json"
+
+# Resolved from this file's own location so the toolchain can be moved without
+# every caller learning where it lives.
+LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MANIFEST_TOOL="$LIB_DIR/manifest.py"
 
 repo_root() {
 	git rev-parse --show-toplevel 2>/dev/null || pwd
@@ -38,11 +44,11 @@ discover_modules() {
 # module_id <module-dir> — the manifest's declared id, which is the marketplace
 # slug. Never derived from the path.
 module_id() {
-	"$(repo_root)/scripts/manifest.py" get "$1/$MANIFEST_NAME" id
+	"$MANIFEST_TOOL" get "$1/$MANIFEST_NAME" id
 }
 
 module_version() {
-	"$(repo_root)/scripts/manifest.py" get "$1/$MANIFEST_NAME" version
+	"$MANIFEST_TOOL" get "$1/$MANIFEST_NAME" version
 }
 
 # warn_nested_modules — a module directory that contains another module gets

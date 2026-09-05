@@ -61,7 +61,7 @@ jobs:
               base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
             fi
             echo "Comparing $base..HEAD"
-            ./scripts/list-changed.sh "$base" HEAD > changed.txt
+            ./ci/scripts/list-changed.sh "$base" HEAD > changed.txt
             echo "base=$base" >> "$GITHUB_OUTPUT"
           fi
 
@@ -78,7 +78,7 @@ jobs:
       # release everyone downstream already has.
       - name: Verify versions were incremented
         if: steps.changed.outputs.any == 'true' && github.event.inputs.modules == ''
-        run: ./scripts/check-versions.sh "${{ steps.changed.outputs.base }}"
+        run: ./ci/scripts/check-versions.sh "${{ steps.changed.outputs.base }}"
 
       - name: Publish
         if: steps.changed.outputs.any == 'true'
@@ -87,8 +87,8 @@ jobs:
           failed=""
           while IFS= read -r mod; do
             [ -z "$mod" ] && continue
-            id="$(./scripts/manifest.py get "$mod/manifest.json" id)"
-            version="$(./scripts/manifest.py get "$mod/manifest.json" version)"
+            id="$(./ci/scripts/manifest.py get "$mod/manifest.json" id)"
+            version="$(./ci/scripts/manifest.py get "$mod/manifest.json" version)"
             echo "::group::$id $version ($mod)"
             if ./marketplace-cli publish "$mod"; then
               echo "$id $version" >> published.txt

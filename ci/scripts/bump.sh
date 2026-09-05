@@ -8,10 +8,10 @@
 # that actually ships.
 #
 # Usage:
-#   scripts/bump.sh                          # every changed module, level from commits
-#   scripts/bump.sh minor                    # every changed module, forced level
-#   scripts/bump.sh patch platform/spotify   # one module, forced level
-#   scripts/bump.sh platform/spotify         # one module, level from commits
+#   ci/scripts/bump.sh                                 # every changed module, level from commits
+#   ci/scripts/bump.sh minor                           # every changed module, forced level
+#   ci/scripts/bump.sh patch modules/platform/spotify  # one module, forced level
+#   ci/scripts/bump.sh modules/platform/spotify        # one module, level from commits
 #
 # Options:
 #   -n, --dry-run   show what would change without writing
@@ -20,7 +20,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=scripts/lib.sh
+# shellcheck source=ci/scripts/lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
 cd "$(repo_root)"
