@@ -1,0 +1,37 @@
+name: Fetch marketplace CLI
+description: >-
+  Extract the marketplace-cli binary from its public GHCR package. Requires no
+  credentials, so it works in fork pull requests where secrets are unavailable.
+
+inputs:
+  image:
+    description: Image to pull the CLI from
+    required: false
+    default: ghcr.io/wolfymaster/marketplace-cli:latest
+
+outputs:
+  path:
+    description: Absolute path to the extracted binary
+    value: ${{ steps.fetch.outputs.path }}
+
+runs:
+  using: composite
+  steps:
+    - id: fetch
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+      run: |
+        set -euo pipefail
+
+        # The image is a scratch container holding one static binary. Extracting
+        # it beats running the container: no volume mounting to reason about, and
+        # the binary sees the workspace directly.
+        docker pull "$IMAGE"
+        cid="$(docker create "$IMAGE")"
+        trap 'docker rm -f "$cid" >/dev/null 2>&1 || true' EXIT
+        docker cp "$cid:/marketplace-cli" "$GITHUB_WORKSPACE/marketplace-cli"
+        chmod +x "$GITHUB_WORKSPACE/marketplace-cli"
+
+        echo "path=$GITHUB_WORKSPACE/marketplace-cli" >> "$GITHUB_OUTPUT"
+        echo "marketplace-cli build: $("$GITHUB_WORKSPACE/marketplace-cli" version)"

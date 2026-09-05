@@ -114,13 +114,22 @@ changed ones: each needs an `id`, `name` and `version`, the `id` must match
 | `.github/workflows/deploy.yml` | Push to `master` | Publishes each changed module, then tags `<id>@<version>` |
 
 Deploy runs on the `[self-hosted, docker-local]` runner because the marketplace
-API is only reachable on the internal network. It builds the
-`woofx3-marketplace-api` CLI from source, which needs a
-`MARKETPLACE_API_TOKEN` secret with read access to that private repo. The API
-base URL comes from the `MARKETPLACE_API_URL` repo variable, defaulting to
+API is only reachable on the internal network. The API base URL comes from the
+`MARKETPLACE_API_URL` repo variable, defaulting to
 `http://marketplace.dev.woofx3.tv`.
 
-Publishing is non-destructive: `marketplace-api publish` upserts, and the
+**Neither workflow needs a secret.** Both get the publishing tool from
+`ghcr.io/wolfymaster/marketplace-cli:latest` — a public GHCR package holding a
+single static binary, extracted by `.github/actions/marketplace-cli`. GHCR
+package visibility is independent of repository visibility, so the CLI is
+pullable anonymously even though `woofx3-marketplace-api` is private. That also
+means the precheck runs on pull requests from forks, which never receive
+secrets.
+
+The image is republished by that repo's `release-cli.yml` on every push to
+`main` that touches client code.
+
+Publishing is non-destructive: `marketplace-cli publish` upserts, and the
 existing build stays downloadable until the new ZIP is parsed and swapped
 atomically. A failed deploy leaves the previous version live, and re-running is
 safe.

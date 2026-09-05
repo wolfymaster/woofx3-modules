@@ -71,23 +71,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.26'
-
-      - name: Build the marketplace CLI
-        uses: actions/checkout@v4
-        with:
-          repository: wolfymaster/woofx3-marketplace-api
-          path: .marketplace-api
-          token: ${{ secrets.MARKETPLACE_API_TOKEN }}
-
-      - name: Compile CLI
-        run: |
-          set -euo pipefail
-          cd .marketplace-api
-          go build -o "$GITHUB_WORKSPACE/marketplace-api" ./cmd/marketplace-api
+      # Pulled from a public GHCR package, so this job needs no secrets and
+      # still runs on pull requests from forks.
+      - name: Fetch marketplace CLI
+        uses: ./.github/actions/marketplace-cli
 
       # A dry-run publish parses each changed module's manifest exactly the way a
       # real deploy would, so a malformed or mis-identified manifest fails here
@@ -106,5 +93,5 @@ jobs:
           while IFS= read -r mod; do
             [ -z "$mod" ] && continue
             echo "--- $mod"
-            ./marketplace-api publish --dry-run "$mod"
+            ./marketplace-cli publish --dry-run "$mod"
           done <<< "$changed"

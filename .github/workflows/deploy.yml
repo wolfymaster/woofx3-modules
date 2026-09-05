@@ -36,24 +36,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.26'
-
-      - name: Check out the marketplace API
-        uses: actions/checkout@v4
-        with:
-          repository: wolfymaster/woofx3-marketplace-api
-          path: .marketplace-api
-          token: ${{ secrets.MARKETPLACE_API_TOKEN }}
-
-      - name: Compile CLI
-        run: |
-          set -euo pipefail
-          cd .marketplace-api
-          go build -o "$GITHUB_WORKSPACE/marketplace-api" ./cmd/marketplace-api
-          "$GITHUB_WORKSPACE/marketplace-api" 2>&1 | head -3 || true
+      # Pulled from a public GHCR package: no cross-repo token, no Go toolchain.
+      - name: Fetch marketplace CLI
+        uses: ./.github/actions/marketplace-cli
 
       - name: Resolve what changed
         id: changed
@@ -105,7 +90,7 @@ jobs:
             id="$(./scripts/manifest.py get "$mod/manifest.json" id)"
             version="$(./scripts/manifest.py get "$mod/manifest.json" version)"
             echo "::group::$id $version ($mod)"
-            if ./marketplace-api publish "$mod"; then
+            if ./marketplace-cli publish "$mod"; then
               echo "$id $version" >> published.txt
             else
               echo "::error title=Publish failed::$id ($mod) — the previous version is still live"

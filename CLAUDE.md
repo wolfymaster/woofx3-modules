@@ -9,8 +9,9 @@ publishes every module whose files changed, via the `woofx3-marketplace-api` CLI
 
 Related repos (siblings under `/home/wolfy/code`):
 
-- `woofx3-marketplace-api` — the catalog API and the `marketplace-api` CLI that
-  packages and publishes modules. Deploy CI builds it from source.
+- `woofx3-marketplace-api` — the catalog API, plus `cmd/marketplace-cli`, the
+  client tool that packages and publishes modules. Its `release-cli.yml`
+  publishes that tool to a public GHCR package, which this repo's CI consumes.
 - `woofx3` — the platform, including `barkloader`, the runtime that installs and
   runs the modules produced here.
 
@@ -80,7 +81,14 @@ touched. Keep both properties if you modify it.
 
 ## Publishing
 
-Deploy uses `marketplace-api publish <module-dir>`, which is idempotent and
+CI gets the tool from `ghcr.io/wolfymaster/marketplace-cli:latest`, a public
+GHCR package containing one static binary, extracted by the local composite
+action `.github/actions/marketplace-cli`. Deliberately not a cross-repo checkout
+and build: `woofx3-marketplace-api` is private, so that needed a PAT, and this
+repo is public — meaning fork PRs (which get no secrets) could never run the
+validation job. Don't reintroduce a token here.
+
+Deploy uses `marketplace-cli publish <module-dir>`, which is idempotent and
 non-destructive: it creates the module if absent, otherwise requests a fresh
 presigned upload URL for the existing object. The live build stays downloadable
 until `/complete` parses the new ZIP and swaps the metadata atomically, so a
