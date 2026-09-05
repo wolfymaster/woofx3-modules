@@ -1,0 +1,8 @@
+# Packaging output
+*.zip
+
+# Editor / OS noise
+.DS_Store
+*.swp
+.idea/
+.vscode/
