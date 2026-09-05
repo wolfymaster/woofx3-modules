@@ -1,0 +1,110 @@
+name: Module precheck
+
+# Gate for every change that targets master. The deploy job publishes whatever
+# changed, and the marketplace stores exactly one version per module, so a
+# module that ships under an unchanged version is invisible downstream — this is
+# where that gets caught.
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch: {}
+
+concurrency:
+  group: precheck-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  versions:
+    name: Versions incremented
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The check diffs against the merge base, so the history that reaches
+          # back to it has to be present.
+          fetch-depth: 0
+
+      - name: Check module versions
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "${BASE_SHA:-}" ]; then
+            base="$BASE_SHA"
+          else
+            base="$(./scripts/base-ref.sh)"
+          fi
+          echo "Comparing against $base"
+          ./scripts/check-versions.sh "$base"
+
+      - name: Summarise what would deploy
+        if: success()
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="${BASE_SHA:-$(./scripts/base-ref.sh)}"
+          {
+            echo "### Modules this PR would publish"
+            echo
+            changed="$(./scripts/list-changed.sh "$base" HEAD)"
+            if [ -z "$changed" ]; then
+              echo "_None — no module files changed._"
+            else
+              echo "| Module | Version |"
+              echo "|---|---|"
+              while IFS= read -r mod; do
+                [ -z "$mod" ] && continue
+                printf '| `%s` | %s |\n' \
+                  "$(./scripts/manifest.py get "$mod/manifest.json" id)" \
+                  "$(./scripts/manifest.py get "$mod/manifest.json" version)"
+              done <<< "$changed"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  package:
+    name: Packages build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Build the marketplace CLI
+        uses: actions/checkout@v4
+        with:
+          repository: wolfymaster/woofx3-marketplace-api
+          path: .marketplace-api
+          token: ${{ secrets.MARKETPLACE_API_TOKEN }}
+
+      - name: Compile CLI
+        run: |
+          set -euo pipefail
+          cd .marketplace-api
+          go build -o "$GITHUB_WORKSPACE/marketplace-api" ./cmd/marketplace-api
+
+      # A dry-run publish parses each changed module's manifest exactly the way a
+      # real deploy would, so a malformed or mis-identified manifest fails here
+      # rather than halfway through the deploy.
+      - name: Validate changed modules
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          base="${BASE_SHA:-$(./scripts/base-ref.sh)}"
+          changed="$(./scripts/list-changed.sh "$base" HEAD)"
+          if [ -z "$changed" ]; then
+            echo "No module changes to validate."
+            exit 0
+          fi
+          while IFS= read -r mod; do
+            [ -z "$mod" ] && continue
+            echo "--- $mod"
+            ./marketplace-api publish --dry-run "$mod"
+          done <<< "$changed"

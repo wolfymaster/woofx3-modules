@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Run the module version check before pushing, so the PR check isn't the first
+# place you find out a version wasn't bumped.
+#
+# Installed by scripts/install-hooks.sh (which points core.hooksPath here).
+# Skip a single push with: git push --no-verify
+
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+# stdin gives one line per ref being pushed: <local ref> <local sha> <remote ref> <remote sha>
+# A remote sha of all zeroes means the branch is new on the remote.
+zero="0000000000000000000000000000000000000000"
+status=0
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+	# Nothing to check when the ref is being deleted.
+	[[ "$local_sha" == "$zero" ]] && continue
+
+	if [[ "$remote_sha" == "$zero" ]]; then
+		# New branch: compare against where it diverged from the integration branch.
+		base="$("$repo_root/scripts/base-ref.sh" "$local_sha")" || continue
+	else
+		base="$remote_sha"
+	fi
+
+	if ! "$repo_root/scripts/check-versions.sh" "$base"; then
+		status=1
+	fi
+done
+
+if [[ "$status" -ne 0 ]]; then
+	echo >&2
+	echo "Push aborted by the pre-push hook. Use 'git push --no-verify' to override." >&2
+fi
+
+exit "$status"

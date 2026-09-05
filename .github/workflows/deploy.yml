@@ -1,0 +1,160 @@
+name: Deploy modules
+
+# On merge to master, publish every module whose files changed.
+#
+# Runs on the self-hosted runner because the marketplace API is only reachable
+# on the internal network (traefik on docker.local.arcanine.io), the same place
+# woofx3-marketplace-api deploys itself from.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      modules:
+        description: 'Space-separated module directories to publish (blank = whatever changed in the last commit)'
+        required: false
+        default: ''
+
+concurrency:
+  # Never let two deploys race for the same module's R2 object. Queue instead of
+  # cancelling: a cancelled publish is the one case that can leave a module
+  # mid-swap.
+  group: deploy-modules
+  cancel-in-progress: false
+
+permissions:
+  contents: write # to push the per-module release tags
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, docker-local]
+    env:
+      API: ${{ vars.MARKETPLACE_API_URL || 'http://marketplace.dev.woofx3.tv' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Check out the marketplace API
+        uses: actions/checkout@v4
+        with:
+          repository: wolfymaster/woofx3-marketplace-api
+          path: .marketplace-api
+          token: ${{ secrets.MARKETPLACE_API_TOKEN }}
+
+      - name: Compile CLI
+        run: |
+          set -euo pipefail
+          cd .marketplace-api
+          go build -o "$GITHUB_WORKSPACE/marketplace-api" ./cmd/marketplace-api
+          "$GITHUB_WORKSPACE/marketplace-api" 2>&1 | head -3 || true
+
+      - name: Resolve what changed
+        id: changed
+        env:
+          BEFORE: ${{ github.event.before }}
+          MANUAL: ${{ github.event.inputs.modules }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "${MANUAL:-}" ]; then
+            echo "Manual run for: $MANUAL"
+            printf '%s\n' $MANUAL > changed.txt
+          else
+            # github.event.before is all zeroes for a branch's first push, and
+            # points at a discarded commit after a force-push. Fall back to the
+            # previous commit in either case.
+            base="${BEFORE:-}"
+            if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+              base="$(git rev-parse HEAD~1 2>/dev/null || git rev-parse HEAD)"
+            fi
+            echo "Comparing $base..HEAD"
+            ./scripts/list-changed.sh "$base" HEAD > changed.txt
+            echo "base=$base" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "Modules to publish:"
+          cat changed.txt
+          if [ -s changed.txt ]; then
+            echo "any=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "any=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Guards a direct push to master that skipped the PR check. Publishing a
+      # changed module under an unchanged version would silently overwrite the
+      # release everyone downstream already has.
+      - name: Verify versions were incremented
+        if: steps.changed.outputs.any == 'true' && github.event.inputs.modules == ''
+        run: ./scripts/check-versions.sh "${{ steps.changed.outputs.base }}"
+
+      - name: Publish
+        if: steps.changed.outputs.any == 'true'
+        run: |
+          set -euo pipefail
+          failed=""
+          while IFS= read -r mod; do
+            [ -z "$mod" ] && continue
+            id="$(./scripts/manifest.py get "$mod/manifest.json" id)"
+            version="$(./scripts/manifest.py get "$mod/manifest.json" version)"
+            echo "::group::$id $version ($mod)"
+            if ./marketplace-api publish "$mod"; then
+              echo "$id $version" >> published.txt
+            else
+              echo "::error title=Publish failed::$id ($mod) — the previous version is still live"
+              failed="$failed $id"
+            fi
+            echo "::endgroup::"
+          done < changed.txt
+
+          if [ -n "$failed" ]; then
+            echo "Failed to publish:$failed" >&2
+            exit 1
+          fi
+
+      # Tags are the release history the marketplace itself doesn't keep — the
+      # modules table stores only the current version per module, so without
+      # these there's no record of what shipped when.
+      - name: Tag published versions
+        if: steps.changed.outputs.any == 'true'
+        run: |
+          set -euo pipefail
+          [ -f published.txt ] || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          while read -r id version; do
+            [ -z "$id" ] && continue
+            tag="$id@$version"
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              echo "Tag $tag already exists, skipping"
+              continue
+            fi
+            git tag -a "$tag" -m "$id $version"
+            git push origin "$tag"
+            echo "Tagged $tag"
+          done < published.txt
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Published modules"
+            echo
+            if [ -s published.txt ] 2>/dev/null; then
+              echo "| Module | Version |"
+              echo "|---|---|"
+              while read -r id version; do
+                [ -z "$id" ] && continue
+                printf '| `%s` | %s |\n' "$id" "$version"
+              done < published.txt
+            else
+              echo "_Nothing published._"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
