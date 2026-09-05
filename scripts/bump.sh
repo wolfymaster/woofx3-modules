@@ -68,18 +68,21 @@ if [[ ! -t 1 || -n "${NO_COLOR:-}" ]]; then green=""; dim=""; reset=""; fi
 # bumps the minor rather than declaring 1.0.0 on the author's behalf.
 derive_level() {
 	local mod="$1"
-	local messages
-	messages="$(git log --format='%B%x00' "$BASE"..HEAD -- "$mod" 2>/dev/null || true)"
+	local subjects bodies
+	# A conventional-commit type is only meaningful on the subject line, so match
+	# those separately; BREAKING CHANGE is a footer and may appear anywhere.
+	subjects="$(git log --format='%s' "$BASE"..HEAD -- "$mod" 2>/dev/null || true)"
+	bodies="$(git log --format='%B' "$BASE"..HEAD -- "$mod" 2>/dev/null || true)"
 
-	if [[ -z "$messages" ]]; then
+	if [[ -z "$subjects" ]]; then
 		# Uncommitted work has no messages to read; patch is the safe floor and
 		# the author can always force a level.
 		echo "patch"
 		return
 	fi
 
-	if grep -qE '^[a-zA-Z]+(\([^)]*\))?!:' <<<"$messages" ||
-		grep -qE '^BREAKING[ -]CHANGE:' <<<"$messages"; then
+	if grep -qE '^[a-zA-Z]+(\([^)]*\))?!:' <<<"$subjects" ||
+		grep -qE '^BREAKING[ -]CHANGE:' <<<"$bodies"; then
 		local current major
 		current="$(module_version "$mod")"
 		major="${current%%.*}"
@@ -91,7 +94,7 @@ derive_level() {
 		return
 	fi
 
-	if grep -qE '^feat(\([^)]*\))?:' <<<"$messages"; then
+	if grep -qE '^feat(\([^)]*\))?:' <<<"$subjects"; then
 		echo "minor"
 		return
 	fi
@@ -99,11 +102,29 @@ derive_level() {
 	echo "patch"
 }
 
-# reason_for <module-dir> — the commit subject that justified the level, for the
-# summary line. Purely cosmetic.
+# reason_for <module-dir> <level> — the commit subject that actually justified
+# the level, so the summary points at the breaking or feature commit rather than
+# whatever happened to land last. Purely cosmetic.
 reason_for() {
-	local mod="$1"
-	git log --format='%s' "$BASE"..HEAD -- "$mod" 2>/dev/null | head -1
+	local mod="$1" level="$2"
+	local subjects
+	subjects="$(git log --format='%s' "$BASE"..HEAD -- "$mod" 2>/dev/null || true)"
+	[[ -z "$subjects" ]] && return 0
+
+	local pattern=""
+	case "$level" in
+	major) pattern='^[a-zA-Z]+(\([^)]*\))?!:' ;;
+	minor) pattern='^feat(\([^)]*\))?:' ;;
+	esac
+
+	if [[ -n "$pattern" ]]; then
+		local match
+		if match="$(grep -m1 -E "$pattern" <<<"$subjects")"; then
+			printf '%s\n' "$match"
+			return 0
+		fi
+	fi
+	head -1 <<<"$subjects"
 }
 
 if [[ ${#TARGETS[@]} -eq 0 ]]; then
@@ -128,7 +149,7 @@ for mod in "${TARGETS[@]}"; do
 	new="$(semver_bump "$old" "$level")"
 	id="$(module_id "$mod")"
 
-	reason="$(reason_for "$mod")"
+	reason="$(reason_for "$mod" "$level")"
 	suffix=""
 	[[ -z "$LEVEL" && -n "$reason" ]] && suffix="  ${dim}(${level}: ${reason})${reset}"
 	[[ -n "$LEVEL" ]] && suffix="  ${dim}(${level}, forced)${reset}"

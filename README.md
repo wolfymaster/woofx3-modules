@@ -1,0 +1,139 @@
+# woofx3-modules
+
+Source for the modules published to the [WoofX3 marketplace](../woofx3-marketplace-api).
+Merging to `master` publishes every module whose files changed.
+
+## What counts as a module
+
+**A module is any directory containing a `manifest.json`.** That's the whole
+rule. Modules can sit at any depth, and the top-level folders (`platform/`,
+`custom/`) are for humans — no tooling keys off them.
+
+Identity comes from the manifest, not the path:
+
+```jsonc
+{
+  "id": "twitch_platform",   // the marketplace slug — must be unique across the repo
+  "name": "Twitch Platform",
+  "version": "1.1.0"         // semver; the precheck requires this to go up
+}
+```
+
+`platform/twitch/` publishes as `twitch_platform`. Renaming or moving the
+directory changes nothing; renaming the `id` creates a different module.
+
+## Making a change
+
+```bash
+# 1. branch and edit
+git checkout -b feat/spotify-device-picker
+$EDITOR platform/spotify/functions/song_request.js
+
+# 2. commit with a conventional-commit message
+git commit -am "feat(spotify): let viewers pick the playback device"
+
+# 3. bump — the level is derived from your commit messages
+./scripts/bump.sh
+#   spotify   1.0.0 -> 1.1.0  (minor: feat(spotify): let viewers pick the playback device)
+
+# 4. commit the version and push
+git commit -am "chore(spotify): 1.1.0"
+git push
+```
+
+Open a PR against `master`. When it merges, the deploy workflow publishes
+`spotify` at `1.1.0` and tags the commit `spotify@1.1.0`.
+
+## Versioning
+
+Every module carries its own version; there is no repo-wide version.
+
+**The rule the CI enforces:** if you change a module's files, its
+`manifest.json` version must go up. This matters because the marketplace stores
+exactly one version per module — a change shipped under an unchanged version is
+invisible to everyone downstream, because installed copies never learn there's
+something new.
+
+`./scripts/bump.sh` does the arithmetic, deriving the level from the
+conventional-commit messages on your branch that touched each module:
+
+| Commit on your branch | Bump |
+|---|---|
+| `feat!: …`, or a `BREAKING CHANGE:` footer | major |
+| `feat: …` | minor |
+| anything else (`fix:`, `chore:`, `docs:`, …) | patch |
+
+A module still on `0.x` gets a minor bump for a breaking change rather than
+being pushed to `1.0.0` on your behalf (semver §4).
+
+```bash
+./scripts/bump.sh                          # every changed module, level from commits
+./scripts/bump.sh minor                    # every changed module, forced level
+./scripts/bump.sh patch platform/spotify   # one module, forced level
+./scripts/bump.sh --dry-run                # show what would change
+```
+
+Because levels come from commit messages scoped by path, **keep a commit to one
+module** where you can. A single `feat!:` commit touching three modules bumps all
+three to a new major. When that's inconvenient, pass the level explicitly.
+
+This is semantic-release's semantics with the author, not a bot, running it. The
+trade is deliberate: nothing writes to `master` behind your back, and the version
+in the PR diff is the version that actually ships.
+
+## Local setup
+
+```bash
+./scripts/install-hooks.sh
+```
+
+Points `core.hooksPath` at `.githooks/`, so `pre-push` runs the same version
+check CI does and you find out before opening the PR. Bypass once with
+`git push --no-verify`; uninstall with `git config --unset core.hooksPath`.
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/bump.sh` | Increment versions for changed modules |
+| `scripts/check-versions.sh` | The gate — fails if a changed module wasn't bumped |
+| `scripts/list-changed.sh` | Modules changed between two revisions (`--json` for a matrix) |
+| `scripts/base-ref.sh` | The revision "changed" is measured against |
+| `scripts/manifest.py` | Read/write top-level manifest fields |
+| `scripts/lib.sh` | Shared discovery, attribution and semver helpers |
+
+`check-versions.sh` also validates every manifest in the repo, not just the
+changed ones: each needs an `id`, `name` and `version`, the `id` must match
+`^[a-z0-9][a-z0-9_-]{0,62}$`, and no two modules may declare the same `id`.
+
+## CI
+
+| Workflow | Trigger | Does |
+|---|---|---|
+| `.github/workflows/precheck.yml` | PR to `master` | Runs the version check, then a dry-run publish of each changed module so a malformed manifest fails here rather than mid-deploy |
+| `.github/workflows/deploy.yml` | Push to `master` | Publishes each changed module, then tags `<id>@<version>` |
+
+Deploy runs on the `[self-hosted, docker-local]` runner because the marketplace
+API is only reachable on the internal network. It builds the
+`woofx3-marketplace-api` CLI from source, which needs a
+`MARKETPLACE_API_TOKEN` secret with read access to that private repo. The API
+base URL comes from the `MARKETPLACE_API_URL` repo variable, defaulting to
+`http://marketplace.dev.woofx3.tv`.
+
+Publishing is non-destructive: `marketplace-api publish` upserts, and the
+existing build stays downloadable until the new ZIP is parsed and swapped
+atomically. A failed deploy leaves the previous version live, and re-running is
+safe.
+
+`deploy.yml` also accepts a manual `workflow_dispatch` with a space-separated
+list of module directories, for republishing after an incident.
+
+## Release history
+
+The marketplace stores only each module's current version, so the git tags
+(`spotify@1.1.0`) are the record of what shipped when.
+
+```bash
+git tag -l 'spotify@*'          # every released version of one module
+git log --oneline spotify@1.0.0..spotify@1.1.0 -- platform/spotify
+```
