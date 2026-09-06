@@ -93,7 +93,7 @@ touched. Keep both properties if you modify it.
 
 ## Publishing
 
-CI gets the tool from `ghcr.io/wolfymaster/marketplace-cli:latest`, a public
+CI gets the tool from `ghcr.io/wolfymaster/woofx3-marketplace-cli:latest`, a public
 GHCR package containing one static binary, extracted by the local composite
 action `.github/actions/marketplace-cli`. Deliberately not a cross-repo checkout
 and build: `woofx3-marketplace-api` is private, so that needed a PAT, and this

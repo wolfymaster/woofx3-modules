@@ -131,7 +131,7 @@ which resolves and validates the manifest without making a single API call, so
 pull requests from forks still get full validation.
 
 Both workflows get the publishing tool from
-`ghcr.io/wolfymaster/marketplace-cli:latest` — a public GHCR package holding a
+`ghcr.io/wolfymaster/woofx3-marketplace-cli:latest` — a public GHCR package holding a
 single static binary, extracted by `.github/actions/marketplace-cli`. GHCR
 package visibility is independent of repository visibility, so the CLI is
 pullable anonymously even though `woofx3-marketplace-api` is private. That also

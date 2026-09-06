@@ -7,7 +7,7 @@ inputs:
   image:
     description: Image to pull the CLI from
     required: false
-    default: ghcr.io/wolfymaster/marketplace-cli:latest
+    default: ghcr.io/wolfymaster/woofx3-marketplace-cli:latest
 
 outputs:
   path:
