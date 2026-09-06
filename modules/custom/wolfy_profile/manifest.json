@@ -2,7 +2,7 @@
   "id": "woofx3_wolfy_profile",
   "name": "Wolfy profile",
   "author": "WolfyMaster LLC",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Bundled workflows migrated from woofx3/wooflow/workflows/*.sh. Triggers are provided by the `twitch_platform` module; alerts use the workflow engine's built-in `builtin:action:alert`. Install `twitch_platform` first.",
   "assets": [
     {

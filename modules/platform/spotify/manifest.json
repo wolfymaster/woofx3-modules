@@ -2,7 +2,7 @@
   "id": "woofx3_spotify",
   "name": "Spotify Song Request",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "platform",
   "description": "Adds the !sr chat command to queue songs on Spotify. Accepts a song name or a Spotify track URL.",
   "functions": [
