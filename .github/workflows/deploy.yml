@@ -1,10 +1,6 @@
 name: Deploy modules
 
 # On merge to master, publish every module whose files changed.
-#
-# The marketplace API is public (Railway), so this runs on a GitHub-hosted
-# runner. woofx3-marketplace-api's self-hosted Portainer workflow is
-# workflow_dispatch-only; railway-deploy.yml is the live path.
 
 on:
   push:
@@ -30,13 +26,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      API: ${{ vars.MARKETPLACE_API_URL || 'https://woofx3-marketplace-api-production.up.railway.app' }}
+      API: ${{ vars.MARKETPLACE_API_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Pulled from a public GHCR package: no cross-repo token, no Go toolchain.
       - name: Fetch marketplace CLI
         uses: ./.github/actions/marketplace-cli
 
