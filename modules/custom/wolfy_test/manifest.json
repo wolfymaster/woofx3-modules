@@ -1,0 +1,46 @@
+{
+  "id": "wolfy_test",
+  "name": "Wolfy test",
+  "author": "WolfyMaster LLC",
+  "version": "1.0.0",
+  "description": "TESTING",
+  "assets": [
+    {
+      "id": "wolf-hype",
+      "name": "Wolf Hype",
+      "path": "assets/wolf-hype.mp3",
+      "kind": "audio"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "testing_widget",
+      "name": "Testing Widget",
+      "description": "Just Testing.",
+      "entry": "widgets/testWidget/index.html",
+      "assets": "widgets/testWidget",
+      "alertTypes": []
+    }
+  ],
+  "workflows": [
+    {
+      "id": "follow-workflow",
+      "name": "Follow Test",
+      "trigger": "twitch_platform:trigger:follow.user.twitch",
+      "steps": [
+        {
+          "id": "alert",
+          "type": "action",
+          "action": "builtin:action:alert",
+          "parameters": {
+            "widget": "MediaWidget",
+            "audioUrl": "${asset:wolf-hype}",
+            "mediaUrl": "https://media.tenor.com/LdHGHWDh0Y8AAAPo/look-at-you-i-see-you.mp4",
+            "text": "THIS IS A TEST",
+            "duration": 6
+          }
+        }
+      ]
+    }
+  ]
+}
