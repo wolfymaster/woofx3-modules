@@ -27,6 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       API: ${{ vars.MARKETPLACE_API_URL }}
+      # Required by the marketplace on every state-changing request. Only this
+      # job needs it: the precheck validates with a dry run that makes no API
+      # calls, so pull requests from forks keep working without secrets.
+      API_TOKEN: ${{ secrets.MARKETPLACE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,6 +38,15 @@ jobs:
 
       - name: Fetch marketplace CLI
         uses: ./.github/actions/marketplace-cli
+
+      # Fail here with a clear message rather than as a 401 partway through
+      # publishing, which would leave some modules updated and others not.
+      - name: Check the publish token is configured
+        run: |
+          if [ -z "${API_TOKEN:-}" ]; then
+            echo "::error title=Missing publish token::Set the MARKETPLACE_API_TOKEN repository secret to the marketplace's API_TOKEN value."
+            exit 1
+          fi
 
       - name: Resolve what changed
         id: changed

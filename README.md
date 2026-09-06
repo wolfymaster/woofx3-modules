@@ -120,7 +120,17 @@ Both workflows run on GitHub-hosted runners — the marketplace API is public
 defaulting to `https://woofx3-marketplace-api-production.up.railway.app`; set
 that variable to point at a different environment.
 
-**Neither workflow needs a secret.** Both get the publishing tool from
+The deploy job needs one secret, **`MARKETPLACE_API_TOKEN`**, matching the
+marketplace's `API_TOKEN`. The marketplace requires a bearer token on every
+state-changing request; reads stay open. Generate one with
+`openssl rand -hex 32`, set it as the API's `API_TOKEN` and as this repo's
+secret.
+
+The precheck needs no secret: its validation step is a `publish --dry-run`,
+which resolves and validates the manifest without making a single API call, so
+pull requests from forks still get full validation.
+
+Both workflows get the publishing tool from
 `ghcr.io/wolfymaster/marketplace-cli:latest` — a public GHCR package holding a
 single static binary, extracted by `.github/actions/marketplace-cli`. GHCR
 package visibility is independent of repository visibility, so the CLI is

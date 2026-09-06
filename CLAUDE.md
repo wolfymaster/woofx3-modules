@@ -98,7 +98,14 @@ GHCR package containing one static binary, extracted by the local composite
 action `.github/actions/marketplace-cli`. Deliberately not a cross-repo checkout
 and build: `woofx3-marketplace-api` is private, so that needed a PAT, and this
 repo is public — meaning fork PRs (which get no secrets) could never run the
-validation job. Don't reintroduce a token here.
+validation job. Don't reintroduce a credential for *fetching the tool*.
+
+Authenticating to the marketplace is a separate matter. It requires
+`Authorization: Bearer <token>` on every state-changing request, supplied by the
+deploy job as `API_TOKEN` from the `MARKETPLACE_API_TOKEN` secret. Keep that on
+the deploy job only: the precheck validates with `publish --dry-run`, which
+returns before any HTTP call, so fork PRs keep full validation without secrets.
+If you ever make the precheck hit the API for real, that property is lost.
 
 Deploy uses `marketplace-cli publish <module-dir>`, which is idempotent and
 non-destructive: it creates the module if absent, otherwise requests a fresh
