@@ -2,7 +2,7 @@
   "id": "woofx3_spotify",
   "name": "Spotify Song Request",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "platform",
   "description": "Adds the !sr chat command to queue songs on Spotify. Accepts a song name or a Spotify track URL.",
   "functions": [
@@ -102,16 +102,19 @@
   "settings": [
     {
       "id": "authorizeSpotify",
-      "name": "Authorize Spotify",
+      "label": "Authorize Spotify",
       "description": "Connect your Spotify account to enable song requests and playback control.",
       "type": "button",
-      "action": { "kind": "integration", "integration": "spotify" }
+      "action": {
+        "kind": "integration",
+        "integration": "spotify"
+      }
     },
     {
       "id": "clientId",
-      "name": "Spotify Client ID",
+      "label": "Spotify Client ID",
       "description": "Optional: use your own Spotify app's Client ID instead of the default. Not required — Authorize Spotify above fills this in automatically.",
-      "type": "string",
+      "type": "text",
       "required": false
     }
   ],

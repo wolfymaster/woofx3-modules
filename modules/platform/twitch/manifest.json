@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -112,7 +112,7 @@
           "operator": "gte",
           "description": "Only fire when the cheer meets or exceeds this amount.",
           "hint": "Compares against the cheer amount on the Twitch channel.cheer event payload (see wolfy_profile workflows).",
-          "dataSchema": "{\n  \"amount\": 1000,\n  \"isAnonymous\": false,\n  \"userName\": \"viewer42\",\n  \"userId\": \"123456\",\n  \"message\": \"Cheer1000 woof\"\n}"
+          "examplePayload": "{\n  \"amount\": 1000,\n  \"isAnonymous\": false,\n  \"userName\": \"viewer42\",\n  \"userId\": \"123456\",\n  \"message\": \"Cheer1000 woof\"\n}"
         }
       ],
       "allowVariants": true
@@ -147,7 +147,10 @@
             "kind": "internal",
             "request": {
               "event": "twitchapi",
-              "payload": { "command": "listChannelPointRewards", "args": {} }
+              "payload": {
+                "command": "listChannelPointRewards",
+                "args": {}
+              }
             },
             "timeoutMs": 10000
           },
@@ -156,7 +159,7 @@
           "hint": "Options are loaded live from every custom channel-point reward configured on the broadcaster's channel via twitchapi.listChannelPointRewards. If the list is empty, create a custom reward in the Twitch creator dashboard.",
           "eventPath": "rewardId",
           "operator": "eq",
-          "dataSchema": "{\n  \"redeemId\": \"...\",\n  \"rewardId\": \"...\",\n  \"rewardTitle\": \"...\",\n  \"userId\": \"...\",\n  \"userName\": \"...\",\n  \"message\": \"\"\n}"
+          "examplePayload": "{\n  \"redeemId\": \"...\",\n  \"rewardId\": \"...\",\n  \"rewardTitle\": \"...\",\n  \"userId\": \"...\",\n  \"userName\": \"...\",\n  \"message\": \"\"\n}"
         }
       ]
     },
@@ -186,7 +189,7 @@
           "eventPath": "viewers",
           "operator": "gte",
           "description": "Only fire when the raid brings at least this many viewers.",
-          "dataSchema": "{\n  \"fromBroadcasterUserId\": \"123456\",\n  \"fromBroadcasterUserName\": \"raider99\",\n  \"viewers\": 50\n}"
+          "examplePayload": "{\n  \"fromBroadcasterUserId\": \"123456\",\n  \"fromBroadcasterUserName\": \"raider99\",\n  \"viewers\": 50\n}"
         }
       ]
     },
@@ -204,12 +207,21 @@
           "type": "select",
           "required": true,
           "options": [
-            { "value": "1000", "label": "Tier 1" },
-            { "value": "2000", "label": "Tier 2" },
-            { "value": "3000", "label": "Tier 3" }
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
           ],
           "defaultValue": "1000",
-          "dataSchema": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"chatterIsAnonymous\": false,\n  \"tier\": \"1000\",\n  \"isPrime\": false,\n  \"durationMonths\": 1,\n  \"cumulativeMonths\": 6,\n  \"streakMonths\": 3,\n  \"isGift\": false,\n  \"gifterIsAnonymous\": null,\n  \"gifterId\": null,\n  \"gifterName\": null,\n  \"messageId\": \"...\",\n  \"messageText\": \"...\"\n}"
+          "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"chatterIsAnonymous\": false,\n  \"tier\": \"1000\",\n  \"isPrime\": false,\n  \"durationMonths\": 1,\n  \"cumulativeMonths\": 6,\n  \"streakMonths\": 3,\n  \"isGift\": false,\n  \"gifterIsAnonymous\": null,\n  \"gifterId\": null,\n  \"gifterName\": null,\n  \"messageId\": \"...\",\n  \"messageText\": \"...\"\n}"
         }
       ]
     },
@@ -227,9 +239,18 @@
           "type": "select",
           "required": true,
           "options": [
-            { "value": "1000", "label": "Tier 1" },
-            { "value": "2000", "label": "Tier 2" },
-            { "value": "3000", "label": "Tier 3" }
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
           ],
           "defaultValue": "1000"
         }
@@ -263,9 +284,18 @@
           "type": "select",
           "required": true,
           "options": [
-            { "value": "1000", "label": "Tier 1" },
-            { "value": "2000", "label": "Tier 2" },
-            { "value": "3000", "label": "Tier 3" }
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
           ],
           "defaultValue": "1000"
         }
@@ -285,9 +315,18 @@
           "type": "select",
           "required": true,
           "options": [
-            { "value": "1000", "label": "Tier 1" },
-            { "value": "2000", "label": "Tier 2" },
-            { "value": "3000", "label": "Tier 3" }
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
           ],
           "defaultValue": "1000"
         }
@@ -328,14 +367,29 @@
           "type": "select",
           "required": true,
           "options": [
-            { "value": "primary", "label": "Primary" },
-            { "value": "blue", "label": "Blue" },
-            { "value": "green", "label": "Green" },
-            { "value": "orange", "label": "Orange" },
-            { "value": "purple", "label": "Purple" }
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "blue",
+              "label": "Blue"
+            },
+            {
+              "value": "green",
+              "label": "Green"
+            },
+            {
+              "value": "orange",
+              "label": "Orange"
+            },
+            {
+              "value": "purple",
+              "label": "Purple"
+            }
           ],
           "defaultValue": "primary",
-          "dataSchema": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"moderator1\",\n  \"color\": \"primary\",\n  \"messageId\": \"...\",\n  \"messageText\": \"Going live in 5 minutes!\"\n}"
+          "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"moderator1\",\n  \"color\": \"primary\",\n  \"messageId\": \"...\",\n  \"messageText\": \"Going live in 5 minutes!\"\n}"
         }
       ]
     },
@@ -353,11 +407,26 @@
           "type": "select",
           "required": true,
           "options": [
-            { "value": "primary", "label": "Primary" },
-            { "value": "blue", "label": "Blue" },
-            { "value": "green", "label": "Green" },
-            { "value": "orange", "label": "Orange" },
-            { "value": "purple", "label": "Purple" }
+            {
+              "value": "primary",
+              "label": "Primary"
+            },
+            {
+              "value": "blue",
+              "label": "Blue"
+            },
+            {
+              "value": "green",
+              "label": "Green"
+            },
+            {
+              "value": "orange",
+              "label": "Orange"
+            },
+            {
+              "value": "purple",
+              "label": "Purple"
+            }
           ],
           "defaultValue": "primary"
         }
@@ -382,7 +451,7 @@
           "eventPath": "amount",
           "operator": "gte",
           "description": "Only fire when the donation meets or exceeds this amount, in the currency's major unit (e.g. dollars, not cents).",
-          "dataSchema": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"charityName\": \"Direct Relief\",\n  \"amount\": 25.5,\n  \"currency\": \"USD\"\n}"
+          "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"charityName\": \"Direct Relief\",\n  \"amount\": 25.5,\n  \"currency\": \"USD\"\n}"
         }
       ]
     },
@@ -405,7 +474,7 @@
           "eventPath": "newTier",
           "operator": "gte",
           "description": "Only fire when the newly reached bits badge tier meets or exceeds this value.",
-          "dataSchema": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"newTier\": 1000\n}"
+          "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"newTier\": 1000\n}"
         }
       ]
     },
@@ -428,7 +497,7 @@
           "eventPath": "streakCount",
           "operator": "gte",
           "description": "Only fire when the watch streak meets or exceeds this many consecutive broadcasts.",
-          "dataSchema": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"streakCount\": 5,\n  \"channelPointsAwarded\": 500\n}"
+          "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"streakCount\": 5,\n  \"channelPointsAwarded\": 500\n}"
         }
       ]
     }
