@@ -2,7 +2,7 @@
   "id": "woofx3_counter",
   "name": "Counter",
   "author": "WolfyMaster LLC",
-  "version": "0.3.0",
+  "version": "0.3.2",
   "category": "utility",
   "description": "Named counters with increment, decrement, set, and reset actions. Displays live counter values in scene overlays using configurable label templates.",
   "resources": [
@@ -10,16 +10,60 @@
       "kind": "counter",
       "name": "Counter",
       "description": "A persistent numeric counter. Owned by the counter module; identified by canonical id `counter:counter:{instanceId}`.",
-      "valueSchema": { "type": "number", "default": 0 }
+      "schema": [
+        {
+          "id": "initialValue",
+          "label": "Initial value",
+          "type": "number",
+          "defaultValue": 0,
+          "description": "Value the counter starts at."
+        }
+      ]
     }
   ],
   "functions": [
-    { "id": "increment",     "name": "Increment counter",     "runtime": "js", "path": "functions/increment.js",     "entryPoint": "increment" },
-    { "id": "decrement",     "name": "Decrement counter",     "runtime": "js", "path": "functions/decrement.js",     "entryPoint": "decrement" },
-    { "id": "set",           "name": "Set counter",           "runtime": "js", "path": "functions/set.js",           "entryPoint": "set" },
-    { "id": "reset",         "name": "Reset counter",         "runtime": "js", "path": "functions/reset.js",         "entryPoint": "reset" },
-    { "id": "createCounter", "name": "Create counter",        "runtime": "js", "path": "functions/createCounter.js", "entryPoint": "createCounter" },
-    { "id": "deleteCounter", "name": "Delete counter",        "runtime": "js", "path": "functions/deleteCounter.js", "entryPoint": "deleteCounter" }
+    {
+      "id": "increment",
+      "name": "Increment counter",
+      "runtime": "js",
+      "path": "functions/increment.js",
+      "entryPoint": "increment"
+    },
+    {
+      "id": "decrement",
+      "name": "Decrement counter",
+      "runtime": "js",
+      "path": "functions/decrement.js",
+      "entryPoint": "decrement"
+    },
+    {
+      "id": "set",
+      "name": "Set counter",
+      "runtime": "js",
+      "path": "functions/set.js",
+      "entryPoint": "set"
+    },
+    {
+      "id": "reset",
+      "name": "Reset counter",
+      "runtime": "js",
+      "path": "functions/reset.js",
+      "entryPoint": "reset"
+    },
+    {
+      "id": "createCounter",
+      "name": "Create counter",
+      "runtime": "js",
+      "path": "functions/createCounter.js",
+      "entryPoint": "createCounter"
+    },
+    {
+      "id": "deleteCounter",
+      "name": "Delete counter",
+      "runtime": "js",
+      "path": "functions/deleteCounter.js",
+      "entryPoint": "deleteCounter"
+    }
   ],
   "actions": [
     {
@@ -33,7 +77,7 @@
           "id": "target",
           "label": "Counter",
           "type": "resource_ref",
-          "kind": "counter",
+          "resourceKind": "counter",
           "required": true,
           "description": "Which counter to increment."
         },
@@ -59,7 +103,7 @@
           "id": "target",
           "label": "Counter",
           "type": "resource_ref",
-          "kind": "counter",
+          "resourceKind": "counter",
           "required": true,
           "description": "Which counter to decrement."
         },
@@ -85,7 +129,7 @@
           "id": "target",
           "label": "Counter",
           "type": "resource_ref",
-          "kind": "counter",
+          "resourceKind": "counter",
           "required": true,
           "description": "Which counter to set."
         },
@@ -109,7 +153,7 @@
           "id": "target",
           "label": "Counter",
           "type": "resource_ref",
-          "kind": "counter",
+          "resourceKind": "counter",
           "required": true,
           "description": "Which counter to reset."
         },
@@ -165,7 +209,7 @@
           "id": "target",
           "label": "Counter",
           "type": "resource_ref",
-          "kind": "counter",
+          "resourceKind": "counter",
           "required": true,
           "description": "Which counter to delete."
         }
@@ -180,45 +224,45 @@
       "entry": "widgets/counter/index.html",
       "assets": "widgets/counter",
       "acceptedEvents": [],
-      "alertTypes": ["module.storage.changed"],
-      "settingsSchema": {
-        "fields": [
-          {
-            "key": "target",
-            "fieldType": "resource_ref",
-            "kind": "counter",
-            "label": "Counter",
-            "required": true,
-            "description": "Which counter to display."
-          },
-          {
-            "key": "labelTemplate",
-            "fieldType": "text",
-            "label": "Label template",
-            "defaultValue": "{value}",
-            "description": "Text to display. {value} is replaced by the counter's current number. {max} is replaced by the Max value setting. Examples: '{value} deaths so far', '{value}/{max} subs', 'Streamer has died {value} times'."
-          },
-          {
-            "key": "maxValue",
-            "fieldType": "number",
-            "label": "Max value (optional)",
-            "defaultValue": null,
-            "description": "Substituted for {max} in the label template. Leave blank if not needed."
-          },
-          {
-            "key": "fontSize",
-            "fieldType": "number",
-            "label": "Font size (px)",
-            "defaultValue": 64
-          },
-          {
-            "key": "accentColor",
-            "fieldType": "color",
-            "label": "Text color",
-            "defaultValue": "#7ad7ff"
-          }
-        ]
-      }
+      "alertTypes": [
+        "module.storage.changed"
+      ],
+      "settingsSchema": [
+        {
+          "id": "target",
+          "type": "resource_ref",
+          "resourceKind": "counter",
+          "label": "Counter",
+          "required": true,
+          "description": "Which counter to display."
+        },
+        {
+          "id": "labelTemplate",
+          "type": "text",
+          "label": "Label template",
+          "defaultValue": "{value}",
+          "description": "Text to display. {value} is replaced by the counter's current number. {max} is replaced by the Max value setting. Examples: '{value} deaths so far', '{value}/{max} subs', 'Streamer has died {value} times'."
+        },
+        {
+          "id": "maxValue",
+          "type": "number",
+          "label": "Max value (optional)",
+          "defaultValue": null,
+          "description": "Substituted for {max} in the label template. Leave blank if not needed."
+        },
+        {
+          "id": "fontSize",
+          "type": "number",
+          "label": "Font size (px)",
+          "defaultValue": 64
+        },
+        {
+          "id": "accentColor",
+          "type": "color",
+          "label": "Text color",
+          "defaultValue": "#7ad7ff"
+        }
+      ]
     }
   ]
 }
