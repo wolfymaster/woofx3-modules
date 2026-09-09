@@ -2,7 +2,7 @@
   "id": "wolfy_test",
   "name": "Wolfy test",
   "author": "WolfyMaster LLC",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "TESTING",
   "assets": [
     {
@@ -26,7 +26,7 @@
     {
       "id": "follow-workflow",
       "name": "Follow Test",
-      "trigger": "twitch_platform:trigger:follow.user.twitch",
+      "trigger": "channel.follow",
       "steps": [
         {
           "id": "alert",
