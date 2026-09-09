@@ -2,7 +2,7 @@
   "id": "woofx3_counter",
   "name": "Counter",
   "author": "WolfyMaster LLC",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "category": "utility",
   "description": "Named counters with increment, decrement, set, and reset actions. Displays live counter values in scene overlays using configurable label templates.",
   "resources": [
@@ -10,10 +10,15 @@
       "kind": "counter",
       "name": "Counter",
       "description": "A persistent numeric counter. Owned by the counter module; identified by canonical id `counter:counter:{instanceId}`.",
-      "valueSchema": {
-        "type": "number",
-        "default": 0
-      }
+      "schema": [
+        {
+          "id": "initialValue",
+          "label": "Initial value",
+          "type": "number",
+          "defaultValue": 0,
+          "description": "Value the counter starts at."
+        }
+      ]
     }
   ],
   "functions": [
