@@ -5,7 +5,7 @@ Example module packaging workflow definitions that used to be pushed via `woofx3
 This module declares **only workflows** — no triggers, actions, or functions of its own.
 
 - Workflows bind to **event types** (`channel.follow`, `channel.cheer`, ...), not to another module's trigger declarations. Nothing has to be installed first, and whichever module emits the event — at whatever version — satisfies the binding. The Twitch module can be uninstalled and reinstalled underneath these workflows without touching them.
-- **`builtin:action:alert`** — the workflow engine's built-in alert handler. Always available; nothing to install.
+- **`woofx3:action:alert`** — the alert action, declared by the bundled `woofx3` module and installed by barkloader before any upload. This is a hard reference by canonical id, so it is checked at install like any other cross-module reference — there is no longer an exempt namespace.
 
 The legacy `update_timer` step on the follow workflow has been dropped pending a built-in (or `slobs` module) that exposes a timer action; the rest of the alert behavior is preserved.
 
