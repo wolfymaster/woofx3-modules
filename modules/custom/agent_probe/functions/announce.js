@@ -1,4 +1,5 @@
-export function announce(ctx) {
-  const who = ctx?.parameters?.user ?? "someone";
-  return { message: `probe saw ${who}` };
+function announce(ctx) {
+  const params = (ctx.event && ctx.event.parameters) || ctx.event || {};
+  const who = params.user || "someone";
+  return { message: "probe saw " + who };
 }
