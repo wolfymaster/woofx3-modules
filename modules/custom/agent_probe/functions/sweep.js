@@ -1,3 +1,3 @@
-export function sweep() {
+function sweep() {
   return { sweptAt: new Date().toISOString() };
 }

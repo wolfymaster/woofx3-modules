@@ -1,5 +1,6 @@
-export function increment(ctx) {
-  const step = Number(ctx?.parameters?.step ?? 1);
-  const current = Number(ctx?.parameters?.current ?? 0);
+function increment(ctx) {
+  const params = (ctx.event && ctx.event.parameters) || ctx.event || {};
+  const step = Number(params.step || 1);
+  const current = Number(params.current || 0);
   return { next: current + step };
 }

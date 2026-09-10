@@ -2,7 +2,7 @@
   "id": "agent_probe",
   "name": "Agent Probe",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "utility",
   "description": "Exercises every module declaration kind so install paths are covered end to end: functions, actions (function and cross-module), triggers, widgets, overlays, assets, resource kinds, background tasks, settings, workflows and commands.",
   "taxonomy": [
