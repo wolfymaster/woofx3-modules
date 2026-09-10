@@ -2,30 +2,42 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
     {
-      "id": "follow.channel.twitch",
+      "id": "channel_follow",
       "name": "Channel follow",
       "description": "Twitch EventSub: channel.follow",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.follow",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.follow"
+      ]
     },
     {
-      "id": "message.user.twitch",
+      "id": "user_message",
       "name": "Channel chat message",
       "description": "Twitch EventSub: channel.chat.message",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "user.message",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.chat"
+      ]
     },
     {
-      "id": "subscribe.channel.twitch",
+      "id": "channel_subscribe",
       "name": "Channel subscribe",
       "description": "Twitch EventSub: channel.subscribe",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.subscribe",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -52,11 +64,15 @@
       ]
     },
     {
-      "id": "subscriptionGift.channel.twitch",
+      "id": "channel_subscription_gift",
       "name": "Channel subscription gift",
       "description": "Twitch EventSub: channel.subscription.gift",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.subscriptionGift",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -94,11 +110,16 @@
       ]
     },
     {
-      "id": "cheer.channel.twitch",
+      "id": "channel_cheer",
       "name": "Channel cheer",
       "description": "Twitch EventSub: channel.cheer",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.cheer",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.cheer"
+      ],
+      "allowVariants": true,
       "schema": [
         {
           "id": "amount",
@@ -114,29 +135,40 @@
           "hint": "Compares against the cheer amount on the Twitch channel.cheer event payload (see wolfy_profile workflows).",
           "examplePayload": "{\n  \"amount\": 1000,\n  \"isAnonymous\": false,\n  \"userName\": \"viewer42\",\n  \"userId\": \"123456\",\n  \"message\": \"Cheer1000 woof\"\n}"
         }
-      ],
-      "allowVariants": true
+      ]
     },
     {
-      "id": "hypetrain.channel.twitch",
+      "id": "channel_hypetrain",
       "name": "Hype train begin",
       "description": "Twitch EventSub: channel.hype_train.begin",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.hypetrain",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.hypetrain"
+      ]
     },
     {
-      "id": "online.channel.twitch",
+      "id": "stream_online",
       "name": "Stream online",
       "description": "Twitch EventSub: stream.online",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "stream.online",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.stream"
+      ]
     },
     {
-      "id": "redeem.channelpoints.twitch",
+      "id": "channelpoints_redeem",
       "name": "Channel point redemption",
       "description": "Twitch EventSub: channel.channel_points_custom_reward_redemption.add",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channelpoints.redeem",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.channelpoints"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -164,18 +196,26 @@
       ]
     },
     {
-      "id": "offline.channel.twitch",
+      "id": "stream_offline",
       "name": "Stream offline",
       "description": "Twitch EventSub: stream.offline",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "stream.offline",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.stream"
+      ]
     },
     {
-      "id": "raid.channel.twitch",
+      "id": "channel_raid",
       "name": "Channel raid",
       "description": "Twitch EventSub: channel.raid",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.raid",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.raid"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -194,11 +234,15 @@
       ]
     },
     {
-      "id": "resub.channel.twitch",
+      "id": "channel_resub",
       "name": "Channel resub",
       "description": "Twitch EventSub: channel.chat.notification (resub)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.resub",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -226,11 +270,15 @@
       ]
     },
     {
-      "id": "sharedResub.channel.twitch",
+      "id": "channel_shared_resub",
       "name": "Channel resub (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) — fires when the resub is announced in another broadcaster's chat during a shared chat session.",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) \u2014 fires when the resub is announced in another broadcaster's chat during a shared chat session.",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.sharedResub",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -257,25 +305,37 @@
       ]
     },
     {
-      "id": "giftPaidUpgrade.channel.twitch",
+      "id": "channel_gift_paid_upgrade",
       "name": "Gift sub upgraded to paid",
-      "description": "Twitch EventSub: channel.chat.notification (gift_paid_upgrade) — a user upgraded their gifted sub to a paid one.",
+      "description": "Twitch EventSub: channel.chat.notification (gift_paid_upgrade) \u2014 a user upgraded their gifted sub to a paid one.",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.giftPaidUpgrade",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ]
     },
     {
-      "id": "sharedGiftPaidUpgrade.channel.twitch",
+      "id": "channel_shared_gift_paid_upgrade",
       "name": "Gift sub upgraded to paid (shared chat)",
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_gift_paid_upgrade)",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.sharedGiftPaidUpgrade",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ]
     },
     {
-      "id": "primePaidUpgrade.channel.twitch",
+      "id": "channel_prime_paid_upgrade",
       "name": "Prime sub upgraded to paid",
-      "description": "Twitch EventSub: channel.chat.notification (prime_paid_upgrade) — a user upgraded their Prime sub to a paid one.",
+      "description": "Twitch EventSub: channel.chat.notification (prime_paid_upgrade) \u2014 a user upgraded their Prime sub to a paid one.",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.primePaidUpgrade",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -302,11 +362,15 @@
       ]
     },
     {
-      "id": "sharedPrimePaidUpgrade.channel.twitch",
+      "id": "channel_shared_prime_paid_upgrade",
       "name": "Prime sub upgraded to paid (shared chat)",
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_prime_paid_upgrade)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.sharedPrimePaidUpgrade",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -333,32 +397,48 @@
       ]
     },
     {
-      "id": "unraid.channel.twitch",
+      "id": "channel_unraid",
       "name": "Raid cancelled (unraid)",
-      "description": "Twitch EventSub: channel.chat.notification (unraid) — the broadcaster cancelled an outgoing raid.",
+      "description": "Twitch EventSub: channel.chat.notification (unraid) \u2014 the broadcaster cancelled an outgoing raid.",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.unraid",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.raid"
+      ]
     },
     {
-      "id": "payItForward.channel.twitch",
+      "id": "channel_pay_it_forward",
       "name": "Gift sub paid forward",
-      "description": "Twitch EventSub: channel.chat.notification (pay_it_forward) — a recipient of a gifted sub paid it forward by gifting another sub.",
+      "description": "Twitch EventSub: channel.chat.notification (pay_it_forward) \u2014 a recipient of a gifted sub paid it forward by gifting another sub.",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.payItForward",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ]
     },
     {
-      "id": "sharedPayItForward.channel.twitch",
+      "id": "channel_shared_pay_it_forward",
       "name": "Gift sub paid forward (shared chat)",
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_pay_it_forward)",
       "type": "eventbus",
-      "category": "platform.twitch"
+      "event": "channel.sharedPayItForward",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ]
     },
     {
-      "id": "announcement.channel.twitch",
+      "id": "channel_announcement",
       "name": "Chat announcement",
       "description": "Twitch EventSub: channel.chat.notification (announcement)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.announcement",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.chat"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -394,11 +474,15 @@
       ]
     },
     {
-      "id": "sharedAnnouncement.channel.twitch",
+      "id": "channel_shared_announcement",
       "name": "Chat announcement (shared chat)",
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_announcement)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.sharedAnnouncement",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.chat"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -433,11 +517,15 @@
       ]
     },
     {
-      "id": "charityDonation.channel.twitch",
+      "id": "channel_charity_donation",
       "name": "Charity donation",
       "description": "Twitch EventSub: channel.chat.notification (charity_donation)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.charityDonation",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.donation"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -456,11 +544,15 @@
       ]
     },
     {
-      "id": "bitsBadgeTier.channel.twitch",
+      "id": "channel_bits_badge_tier",
       "name": "New bits badge tier reached",
       "description": "Twitch EventSub: channel.chat.notification (bits_badge_tier)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.bitsBadgeTier",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.cheer"
+      ],
       "allowVariants": true,
       "schema": [
         {
@@ -479,11 +571,15 @@
       ]
     },
     {
-      "id": "watchStreak.channel.twitch",
+      "id": "channel_watch_streak",
       "name": "Watch streak milestone",
       "description": "Twitch EventSub: channel.chat.notification (watch_streak)",
       "type": "eventbus",
-      "category": "platform.twitch",
+      "event": "channel.watchStreak",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.watchstreak"
+      ],
       "allowVariants": true,
       "schema": [
         {

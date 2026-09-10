@@ -2,9 +2,9 @@
 
 Example module packaging workflow definitions that used to be pushed via `woofx3/wooflow/workflows/*.sh` (POST to `/v1/workflow-definitions`).
 
-This module declares **only workflows** — no triggers, actions, or functions of its own. Every reference is a cross-module canonical id:
+This module declares **only workflows** — no triggers, actions, or functions of its own.
 
-- **`twitch_platform`** _(install first)_ — provides the EventSub-aligned trigger declarations (`twitch.channel.follow`, `twitch.channel.subscribe`, etc.).
+- Workflows bind to **event types** (`channel.follow`, `channel.cheer`, ...), not to another module's trigger declarations. Nothing has to be installed first, and whichever module emits the event — at whatever version — satisfies the binding. The Twitch module can be uninstalled and reinstalled underneath these workflows without touching them.
 - **`builtin:action:alert`** — the workflow engine's built-in alert handler. Always available; nothing to install.
 
 The legacy `update_timer` step on the follow workflow has been dropped pending a built-in (or `slobs` module) that exposes a timer action; the rest of the alert behavior is preserved.
@@ -22,18 +22,25 @@ Scripts `simple_workflow.sh` and `add_workflow.sh` still live under `wooflow/wor
 
 ## Workflow triggers
 
-Every `workflow.trigger` field is a full canonical id (`{moduleId}:trigger:{manifest_id}`) pointing at the `twitch_platform` module's trigger declarations:
+Every `workflow.trigger` is a bare event type — the NATS subject and CloudEvent
+type the engine subscribes to:
 
-| Workflow | `trigger` (canonical id) | Underlying NATS subject |
-|----------|--------------------------|-------------------------|
-| `follow-workflow` | `twitch_platform:trigger:twitch.channel.follow` | `twitch.channel.follow` |
-| `subscription-workflow` | `twitch_platform:trigger:twitch.channel.subscribe` | `twitch.channel.subscribe` |
-| `bits-workflow` | `twitch_platform:trigger:twitch.channel.cheer` | `twitch.channel.cheer` |
-| `gifted-subscription-workflow` | `twitch_platform:trigger:twitch.channel.subscription.gift` | `twitch.channel.subscription.gift` |
+| Workflow | `trigger` (event type) |
+|----------|------------------------|
+| `follow-workflow` | `channel.follow` |
+| `subscription-workflow` | `channel.subscribe` |
+| `bits-workflow` | `channel.cheer` |
+| `gifted-subscription-workflow` | `channel.subscriptionGift` |
 
-The NATS subject the engine subscribes to lives on the trigger row (`triggers.event`) — install resolves the workflow's `trigger` canonical id against that row at registration time. The workflow definition itself doesn't carry the subject.
+A `trigger` naming a canonical id (`{moduleId}:trigger:{manifest_id}`) is still
+valid and means something different: a hard dependency on that declaration,
+which blocks uninstalling the module that provides it. Use it when a workflow
+genuinely cannot work without one specific module. These four do not — any
+platform's follow will do.
 
-When simulating via API, pass the EventSub subscription type only (e.g. `channel.cheer`); the bus publishes `type` `twitch.channel.cheer`.
+Events carry the originating platform as the CloudEvent's `platform` attribute,
+so a workflow that wants Twitch follows only can filter on `${trigger.platform}`
+rather than by subscribing to a Twitch-specific subject.
 
 ## Trigger conditions (TODO)
 
@@ -75,4 +82,4 @@ Notes on the migration from the legacy script format:
 
 ## Layout
 
-Unpacked directory for local inspection or tooling. Zip this folder (with `module.json` at the archive root) to install through barkloader's upload path. Install order matters: bring up `twitch_platform` before `wolfy_profile`, and bring up the `slobs` action provider before the workflows can run.
+Unpacked directory for local inspection or tooling. Zip this folder (with `manifest.json` at the archive root) to install through barkloader's upload path. Install order does not matter: these workflows bind to event types, so they install cleanly whether or not anything emitting those events is present yet.
