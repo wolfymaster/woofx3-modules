@@ -2,7 +2,7 @@
   "id": "woofx3_throne",
   "name": "Throne Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "platform",
   "description": "Receives Throne webhooks and fires triggers when someone buys a gift, makes a contribution, or completes a crowdfunded gift on your Throne wishlist.",
   "functions": [
@@ -28,7 +28,7 @@
       "description": "Fires when someone buys a gift from your Throne wishlist.",
       "type": "eventbus",
       "event": "throne.gift.purchased",
-      "category": "platform",
+      "taxonomy": ["platform.throne", "alert.gift"],
       "emits": {
         "fields": [
           { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
@@ -50,7 +50,7 @@
       "description": "Fires when someone contributes toward an item on your Throne wishlist.",
       "type": "eventbus",
       "event": "throne.contribution.purchased",
-      "category": "platform",
+      "taxonomy": ["platform.throne", "alert.contribution"],
       "emits": {
         "fields": [
           { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
@@ -71,7 +71,7 @@
       "description": "Fires when contributions fully fund an item on your Throne wishlist.",
       "type": "eventbus",
       "event": "throne.gift.crowdfunded",
-      "category": "platform",
+      "taxonomy": ["platform.throne", "alert.gift"],
       "emits": {
         "fields": [
           { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
