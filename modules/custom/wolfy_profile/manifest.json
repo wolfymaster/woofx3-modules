@@ -2,7 +2,7 @@
   "id": "woofx3_wolfy_profile",
   "name": "Wolfy profile",
   "author": "WolfyMaster LLC",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Bundled workflows migrated from woofx3/wooflow/workflows/*.sh. Workflows bind to platform-agnostic event types (`channel.follow`, ...), so no module needs to be installed first; alerts use the workflow engine's built-in `woofx3:action:alert`.",
   "assets": [
     {
