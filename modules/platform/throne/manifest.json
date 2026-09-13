@@ -1,0 +1,53 @@
+{
+  "id": "woofx3_throne",
+  "name": "Throne Integration",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Receives Throne webhooks and fires a trigger when someone buys an item from your Throne wishlist.",
+  "functions": [
+    {
+      "id": "handle_throne_webhook",
+      "name": "Handle Throne Webhook",
+      "runtime": "js",
+      "path": "functions/handle_throne_webhook.js",
+      "entryPoint": "handle_throne_webhook"
+    }
+  ],
+  "triggers": [
+    {
+      "id": "throne_webhook",
+      "name": "Throne webhook",
+      "description": "The public URL to paste into Throne's webhook settings. Verifies each request and turns it into Throne events.",
+      "type": "webhook",
+      "handler": "handle_throne_webhook"
+    },
+    {
+      "id": "item_purchased",
+      "name": "Throne item purchased",
+      "description": "Fires when someone buys an item from your Throne wishlist.",
+      "type": "eventbus",
+      "event": "throne.item.purchased",
+      "category": "platform",
+      "emits": {
+        "fields": [
+          { "path": "itemName", "type": "string", "description": "Name of the purchased item.", "example": "Mechanical Keyboard" },
+          { "path": "itemPrice", "type": "number", "description": "Price of the item, in the currency below.", "example": 89.99 },
+          { "path": "currency", "type": "string", "example": "USD" },
+          { "path": "gifterName", "type": "string", "description": "Who bought it. Empty when the gift is anonymous." },
+          { "path": "isAnonymous", "type": "boolean" },
+          { "path": "message", "type": "string", "description": "The note the gifter left, if any." }
+        ]
+      }
+    }
+  ],
+  "settings": [
+    {
+      "id": "webhookSecret",
+      "label": "Throne Webhook Secret",
+      "description": "The signing secret from Throne's webhook settings. Requests without a valid signature are rejected.",
+      "type": "secret",
+      "required": true
+    }
+  ]
+}
