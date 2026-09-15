@@ -2,7 +2,7 @@
   "id": "agent_probe",
   "name": "Agent Probe",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "category": "utility",
   "description": "Exercises every module declaration kind so install paths are covered end to end: functions, actions (function and cross-module), triggers, widgets, overlays, assets, resource kinds, background tasks, settings, workflows and commands.",
   "taxonomy": [
@@ -166,10 +166,6 @@
       "description": "Renders the last event type it received.",
       "entry": "widgets/probe_panel/index.html",
       "assets": "widgets/probe_panel",
-      "acceptedEvents": [
-        "channel.follow",
-        "channel.cheer"
-      ],
       "settingsSchema": [
         {
           "id": "label",

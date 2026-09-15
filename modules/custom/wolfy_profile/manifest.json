@@ -2,7 +2,7 @@
   "id": "woofx3_wolfy_profile",
   "name": "Wolfy profile",
   "author": "WolfyMaster LLC.example",
-  "version": "1.2.4",
+  "version": "2.0.0",
   "description": "Bundled workflows migrated from woofx3/wooflow/workflows/*.sh. Workflows bind to platform-agnostic event types (`channel.follow`, ...), so no module needs to be installed first; alerts use the workflow engine's built-in `woofx3:action:alert`.",
   "assets": [
     {
@@ -53,11 +53,43 @@
           "type": "action",
           "action": "woofx3:action:alert",
           "parameters": {
-            "widget": "MediaWidget",
-            "audioUrl": "${asset:pleasure}",
-            "mediaUrl": "https://media.tenor.com/LdHGHWDh0Y8AAAPo/look-at-you-i-see-you.mp4",
-            "text": "<3  {primary}${trigger.data.userName}{primary} followed <3",
-            "duration": 6
+            "target": "default",
+            "layout": {
+              "width": 1920,
+              "height": 1080,
+              "widgets": [
+                {
+                  "id": "video",
+                  "widgetCanonicalId": "woofx3:widget:video",
+                  "position": { "x": 16, "y": 16 },
+                  "size": { "width": 1888, "height": 880 },
+                  "settings": {
+                    "src": "https://media.tenor.com/LdHGHWDh0Y8AAAPo/look-at-you-i-see-you.mp4",
+                    "loop": true,
+                    "duration": 6
+                  }
+                },
+                {
+                  "id": "message",
+                  "widgetCanonicalId": "woofx3:widget:text",
+                  "position": { "x": 16, "y": 908 },
+                  "size": { "width": 1888, "height": 156 },
+                  "settings": {
+                    "text": "<3  {primary}${trigger.data.userName}{primary} followed <3"
+                  }
+                },
+                {
+                  "id": "sound",
+                  "widgetCanonicalId": "woofx3:widget:audio",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1, "height": 1 },
+                  "settings": {
+                    "src": "${asset:pleasure}",
+                    "duration": 6
+                  }
+                }
+              ]
+            }
           }
         }
       ]
@@ -72,10 +104,41 @@
           "type": "action",
           "action": "woofx3:action:alert",
           "parameters": {
-            "widget": "MediaWidget",
-            "audioUrl": "${asset:wolf-hype}",
-            "mediaUrl": "https://media.tenor.com/bj2uMQRTdSEAAAPo/dog-husky.mp4",
-            "text": "<3  {primary}${trigger.data.userName}{primary} subscribed <3"
+            "target": "default",
+            "layout": {
+              "width": 1920,
+              "height": 1080,
+              "widgets": [
+                {
+                  "id": "video",
+                  "widgetCanonicalId": "woofx3:widget:video",
+                  "position": { "x": 16, "y": 16 },
+                  "size": { "width": 1888, "height": 880 },
+                  "settings": {
+                    "src": "https://media.tenor.com/bj2uMQRTdSEAAAPo/dog-husky.mp4",
+                    "loop": true
+                  }
+                },
+                {
+                  "id": "message",
+                  "widgetCanonicalId": "woofx3:widget:text",
+                  "position": { "x": 16, "y": 908 },
+                  "size": { "width": 1888, "height": 156 },
+                  "settings": {
+                    "text": "<3  {primary}${trigger.data.userName}{primary} subscribed <3"
+                  }
+                },
+                {
+                  "id": "sound",
+                  "widgetCanonicalId": "woofx3:widget:audio",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1, "height": 1 },
+                  "settings": {
+                    "src": "${asset:wolf-hype}"
+                  }
+                }
+              ]
+            }
           }
         }
       ]
@@ -90,42 +153,45 @@
           "type": "action",
           "action": "woofx3:action:alert",
           "parameters": {
-            "widget": "MediaWidget",
-            "mediaUrl": [
-              "${asset:bit_overlay}",
-              "${asset:confetti}"
-            ],
-            "audioUrl": "${asset:pink-pony-club}",
-            "duration": 10,
-            "options": [
-              {
-                "view": {
-                  "fullScreen": true,
-                  "positionAbsolute": true
+            "target": "default",
+            "layout": {
+              "width": 1920,
+              "height": 1080,
+              "widgets": [
+                {
+                  "id": "bits",
+                  "widgetCanonicalId": "woofx3:widget:lottie",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1920, "height": 1080 },
+                  "settings": {
+                    "src": "${asset:bit_overlay}",
+                    "textLayer": "message.text",
+                    "text": "${trigger.data.amount} BITS",
+                    "duration": 10
+                  }
                 },
-                "animation": {
-                  "path": [
-                    "assets",
-                    0,
-                    "layers",
-                    0,
-                    "t",
-                    "d",
-                    "k",
-                    0,
-                    "s",
-                    "t"
-                  ],
-                  "value": "${trigger.data.amount} BITS"
+                {
+                  "id": "confetti",
+                  "widgetCanonicalId": "woofx3:widget:image",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1920, "height": 1080 },
+                  "settings": {
+                    "src": "${asset:confetti}",
+                    "fit": "cover"
+                  }
+                },
+                {
+                  "id": "sound",
+                  "widgetCanonicalId": "woofx3:widget:audio",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1, "height": 1 },
+                  "settings": {
+                    "src": "${asset:pink-pony-club}",
+                    "duration": 10
+                  }
                 }
-              },
-              {
-                "view": {
-                  "fullScreen": true,
-                  "positionAbsolute": true
-                }
-              }
-            ]
+              ]
+            }
           }
         }
       ]
@@ -140,10 +206,41 @@
           "type": "action",
           "action": "woofx3:action:alert",
           "parameters": {
-            "widget": "MediaWidget",
-            "audioUrl": "${asset:all-in-this-together}",
-            "mediaUrl": "https://media.tenor.com/MojW2yr1vFoAAAPo/money-money-money.mp4",
-            "text": "$$ {primary}${trigger.data.gifterName}{primary} gifted {primary}${trigger.data.amount}{primary} {event.data.amount > 1 ? 'subs' : 'sub'} $$"
+            "target": "default",
+            "layout": {
+              "width": 1920,
+              "height": 1080,
+              "widgets": [
+                {
+                  "id": "video",
+                  "widgetCanonicalId": "woofx3:widget:video",
+                  "position": { "x": 16, "y": 16 },
+                  "size": { "width": 1888, "height": 880 },
+                  "settings": {
+                    "src": "https://media.tenor.com/MojW2yr1vFoAAAPo/money-money-money.mp4",
+                    "loop": true
+                  }
+                },
+                {
+                  "id": "message",
+                  "widgetCanonicalId": "woofx3:widget:text",
+                  "position": { "x": 16, "y": 908 },
+                  "size": { "width": 1888, "height": 156 },
+                  "settings": {
+                    "text": "$$ {primary}${trigger.data.gifterName}{primary} gifted {primary}${trigger.data.amount}{primary} ${trigger.data.amount > 1 ? 'subs' : 'sub'} $$"
+                  }
+                },
+                {
+                  "id": "sound",
+                  "widgetCanonicalId": "woofx3:widget:audio",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1, "height": 1 },
+                  "settings": {
+                    "src": "${asset:all-in-this-together}"
+                  }
+                }
+              ]
+            }
           }
         }
       ]

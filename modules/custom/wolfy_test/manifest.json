@@ -2,7 +2,7 @@
   "id": "wolfy_test",
   "name": "Wolfy test",
   "author": "WolfyMaster LLC",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "TESTING",
   "assets": [
     {
@@ -33,11 +33,43 @@
           "type": "action",
           "action": "woofx3:action:alert",
           "parameters": {
-            "widget": "MediaWidget",
-            "audioUrl": "${asset:wolf-hype}",
-            "mediaUrl": "https://media.tenor.com/LdHGHWDh0Y8AAAPo/look-at-you-i-see-you.mp4",
-            "text": "THIS IS A TEST",
-            "duration": 6
+            "target": "default",
+            "layout": {
+              "width": 1920,
+              "height": 1080,
+              "widgets": [
+                {
+                  "id": "video",
+                  "widgetCanonicalId": "woofx3:widget:video",
+                  "position": { "x": 16, "y": 16 },
+                  "size": { "width": 1888, "height": 880 },
+                  "settings": {
+                    "src": "https://media.tenor.com/LdHGHWDh0Y8AAAPo/look-at-you-i-see-you.mp4",
+                    "loop": true,
+                    "duration": 6
+                  }
+                },
+                {
+                  "id": "message",
+                  "widgetCanonicalId": "woofx3:widget:text",
+                  "position": { "x": 16, "y": 908 },
+                  "size": { "width": 1888, "height": 156 },
+                  "settings": {
+                    "text": "THIS IS A TEST"
+                  }
+                },
+                {
+                  "id": "sound",
+                  "widgetCanonicalId": "woofx3:widget:audio",
+                  "position": { "x": 0, "y": 0 },
+                  "size": { "width": 1, "height": 1 },
+                  "settings": {
+                    "src": "${asset:wolf-hype}",
+                    "duration": 6
+                  }
+                }
+              ]
+            }
           }
         }
       ]
