@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -15,7 +15,16 @@
       "taxonomy": [
         "platform.twitch",
         "alert.follow"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who followed."
+          }
+        ]
+      }
     },
     {
       "id": "user_message",
@@ -26,7 +35,69 @@
       "taxonomy": [
         "platform.twitch",
         "alert.chat"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string"
+          },
+          {
+            "path": "message",
+            "type": "string"
+          },
+          {
+            "path": "isPaid",
+            "type": "boolean",
+            "description": "Whether the message carried bits."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "Bits cheered in the message. 0 when none."
+          },
+          {
+            "path": "channelId",
+            "type": "string",
+            "description": "The channel in a shared chat session the message came from. Absent otherwise."
+          },
+          {
+            "path": "channelName",
+            "type": "string",
+            "description": "The channel in a shared chat session the message came from. Absent otherwise."
+          },
+          {
+            "path": "membership.isBroadcaster",
+            "type": "boolean"
+          },
+          {
+            "path": "membership.isModerator",
+            "type": "boolean"
+          },
+          {
+            "path": "membership.isSubscriber",
+            "type": "boolean"
+          },
+          {
+            "path": "membership.isVip",
+            "type": "boolean"
+          },
+          {
+            "path": "membership.isFollower",
+            "type": "boolean",
+            "description": "Absent when the lookup did not resolve in time."
+          },
+          {
+            "path": "membership.subscriberTier",
+            "type": "string",
+            "description": "tier1, tier2 or tier3. Absent when not subscribed or unresolved."
+          }
+        ]
+      }
     },
     {
       "id": "channel_subscribe",
@@ -38,6 +109,129 @@
         "platform.twitch",
         "alert.subscription"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "Who now holds the sub: the recipient of a gifted sub."
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who now holds the sub: the recipient of a gifted sub."
+          },
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "isGift",
+            "type": "boolean"
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "tier",
+          "label": "Subscription tier",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
+          ],
+          "defaultValue": "1000"
+        }
+      ]
+    },
+    {
+      "id": "channel_shared_subscribe",
+      "name": "Channel subscribe (shared chat)",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_sub, shared_chat_sub_gift) \u2014 fires when the sub happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "type": "eventbus",
+      "event": "channel.sharedSubscribe",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "Who now holds the sub: the recipient of a gifted sub."
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who now holds the sub: the recipient of a gifted sub."
+          },
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "isGift",
+            "type": "boolean"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -73,6 +267,35 @@
         "platform.twitch",
         "alert.subscription"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "isAnonymous",
+            "type": "boolean",
+            "description": "Whether the gifter hid their name."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "How many subs were gifted.",
+            "example": 5
+          },
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -104,7 +327,122 @@
           "min": 1,
           "defaultValue": 1,
           "placeholder": "e.g. 5",
-          "eventPath": "total",
+          "eventPath": "amount",
+          "operator": "gte"
+        }
+      ]
+    },
+    {
+      "id": "channel_shared_subscription_gift",
+      "name": "Channel subscription gift (shared chat)",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_community_sub_gift) \u2014 fires when the gift happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "type": "eventbus",
+      "event": "channel.sharedSubscriptionGift",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "isAnonymous",
+            "type": "boolean",
+            "description": "Whether the gifter hid their name."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "How many subs were gifted.",
+            "example": 5
+          },
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "tier",
+          "label": "Gift tier",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
+          ],
+          "defaultValue": "1000"
+        },
+        {
+          "id": "minQuantity",
+          "label": "Minimum gift count",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 5",
+          "eventPath": "amount",
           "operator": "gte"
         }
       ]
@@ -119,6 +457,34 @@
         "platform.twitch",
         "alert.cheer"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "Absent when the cheer is anonymous."
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Absent when the cheer is anonymous."
+          },
+          {
+            "path": "isAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "Bits cheered.",
+            "example": 100
+          },
+          {
+            "path": "message",
+            "type": "string"
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -157,7 +523,24 @@
       "taxonomy": [
         "platform.twitch",
         "alert.stream"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "broadcasterUserId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterUserName",
+            "type": "string"
+          },
+          {
+            "path": "startedAt",
+            "type": "string",
+            "description": "When the stream started, as an ISO 8601 timestamp."
+          }
+        ]
+      }
     },
     {
       "id": "channelpoints_redeem",
@@ -169,6 +552,36 @@
         "platform.twitch",
         "alert.channelpoints"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string"
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who redeemed the reward."
+          },
+          {
+            "path": "rewardId",
+            "type": "string"
+          },
+          {
+            "path": "rewardTitle",
+            "type": "string"
+          },
+          {
+            "path": "redeemId",
+            "type": "string"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What the viewer typed, for a reward that asks for input."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -204,7 +617,19 @@
       "taxonomy": [
         "platform.twitch",
         "alert.stream"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "broadcasterUserId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterUserName",
+            "type": "string"
+          }
+        ]
+      }
     },
     {
       "id": "channel_raid",
@@ -216,6 +641,25 @@
         "platform.twitch",
         "alert.raid"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "fromBroadcasterUserId",
+            "type": "string"
+          },
+          {
+            "path": "fromBroadcasterUserName",
+            "type": "string",
+            "description": "The raiding channel."
+          },
+          {
+            "path": "viewers",
+            "type": "number",
+            "description": "How many viewers came with the raid.",
+            "example": 42
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -234,6 +678,91 @@
       ]
     },
     {
+      "id": "channel_shared_raid",
+      "name": "Channel raid (shared chat)",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_raid) \u2014 fires when the raid happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "type": "eventbus",
+      "event": "channel.sharedRaid",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.raid"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "fromBroadcasterUserId",
+            "type": "string"
+          },
+          {
+            "path": "fromBroadcasterUserName",
+            "type": "string",
+            "description": "The raiding channel."
+          },
+          {
+            "path": "viewers",
+            "type": "number",
+            "description": "How many viewers came with the raid.",
+            "example": 42
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "minViewers",
+          "label": "Minimum viewers",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 25",
+          "eventPath": "viewers",
+          "operator": "gte",
+          "description": "Only fire when the raid brings at least this many viewers."
+        }
+      ]
+    },
+    {
       "id": "channel_resub",
       "name": "Channel resub",
       "description": "Twitch EventSub: channel.chat.notification (resub)",
@@ -243,6 +772,82 @@
         "platform.twitch",
         "alert.subscription"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "isPrime",
+            "type": "boolean"
+          },
+          {
+            "path": "durationMonths",
+            "type": "number",
+            "description": "How many months the resub pays for."
+          },
+          {
+            "path": "cumulativeMonths",
+            "type": "number",
+            "description": "Total months subscribed.",
+            "example": 12
+          },
+          {
+            "path": "streakMonths",
+            "type": "number",
+            "description": "Consecutive months subscribed. Absent when the chatter hides it."
+          },
+          {
+            "path": "isGift",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -279,6 +884,92 @@
         "platform.twitch",
         "alert.subscription"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "isPrime",
+            "type": "boolean"
+          },
+          {
+            "path": "durationMonths",
+            "type": "number",
+            "description": "How many months the resub pays for."
+          },
+          {
+            "path": "cumulativeMonths",
+            "type": "number",
+            "description": "Total months subscribed.",
+            "example": 12
+          },
+          {
+            "path": "streakMonths",
+            "type": "number",
+            "description": "Consecutive months subscribed. Absent when the chatter hides it."
+          },
+          {
+            "path": "isGift",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -313,7 +1004,53 @@
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "isGifterAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      }
     },
     {
       "id": "channel_shared_gift_paid_upgrade",
@@ -324,7 +1061,63 @@
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "isGifterAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      }
     },
     {
       "id": "channel_prime_paid_upgrade",
@@ -336,6 +1129,46 @@
         "platform.twitch",
         "alert.subscription"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -371,6 +1204,56 @@
         "platform.twitch",
         "alert.subscription"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "example": "1000"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -405,7 +1288,41 @@
       "taxonomy": [
         "platform.twitch",
         "alert.raid"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      }
     },
     {
       "id": "channel_pay_it_forward",
@@ -416,7 +1333,53 @@
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "isGifterAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      }
     },
     {
       "id": "channel_shared_pay_it_forward",
@@ -427,7 +1390,63 @@
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
-      ]
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "isGifterAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "gifterId",
+            "type": "string"
+          },
+          {
+            "path": "gifterName",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      }
     },
     {
       "id": "channel_announcement",
@@ -439,6 +1458,45 @@
         "platform.twitch",
         "alert.chat"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "color",
+            "type": "string",
+            "description": "PRIMARY, BLUE, GREEN, ORANGE or PURPLE."
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -483,6 +1541,55 @@
         "platform.twitch",
         "alert.chat"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "color",
+            "type": "string",
+            "description": "PRIMARY, BLUE, GREEN, ORANGE or PURPLE."
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          },
+          {
+            "path": "sourceBroadcasterId",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          },
+          {
+            "path": "sourceBroadcasterName",
+            "type": "string",
+            "description": "The channel in the shared chat session where this happened."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -526,6 +1633,56 @@
         "platform.twitch",
         "alert.donation"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "charityName",
+            "type": "string"
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "The donation in whole currency units: 5.5 is 5.50.",
+            "example": 5
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -553,6 +1710,46 @@
         "platform.twitch",
         "alert.cheer"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "newTier",
+            "type": "number",
+            "description": "The bits badge tier reached.",
+            "example": 1000
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
@@ -580,6 +1777,49 @@
         "platform.twitch",
         "alert.watchstreak"
       ],
+      "emits": {
+        "fields": [
+          {
+            "path": "streakCount",
+            "type": "number",
+            "description": "Consecutive streams watched."
+          },
+          {
+            "path": "channelPointsAwarded",
+            "type": "number"
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string"
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string"
+          },
+          {
+            "path": "chatterId",
+            "type": "string"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who the chat notice is about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean"
+          },
+          {
+            "path": "messageId",
+            "type": "string"
+          },
+          {
+            "path": "messageText",
+            "type": "string",
+            "description": "The message the chatter added. Empty when they added none."
+          }
+        ]
+      },
       "allowVariants": true,
       "schema": [
         {
