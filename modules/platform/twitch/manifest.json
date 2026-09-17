@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -34,6 +34,41 @@
       "description": "Twitch EventSub: channel.subscribe",
       "type": "eventbus",
       "event": "channel.subscribe",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "tier",
+          "label": "Subscription tier",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
+          ],
+          "defaultValue": "1000"
+        }
+      ]
+    },
+    {
+      "id": "channel_shared_subscribe",
+      "name": "Channel subscribe (shared chat)",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_sub, shared_chat_sub_gift) \u2014 fires when the sub happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "type": "eventbus",
+      "event": "channel.sharedSubscribe",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -104,7 +139,53 @@
           "min": 1,
           "defaultValue": 1,
           "placeholder": "e.g. 5",
-          "eventPath": "total",
+          "eventPath": "amount",
+          "operator": "gte"
+        }
+      ]
+    },
+    {
+      "id": "channel_shared_subscription_gift",
+      "name": "Channel subscription gift (shared chat)",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_community_sub_gift) \u2014 fires when the gift happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "type": "eventbus",
+      "event": "channel.sharedSubscriptionGift",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.subscription"
+      ],
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "tier",
+          "label": "Gift tier",
+          "type": "select",
+          "required": true,
+          "options": [
+            {
+              "value": "1000",
+              "label": "Tier 1"
+            },
+            {
+              "value": "2000",
+              "label": "Tier 2"
+            },
+            {
+              "value": "3000",
+              "label": "Tier 3"
+            }
+          ],
+          "defaultValue": "1000"
+        },
+        {
+          "id": "minQuantity",
+          "label": "Minimum gift count",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 5",
+          "eventPath": "amount",
           "operator": "gte"
         }
       ]
@@ -230,6 +311,32 @@
           "operator": "gte",
           "description": "Only fire when the raid brings at least this many viewers.",
           "examplePayload": "{\n  \"fromBroadcasterUserId\": \"123456\",\n  \"fromBroadcasterUserName\": \"raider99\",\n  \"viewers\": 50\n}"
+        }
+      ]
+    },
+    {
+      "id": "channel_shared_raid",
+      "name": "Channel raid (shared chat)",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_raid) \u2014 fires when the raid happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "type": "eventbus",
+      "event": "channel.sharedRaid",
+      "taxonomy": [
+        "platform.twitch",
+        "alert.raid"
+      ],
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "minViewers",
+          "label": "Minimum viewers",
+          "type": "number",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 25",
+          "eventPath": "viewers",
+          "operator": "gte",
+          "description": "Only fire when the raid brings at least this many viewers."
         }
       ]
     },
