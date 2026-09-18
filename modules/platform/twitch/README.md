@@ -17,8 +17,14 @@ Each trigger carries two independent `taxonomy` axes:
 
 - `platform.twitch` — where it comes from.
 - `alert.*` — what kind of thing happened, for grouping in the alerts UI.
-  Ten groups across 24 events, so "a subscription happened" is one entry
-  rather than the ten separate events that make it up.
+  Eleven groups across 27 triggers, so "a subscription happened" is one entry
+  rather than the separate events that make it up.
+
+Shared-chat triggers carry `alert.shared.*` mirroring their own-channel
+counterpart (`alert.shared.subscription`, `alert.shared.raid`,
+`alert.shared.chat`), which collects them under one Shared group instead of
+doubling every group with an entry for someone else's channel. The mirror is
+one-to-one: the shared side never nests deeper than the side it mirrors.
 
 Source list: [EventSub subscription types](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/).
 Extend `manifest.json` when Twitch adds types, and add the matching member to

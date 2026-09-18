@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -166,7 +166,7 @@
       "event": "channel.sharedSubscribe",
       "taxonomy": [
         "platform.twitch",
-        "alert.subscription"
+        "alert.shared.subscription"
       ],
       "emits": {
         "fields": [
@@ -340,7 +340,7 @@
       "event": "channel.sharedSubscriptionGift",
       "taxonomy": [
         "platform.twitch",
-        "alert.subscription"
+        "alert.shared.subscription"
       ],
       "emits": {
         "fields": [
@@ -685,7 +685,7 @@
       "event": "channel.sharedRaid",
       "taxonomy": [
         "platform.twitch",
-        "alert.raid"
+        "alert.shared.raid"
       ],
       "emits": {
         "fields": [
@@ -882,7 +882,7 @@
       "event": "channel.sharedResub",
       "taxonomy": [
         "platform.twitch",
-        "alert.subscription"
+        "alert.shared.subscription"
       ],
       "emits": {
         "fields": [
@@ -1060,7 +1060,7 @@
       "event": "channel.sharedGiftPaidUpgrade",
       "taxonomy": [
         "platform.twitch",
-        "alert.subscription"
+        "alert.shared.subscription"
       ],
       "emits": {
         "fields": [
@@ -1202,7 +1202,7 @@
       "event": "channel.sharedPrimePaidUpgrade",
       "taxonomy": [
         "platform.twitch",
-        "alert.subscription"
+        "alert.shared.subscription"
       ],
       "emits": {
         "fields": [
@@ -1389,7 +1389,7 @@
       "event": "channel.sharedPayItForward",
       "taxonomy": [
         "platform.twitch",
-        "alert.subscription"
+        "alert.shared.subscription"
       ],
       "emits": {
         "fields": [
@@ -1539,7 +1539,7 @@
       "event": "channel.sharedAnnouncement",
       "taxonomy": [
         "platform.twitch",
-        "alert.chat"
+        "alert.shared.chat"
       ],
       "emits": {
         "fields": [
