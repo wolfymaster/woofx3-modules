@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -12,6 +12,7 @@
       "description": "Twitch EventSub: channel.follow",
       "type": "eventbus",
       "event": "channel.follow",
+      "sentence": "Someone follows",
       "taxonomy": [
         "platform.twitch",
         "alert.follow"
@@ -32,6 +33,7 @@
       "description": "Twitch EventSub: channel.chat.message",
       "type": "eventbus",
       "event": "user.message",
+      "sentence": "Someone posts a chat message",
       "taxonomy": [
         "platform.twitch",
         "alert.chat"
@@ -105,6 +107,7 @@
       "description": "Twitch EventSub: channel.subscribe",
       "type": "eventbus",
       "event": "channel.subscribe",
+      "sentence": "Someone subscribes at {tier}",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -164,6 +167,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_sub, shared_chat_sub_gift) \u2014 fires when the sub happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
       "type": "eventbus",
       "event": "channel.sharedSubscribe",
+      "sentence": "Someone subscribes at {tier} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -263,6 +267,7 @@
       "description": "Twitch EventSub: channel.subscription.gift",
       "type": "eventbus",
       "event": "channel.subscriptionGift",
+      "sentence": "Someone gifts {minQuantity} at {tier}",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -323,6 +328,7 @@
           "id": "minQuantity",
           "label": "Minimum gift count",
           "type": "number",
+          "unit": "subs",
           "required": true,
           "min": 1,
           "defaultValue": 1,
@@ -338,6 +344,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_community_sub_gift) \u2014 fires when the gift happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
       "type": "eventbus",
       "event": "channel.sharedSubscriptionGift",
+      "sentence": "Someone gifts {minQuantity} at {tier} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -438,6 +445,7 @@
           "id": "minQuantity",
           "label": "Minimum gift count",
           "type": "number",
+          "unit": "subs",
           "required": true,
           "min": 1,
           "defaultValue": 1,
@@ -453,6 +461,7 @@
       "description": "Twitch EventSub: channel.cheer",
       "type": "eventbus",
       "event": "channel.cheer",
+      "sentence": "Someone cheers {amount}",
       "taxonomy": [
         "platform.twitch",
         "alert.cheer"
@@ -491,6 +500,7 @@
           "id": "amount",
           "label": "Minimum bits",
           "type": "number",
+          "unit": "bits",
           "required": true,
           "min": 1,
           "defaultValue": 100,
@@ -509,6 +519,7 @@
       "description": "Twitch EventSub: channel.hype_train.begin",
       "type": "eventbus",
       "event": "channel.hypetrain",
+      "sentence": "A hype train starts",
       "taxonomy": [
         "platform.twitch",
         "alert.hypetrain"
@@ -520,6 +531,7 @@
       "description": "Twitch EventSub: stream.online",
       "type": "eventbus",
       "event": "stream.online",
+      "sentence": "The stream goes live",
       "taxonomy": [
         "platform.twitch",
         "alert.stream"
@@ -548,6 +560,7 @@
       "description": "Twitch EventSub: channel.channel_points_custom_reward_redemption.add",
       "type": "eventbus",
       "event": "channelpoints.redeem",
+      "sentence": "{rewardId} is redeemed",
       "taxonomy": [
         "platform.twitch",
         "alert.channelpoints"
@@ -614,6 +627,7 @@
       "description": "Twitch EventSub: stream.offline",
       "type": "eventbus",
       "event": "stream.offline",
+      "sentence": "The stream ends",
       "taxonomy": [
         "platform.twitch",
         "alert.stream"
@@ -637,6 +651,7 @@
       "description": "Twitch EventSub: channel.raid",
       "type": "eventbus",
       "event": "channel.raid",
+      "sentence": "Someone raids with {minViewers}",
       "taxonomy": [
         "platform.twitch",
         "alert.raid"
@@ -666,6 +681,7 @@
           "id": "minViewers",
           "label": "Minimum viewers",
           "type": "number",
+          "unit": "viewers",
           "required": true,
           "min": 1,
           "defaultValue": 1,
@@ -683,6 +699,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_raid) \u2014 fires when the raid happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
       "type": "eventbus",
       "event": "channel.sharedRaid",
+      "sentence": "Someone raids with {minViewers} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.raid"
@@ -752,6 +769,7 @@
           "id": "minViewers",
           "label": "Minimum viewers",
           "type": "number",
+          "unit": "viewers",
           "required": true,
           "min": 1,
           "defaultValue": 1,
@@ -768,6 +786,7 @@
       "description": "Twitch EventSub: channel.chat.notification (resub)",
       "type": "eventbus",
       "event": "channel.resub",
+      "sentence": "Someone resubscribes at {tier}",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -880,6 +899,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) \u2014 fires when the resub is announced in another broadcaster's chat during a shared chat session.",
       "type": "eventbus",
       "event": "channel.sharedResub",
+      "sentence": "Someone resubscribes at {tier} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1001,6 +1021,7 @@
       "description": "Twitch EventSub: channel.chat.notification (gift_paid_upgrade) \u2014 a user upgraded their gifted sub to a paid one.",
       "type": "eventbus",
       "event": "channel.giftPaidUpgrade",
+      "sentence": "Someone keeps the sub they were gifted",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1058,6 +1079,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_gift_paid_upgrade)",
       "type": "eventbus",
       "event": "channel.sharedGiftPaidUpgrade",
+      "sentence": "Someone keeps the sub they were gifted in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1125,6 +1147,7 @@
       "description": "Twitch EventSub: channel.chat.notification (prime_paid_upgrade) \u2014 a user upgraded their Prime sub to a paid one.",
       "type": "eventbus",
       "event": "channel.primePaidUpgrade",
+      "sentence": "Someone turns a Prime sub into {tier}",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1200,6 +1223,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_prime_paid_upgrade)",
       "type": "eventbus",
       "event": "channel.sharedPrimePaidUpgrade",
+      "sentence": "Someone turns a Prime sub into {tier} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1285,6 +1309,7 @@
       "description": "Twitch EventSub: channel.chat.notification (unraid) \u2014 the broadcaster cancelled an outgoing raid.",
       "type": "eventbus",
       "event": "channel.unraid",
+      "sentence": "A raid is called off",
       "taxonomy": [
         "platform.twitch",
         "alert.raid"
@@ -1330,6 +1355,7 @@
       "description": "Twitch EventSub: channel.chat.notification (pay_it_forward) \u2014 a recipient of a gifted sub paid it forward by gifting another sub.",
       "type": "eventbus",
       "event": "channel.payItForward",
+      "sentence": "Someone passes a gifted sub on",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1387,6 +1413,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_pay_it_forward)",
       "type": "eventbus",
       "event": "channel.sharedPayItForward",
+      "sentence": "Someone passes a gifted sub on in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -1454,6 +1481,7 @@
       "description": "Twitch EventSub: channel.chat.notification (announcement)",
       "type": "eventbus",
       "event": "channel.announcement",
+      "sentence": "An announcement goes out in {color}",
       "taxonomy": [
         "platform.twitch",
         "alert.chat"
@@ -1537,6 +1565,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_announcement)",
       "type": "eventbus",
       "event": "channel.sharedAnnouncement",
+      "sentence": "An announcement goes out in {color} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.chat"
@@ -1629,6 +1658,7 @@
       "description": "Twitch EventSub: channel.chat.notification (charity_donation)",
       "type": "eventbus",
       "event": "channel.charityDonation",
+      "sentence": "Someone donates {minAmount} to charity",
       "taxonomy": [
         "platform.twitch",
         "alert.donation"
@@ -1706,6 +1736,7 @@
       "description": "Twitch EventSub: channel.chat.notification (bits_badge_tier)",
       "type": "eventbus",
       "event": "channel.bitsBadgeTier",
+      "sentence": "Someone earns the bits badge for {minTier}",
       "taxonomy": [
         "platform.twitch",
         "alert.cheer"
@@ -1773,6 +1804,7 @@
       "description": "Twitch EventSub: channel.chat.notification (watch_streak)",
       "type": "eventbus",
       "event": "channel.watchStreak",
+      "sentence": "Someone reaches a watch streak of {minStreakCount}",
       "taxonomy": [
         "platform.twitch",
         "alert.watchstreak"
@@ -1826,6 +1858,7 @@
           "id": "minStreakCount",
           "label": "Minimum streak count",
           "type": "number",
+          "unit": "streams",
           "required": true,
           "min": 1,
           "defaultValue": 1,
