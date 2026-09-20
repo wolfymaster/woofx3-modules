@@ -5,7 +5,8 @@ Guidance for Claude Code when working in this repository.
 ## What this is
 
 Source for the modules published to the WoofX3 marketplace. Merging to `master`
-publishes every module whose files changed, via the `woofx3-marketplace-api` CLI.
+publishes every module whose files changed and retires every module whose
+directory was deleted, via the `woofx3-marketplace-api` CLI.
 
 Related repos (siblings under `/home/wolfy/code`):
 
@@ -74,14 +75,15 @@ ci/scripts/      the toolchain below
 ## Scripts
 
 `ci/scripts/lib.sh` holds the shared primitives — `discover_modules`,
-`owning_module`, `changed_modules`, `semver_cmp`, `semver_bump`. Source it;
-don't duplicate its logic in a new script.
+`owning_module`, `changed_modules`, `removed_modules`, `semver_cmp`,
+`semver_bump`. Source it; don't duplicate its logic in a new script.
 
 | Script | Purpose |
 |---|---|
 | `ci/scripts/bump.sh` | Increment versions for changed modules |
 | `ci/scripts/check-versions.sh` | The gate; also validates every manifest and rejects duplicate ids |
 | `ci/scripts/list-changed.sh` | Changed modules between two revisions (`--json` for an Actions matrix) |
+| `ci/scripts/list-removed.sh` | Deleted modules between two revisions, as `<id><TAB><old-path>` |
 | `ci/scripts/base-ref.sh` | The single definition of what "changed" is measured against |
 | `ci/scripts/manifest.py` | Read/write top-level manifest fields |
 
@@ -113,9 +115,41 @@ presigned upload URL for the existing object. The live build stays downloadable
 until `/complete` parses the new ZIP and swaps the metadata atomically, so a
 failed publish leaves the previous version serving and re-running is safe.
 
-Do **not** switch this to `update-package` — that subcommand issues a `DELETE`
-before re-uploading, so a mid-flight failure removes the module from the
-marketplace entirely.
+## Retiring a module
+
+Deleting a module's directory retires it: the deploy job runs
+`marketplace-cli remove --if-exists <id>` for every id that existed at the base
+revision and is gone at HEAD. Without this the publish path would never notice —
+`discover_modules` reads the working tree, so a deleted directory owns no changed
+files and is simply never published, leaving its last build served from the
+marketplace indefinitely.
+
+**Removal is keyed on the manifest `id`, never the path.** `removed_modules` in
+`lib.sh` is the single implementation; use it rather than diffing paths. Moving a
+module between `platform/` and `custom/` deletes one manifest path and adds
+another, and must not read as a removal — comparing ids is what makes that work,
+the same way identity is the id everywhere else here. Rewriting an `id` in place
+genuinely *is* a removal of the old id plus a publish of the new one.
+
+Three properties of the deploy step are deliberate and worth keeping:
+
+- **Removals run after publishes**, so a rewritten id has its replacement live
+  before the old row goes, and a failed publish aborts before anything is
+  deleted.
+- **`--if-exists` makes each removal idempotent**, so re-running a deploy that
+  failed at a later step doesn't fail again on modules already retired.
+- **A run that would retire more than `MAX_AUTO_REMOVALS` (default 3) modules
+  stops without removing anything.** Deletion is the only irreversible thing
+  this repo's CI does, and a bad base ref or a wholesale directory shuffle can
+  make many modules look deleted at once. The `workflow_dispatch` path skips
+  removals entirely — it names modules to publish and has no base to diff.
+
+## Prefer publish over update-package
+
+Do **not** switch the deploy step's publish to `update-package` — that
+subcommand issues a `DELETE` before re-uploading, so a mid-flight failure removes
+the module from the marketplace entirely. Retirement is the only place a `DELETE`
+belongs, and it happens because the module is gone from the tree on purpose.
 
 ## Conventions
 

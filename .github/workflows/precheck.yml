@@ -61,6 +61,29 @@ jobs:
                   "$(./ci/scripts/manifest.py get "$mod/manifest.json" version)"
               done <<< "$changed"
             fi
+
+            # Merging a deleted module directory retires it, and that is the one
+            # thing a deploy does which can't be undone by pushing a fix. Say so
+            # here so it's visible in review rather than discovered afterwards.
+            echo
+            echo "### Modules this PR would retire"
+            echo
+            removed="$(./ci/scripts/list-removed.sh "$base" HEAD)"
+            if [ -z "$removed" ]; then
+              echo "_None._"
+            else
+              echo "⚠️ Merging this drops these from the marketplace — the catalog row and"
+              echo "the stored ZIP and icon go, and installed copies lose their update path."
+              echo "Moving a module between directories is not a removal; these ids are"
+              echo "genuinely gone from the tree."
+              echo
+              echo "| Module | Was at |"
+              echo "|---|---|"
+              while IFS=$'\t' read -r id path; do
+                [ -z "$id" ] && continue
+                printf '| `%s` | `%s` |\n' "$id" "$path"
+              done <<< "$removed"
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
   package:

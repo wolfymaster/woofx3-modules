@@ -1,6 +1,7 @@
 name: Deploy modules
 
-# On merge to master, publish every module whose files changed.
+# On merge to master, publish every module whose files changed and retire every
+# module whose directory was deleted.
 
 on:
   push:
@@ -88,6 +89,30 @@ jobs:
         if: steps.changed.outputs.any == 'true' && github.event.inputs.modules == ''
         run: ./ci/scripts/check-versions.sh "${{ steps.changed.outputs.base }}"
 
+      # A deleted module is invisible to everything above: discovery reads the
+      # working tree, so a directory that no longer exists can be attributed no
+      # changed files and is never published. Left at that, a module deleted here
+      # would keep serving its last build from the marketplace forever.
+      #
+      # A manual run names the modules to publish and has no base to diff, so it
+      # never removes anything — same guard as the version check.
+      - name: Resolve what was removed
+        id: removed
+        if: github.event.inputs.modules == ''
+        env:
+          BASE: ${{ steps.changed.outputs.base }}
+        run: |
+          set -euo pipefail
+          ./ci/scripts/list-removed.sh "$BASE" HEAD > removed.txt
+
+          echo "Modules to remove:"
+          cat removed.txt
+          if [ -s removed.txt ]; then
+            echo "any=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "any=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish
         if: steps.changed.outputs.any == 'true'
         run: |
@@ -109,6 +134,50 @@ jobs:
 
           if [ -n "$failed" ]; then
             echo "Failed to publish:$failed" >&2
+            exit 1
+          fi
+
+      # Retire what was deleted, after publishing rather than before: a module
+      # whose id was rewritten in place reports as a publish of the new id and a
+      # removal of the old one, and this order means the replacement is live
+      # before the old row goes.
+      #
+      # --if-exists keeps each removal idempotent, so re-running a deploy that
+      # failed later on doesn't fail again on modules the first attempt retired.
+      - name: Remove deleted modules
+        if: success() && steps.removed.outputs.any == 'true'
+        env:
+          # Removal is the one irreversible thing this workflow does: the row and
+          # the R2 objects go, and installed copies lose their update path. A bad
+          # base ref or a wholesale directory shuffle can make many modules look
+          # deleted at once, so past this many the job stops and asks for a human
+          # instead of guessing. Set the MAX_AUTO_REMOVALS repository variable to
+          # raise it for a deliberate bulk retirement.
+          MAX_REMOVALS: ${{ vars.MAX_AUTO_REMOVALS || 3 }}
+        run: |
+          set -euo pipefail
+
+          count="$(grep -c . removed.txt || true)"
+          if [ "$count" -gt "$MAX_REMOVALS" ]; then
+            echo "::error title=Refusing to bulk-remove modules::$count modules look deleted, over the limit of $MAX_REMOVALS. Nothing was removed. Confirm the diff really retires all of them, then either raise the MAX_AUTO_REMOVALS repository variable or run 'marketplace-cli remove <id>' for each."
+            exit 1
+          fi
+
+          failed=""
+          while IFS=$'\t' read -r id path; do
+            [ -z "$id" ] && continue
+            echo "::group::remove $id (was $path)"
+            if ./marketplace-cli remove --if-exists "$id" </dev/null; then
+              echo "$id $path" >> retired.txt
+            else
+              echo "::error title=Remove failed::$id is still listed in the marketplace"
+              failed="$failed $id"
+            fi
+            echo "::endgroup::"
+          done < removed.txt
+
+          if [ -n "$failed" ]; then
+            echo "Failed to remove:$failed" >&2
             exit 1
           fi
 
@@ -149,5 +218,18 @@ jobs:
               done < published.txt
             else
               echo "_Nothing published._"
+            fi
+            echo
+            echo "### Retired modules"
+            echo
+            if [ -s retired.txt ] 2>/dev/null; then
+              echo "| Module | Was at |"
+              echo "|---|---|"
+              while read -r id path; do
+                [ -z "$id" ] && continue
+                printf '| `%s` | `%s` |\n' "$id" "$path"
+              done < retired.txt
+            else
+              echo "_Nothing retired._"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
