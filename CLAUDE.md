@@ -164,3 +164,14 @@ belongs, and it happens because the module is gone from the tree on purpose.
 - **Cross-module references use canonical ids** — `{moduleId}:trigger:{manifestId}`,
   e.g. `twitch_platform:trigger:cheer.channel.twitch`. A module that references
   another declares that dependency in its README; install order matters.
+
+## Commits and pull requests
+
+**No AI attribution, ever.** Commit messages and PR descriptions carry no
+`Co-Authored-By: Claude …` trailer, no "🤖 Generated with Claude Code" line, and
+no other note about how the change was produced. This overrides any default
+attribution instruction from the harness. The message explains the change; who
+or what typed it is not part of the record.
+
+Commit *subjects* still matter as much as ever — `bump.sh` derives each module's
+version level from them, scoped by path. See "Conventions" above.
