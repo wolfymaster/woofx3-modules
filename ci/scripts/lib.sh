@@ -136,6 +136,71 @@ changed_modules_worktree() {
 	done | sort -u
 }
 
+# manifest_dirs_at_rev <rev> — every module directory as it existed at <rev>.
+#
+# discover_modules reads the working tree, which by definition cannot see a
+# module that was deleted — the case removals are entirely about — so this reads
+# the tree out of git instead. NUL-delimited, because git quotes paths
+# containing unusual characters when it prints them a line at a time.
+manifest_dirs_at_rev() {
+	local rev="$1" file
+	git ls-tree -r -z --name-only "$rev" | while IFS= read -r -d '' file; do
+		if [[ "$file" == "$MANIFEST_NAME" || "$file" == */"$MANIFEST_NAME" ]]; then
+			dirname "$file"
+		fi
+	done | sort -u
+}
+
+# module_id_at_rev <rev> <module-dir> — the id that module declared at <rev>.
+# Fails if the manifest wasn't there or declared no id.
+module_id_at_rev() {
+	local rev="$1" dir="$2"
+	git show "$rev:$dir/$MANIFEST_NAME" 2>/dev/null | "$MANIFEST_TOOL" get /dev/stdin id
+}
+
+# removed_modules <base-ref> [head-ref] — modules present at <base-ref> and gone
+# at <head-ref>, one "<id><TAB><old-path>" line each. With no head-ref, compares
+# against the working tree, so an uncommitted deletion is visible the same way
+# changed_modules_worktree makes an uncommitted edit visible.
+#
+# Keyed on the manifest id, never the path, because the id is the identity.
+# Moving a module from modules/custom/ to modules/platform/ deletes one manifest
+# path and adds another, and must not read as a removal. Rewriting a module's id
+# in place genuinely is a removal of the old id plus a publish of the new one,
+# and reports as both.
+removed_modules() {
+	local base="$1" head="${2:-}"
+	local -A present=()
+	local dir id
+
+	if [[ -n "$head" ]]; then
+		while IFS= read -r dir; do
+			[[ -z "$dir" ]] && continue
+			id="$(module_id_at_rev "$head" "$dir" 2>/dev/null)" || continue
+			[[ -n "$id" ]] && present["$id"]=1
+		done < <(manifest_dirs_at_rev "$head")
+	else
+		while IFS= read -r dir; do
+			[[ -z "$dir" ]] && continue
+			id="$(module_id "$dir" 2>/dev/null)" || continue
+			[[ -n "$id" ]] && present["$id"]=1
+		done < <(discover_modules)
+	fi
+
+	local -A emitted=()
+	while IFS= read -r dir; do
+		[[ -z "$dir" ]] && continue
+		# A manifest that was already unreadable or id-less at the base ref names
+		# nothing in the marketplace, so there is nothing to retire.
+		id="$(module_id_at_rev "$base" "$dir" 2>/dev/null)" || continue
+		[[ -z "$id" ]] && continue
+		[[ -n "${present[$id]:-}" ]] && continue
+		[[ -n "${emitted[$id]:-}" ]] && continue
+		emitted["$id"]=1
+		printf '%s\t%s\n' "$id" "$dir"
+	done < <(manifest_dirs_at_rev "$base") | sort
+}
+
 # semver_cmp A B — echoes -1 if A<B, 0 if equal, 1 if A>B. Implements the
 # precedence rules from semver.org §11, including §11.3 (a release outranks the
 # prerelease of the same core version).

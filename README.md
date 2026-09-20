@@ -45,6 +45,33 @@ git push
 Open a PR against `master`. When it merges, the deploy workflow publishes
 `spotify` at `1.1.0` and tags the commit `spotify@1.1.0`.
 
+## Retiring a module
+
+Delete the directory. On merge, the deploy workflow removes the module from the
+marketplace — the catalog row plus its stored ZIP and icon.
+
+```bash
+git rm -r modules/custom/wolfy_test
+git commit -m "chore: retire wolfy_test"
+
+# see what that would retire before pushing
+./ci/scripts/list-removed.sh
+```
+
+Removal is keyed on the manifest's `id`, not the path, so **moving** a module
+between directories is not a removal — the id is still in the tree. Rewriting a
+module's `id` in place is: the old id is retired and the new one is published.
+
+This is the one deploy action that pushing a fix afterwards cannot undo, so the
+PR summary calls it out under "Modules this PR would retire" and the pre-push
+hook prints it. To bring a module back, restore the directory and merge; it
+republishes from scratch.
+
+A run that looks like it would retire more than three modules at once stops
+instead, on the assumption that something is wrong with the diff rather than
+that four modules were meant to go. For a deliberate bulk retirement, raise the
+`MAX_AUTO_REMOVALS` repo variable.
+
 ## Versioning
 
 Every module carries its own version; there is no repo-wide version.
@@ -99,6 +126,7 @@ check CI does and you find out before opening the PR. Bypass once with
 | `ci/scripts/bump.sh` | Increment versions for changed modules |
 | `ci/scripts/check-versions.sh` | The gate — fails if a changed module wasn't bumped |
 | `ci/scripts/list-changed.sh` | Modules changed between two revisions (`--json` for a matrix) |
+| `ci/scripts/list-removed.sh` | Modules deleted between two revisions, as `<id><TAB><old-path>` |
 | `ci/scripts/base-ref.sh` | The revision "changed" is measured against |
 | `ci/scripts/manifest.py` | Read/write top-level manifest fields |
 | `ci/scripts/lib.sh` | Shared discovery, attribution and semver helpers |
@@ -112,8 +140,8 @@ changed ones: each needs an `id`, `name` and `version`, the `id` must match
 
 | Workflow | Trigger | Does |
 |---|---|---|
-| `.github/workflows/precheck.yml` | PR to `master` | Runs the version check, then a dry-run publish of each changed module so a malformed manifest fails here rather than mid-deploy |
-| `.github/workflows/deploy.yml` | Push to `master` | Publishes each changed module, then tags `<id>@<version>` |
+| `.github/workflows/precheck.yml` | PR to `master` | Runs the version check, then a dry-run publish of each changed module so a malformed manifest fails here rather than mid-deploy; summarises what would publish and what would be retired |
+| `.github/workflows/deploy.yml` | Push to `master` | Publishes each changed module, retires each deleted one, then tags `<id>@<version>` |
 
 Both workflows run on GitHub-hosted runners — the marketplace API is public
 (Railway). The base URL comes from the `MARKETPLACE_API_URL` repo variable,
@@ -146,8 +174,14 @@ existing build stays downloadable until the new ZIP is parsed and swapped
 atomically. A failed deploy leaves the previous version live, and re-running is
 safe.
 
+Retirement is the exception — `marketplace-cli remove` deletes the row and the
+R2 objects. It runs only for modules whose directory is gone from the tree, only
+after every publish in the run has succeeded, and uses `--if-exists` so a
+re-run doesn't fail on a module the first attempt already retired.
+
 `deploy.yml` also accepts a manual `workflow_dispatch` with a space-separated
-list of module directories, for republishing after an incident.
+list of module directories, for republishing after an incident. A manual run
+publishes only — it has no base revision to diff, so it never retires anything.
 
 ## Release history
 

@@ -68,9 +68,26 @@ warn_nested_modules
 
 # --- Changed modules must be versioned up ------------------------------------
 mapfile -t changed < <(changed_modules "$BASE" HEAD)
+mapfile -t removed < <(removed_modules "$BASE" HEAD)
+
+# --- Deleted modules are retired on merge ------------------------------------
+# Nothing here can fail on a removal — there is no version to bump — but it is
+# the one thing a deploy does that pushing a fix afterwards cannot undo, so it
+# gets said out loud rather than discovered from the deploy log.
+if [[ ${#removed[@]} -gt 0 ]]; then
+	echo "${yellow}Modules that would be REMOVED from the marketplace:${reset}"
+	echo
+	for entry in "${removed[@]}"; do
+		printf '  %s-%s %-24s %s(was %s)%s\n' \
+			"$yellow" "$reset" "${entry%%$'\t'*}" "$dim" "${entry#*$'\t'}" "$reset"
+	done
+	echo
+fi
 
 if [[ ${#changed[@]} -eq 0 ]]; then
-	echo "${dim}No module changes since $(git rev-parse --short "$BASE").${reset}"
+	if [[ ${#removed[@]} -eq 0 ]]; then
+		echo "${dim}No module changes since $(git rev-parse --short "$BASE").${reset}"
+	fi
 	exit "$failed"
 fi
 
