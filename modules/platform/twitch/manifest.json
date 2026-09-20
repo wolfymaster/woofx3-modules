@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -1878,6 +1878,13 @@
       "runtime": "js",
       "path": "functions/sendChatMessage.js",
       "entryPoint": "sendChatMessage"
+    },
+    {
+      "id": "shoutout",
+      "name": "Shoutout a channel",
+      "runtime": "js",
+      "path": "functions/shoutout.js",
+      "entryPoint": "shoutout"
     }
   ],
   "actions": [
@@ -1896,6 +1903,24 @@
           "placeholder": "What should the bot say?",
           "description": "Plain text. Twitch chat enforces a 500-character limit.",
           "hint": "Supports template substitution from the trigger event (e.g. {user.name})."
+        }
+      ]
+    },
+    {
+      "id": "twitch.shoutout",
+      "name": "Shoutout",
+      "description": "Send a Twitch shoutout for another channel, the same one the /shoutout chat command sends.",
+      "type": "function",
+      "function": "shoutout",
+      "schema": [
+        {
+          "id": "user",
+          "label": "Channel",
+          "type": "text",
+          "required": true,
+          "placeholder": "Channel name or user id",
+          "description": "The channel to shout out. A numeric user id is used as-is; anything else is resolved as a login name.",
+          "hint": "Supports template substitution, so a raid trigger can pass its raider straight through."
         }
       ]
     }
