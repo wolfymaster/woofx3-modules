@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "triggers": [
@@ -132,7 +132,8 @@
           },
           {
             "path": "isGift",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether someone else gifted this subscription."
           }
         ]
       },
@@ -158,13 +159,36 @@
             }
           ],
           "defaultValue": "1000"
+        },
+        {
+          "id": "isGift",
+          "label": "Gifted subs",
+          "type": "select",
+          "options": [
+            {
+              "value": "",
+              "label": "Any subscription"
+            },
+            {
+              "value": "false",
+              "label": "Only subs the viewer bought"
+            },
+            {
+              "value": "true",
+              "label": "Only gifted subs"
+            }
+          ],
+          "defaultValue": "",
+          "eventPath": "isGift",
+          "operator": "eq",
+          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
         }
       ]
     },
     {
       "id": "channel_shared_subscribe",
       "name": "Channel subscribe (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_sub, shared_chat_sub_gift) \u2014 fires when the sub happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_sub, shared_chat_sub_gift) — fires when the sub happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
       "type": "eventbus",
       "event": "channel.sharedSubscribe",
       "sentence": "Someone subscribes at {tier} in another channel's shared chat",
@@ -192,7 +216,8 @@
           },
           {
             "path": "isGift",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether someone else gifted this subscription."
           },
           {
             "path": "broadcasterId",
@@ -258,6 +283,29 @@
             }
           ],
           "defaultValue": "1000"
+        },
+        {
+          "id": "isGift",
+          "label": "Gifted subs",
+          "type": "select",
+          "options": [
+            {
+              "value": "",
+              "label": "Any subscription"
+            },
+            {
+              "value": "false",
+              "label": "Only subs the viewer bought"
+            },
+            {
+              "value": "true",
+              "label": "Only gifted subs"
+            }
+          ],
+          "defaultValue": "",
+          "eventPath": "isGift",
+          "operator": "eq",
+          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel shared subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
         }
       ]
     },
@@ -341,7 +389,7 @@
     {
       "id": "channel_shared_subscription_gift",
       "name": "Channel subscription gift (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_community_sub_gift) \u2014 fires when the gift happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_community_sub_gift) — fires when the gift happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
       "type": "eventbus",
       "event": "channel.sharedSubscriptionGift",
       "sentence": "Someone gifts {minQuantity} at {tier} in another channel's shared chat",
@@ -696,7 +744,7 @@
     {
       "id": "channel_shared_raid",
       "name": "Channel raid (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_raid) \u2014 fires when the raid happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_raid) — fires when the raid happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
       "type": "eventbus",
       "event": "channel.sharedRaid",
       "sentence": "Someone raids with {minViewers} in another channel's shared chat",
@@ -821,7 +869,8 @@
           },
           {
             "path": "isGift",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether someone else gifted this subscription."
           },
           {
             "path": "gifterIsAnonymous",
@@ -890,13 +939,36 @@
           ],
           "defaultValue": "1000",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"chatterIsAnonymous\": false,\n  \"tier\": \"1000\",\n  \"isPrime\": false,\n  \"durationMonths\": 1,\n  \"cumulativeMonths\": 6,\n  \"streakMonths\": 3,\n  \"isGift\": false,\n  \"gifterIsAnonymous\": null,\n  \"gifterId\": null,\n  \"gifterName\": null,\n  \"messageId\": \"...\",\n  \"messageText\": \"...\"\n}"
+        },
+        {
+          "id": "isGift",
+          "label": "Gifted subs",
+          "type": "select",
+          "options": [
+            {
+              "value": "",
+              "label": "Any subscription"
+            },
+            {
+              "value": "false",
+              "label": "Only subs the viewer bought"
+            },
+            {
+              "value": "true",
+              "label": "Only gifted subs"
+            }
+          ],
+          "defaultValue": "",
+          "eventPath": "isGift",
+          "operator": "eq",
+          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
         }
       ]
     },
     {
       "id": "channel_shared_resub",
       "name": "Channel resub (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) \u2014 fires when the resub is announced in another broadcaster's chat during a shared chat session.",
+      "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) — fires when the resub is announced in another broadcaster's chat during a shared chat session.",
       "type": "eventbus",
       "event": "channel.sharedResub",
       "sentence": "Someone resubscribes at {tier} in another channel's shared chat",
@@ -934,7 +1006,8 @@
           },
           {
             "path": "isGift",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether someone else gifted this subscription."
           },
           {
             "path": "gifterIsAnonymous",
@@ -1012,13 +1085,36 @@
             }
           ],
           "defaultValue": "1000"
+        },
+        {
+          "id": "isGift",
+          "label": "Gifted subs",
+          "type": "select",
+          "options": [
+            {
+              "value": "",
+              "label": "Any subscription"
+            },
+            {
+              "value": "false",
+              "label": "Only subs the viewer bought"
+            },
+            {
+              "value": "true",
+              "label": "Only gifted subs"
+            }
+          ],
+          "defaultValue": "",
+          "eventPath": "isGift",
+          "operator": "eq",
+          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel shared subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
         }
       ]
     },
     {
       "id": "channel_gift_paid_upgrade",
       "name": "Gift sub upgraded to paid",
-      "description": "Twitch EventSub: channel.chat.notification (gift_paid_upgrade) \u2014 a user upgraded their gifted sub to a paid one.",
+      "description": "Twitch EventSub: channel.chat.notification (gift_paid_upgrade) — a user upgraded their gifted sub to a paid one.",
       "type": "eventbus",
       "event": "channel.giftPaidUpgrade",
       "sentence": "Someone keeps the sub they were gifted",
@@ -1144,7 +1240,7 @@
     {
       "id": "channel_prime_paid_upgrade",
       "name": "Prime sub upgraded to paid",
-      "description": "Twitch EventSub: channel.chat.notification (prime_paid_upgrade) \u2014 a user upgraded their Prime sub to a paid one.",
+      "description": "Twitch EventSub: channel.chat.notification (prime_paid_upgrade) — a user upgraded their Prime sub to a paid one.",
       "type": "eventbus",
       "event": "channel.primePaidUpgrade",
       "sentence": "Someone turns a Prime sub into {tier}",
@@ -1306,7 +1402,7 @@
     {
       "id": "channel_unraid",
       "name": "Raid cancelled (unraid)",
-      "description": "Twitch EventSub: channel.chat.notification (unraid) \u2014 the broadcaster cancelled an outgoing raid.",
+      "description": "Twitch EventSub: channel.chat.notification (unraid) — the broadcaster cancelled an outgoing raid.",
       "type": "eventbus",
       "event": "channel.unraid",
       "sentence": "A raid is called off",
@@ -1352,7 +1448,7 @@
     {
       "id": "channel_pay_it_forward",
       "name": "Gift sub paid forward",
-      "description": "Twitch EventSub: channel.chat.notification (pay_it_forward) \u2014 a recipient of a gifted sub paid it forward by gifting another sub.",
+      "description": "Twitch EventSub: channel.chat.notification (pay_it_forward) — a recipient of a gifted sub paid it forward by gifting another sub.",
       "type": "eventbus",
       "event": "channel.payItForward",
       "sentence": "Someone passes a gifted sub on",
