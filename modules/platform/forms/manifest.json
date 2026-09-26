@@ -1,0 +1,287 @@
+{
+  "id": "woofx3_forms",
+  "name": "Viewer Forms",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Puts viewer form submissions on stream. The forms site sends each approved submission here; it joins the queue its form is linked to, and the Spotlight widget shows each one as it is taken from the front of that queue.",
+  "settings": [
+    {
+      "id": "webhookSecret",
+      "label": "Webhook signing secret",
+      "description": "The signing secret the forms site shows next to your webhook URL. Requests not signed with it are refused.",
+      "type": "secret",
+      "required": true
+    }
+  ],
+  "resources": [
+    {
+      "kind": "form",
+      "name": "Form link",
+      "description": "Connects a form on the forms site to the queue its approved submissions join.",
+      "icon": "ClipboardList",
+      "schema": [
+        {
+          "id": "formId",
+          "label": "Form id",
+          "type": "text",
+          "required": true,
+          "description": "The form's id on the forms site, shown in its share settings."
+        },
+        {
+          "id": "queue",
+          "label": "Queue",
+          "type": "resource_ref",
+          "resourceKind": "queue",
+          "required": true,
+          "description": "The queue approved submissions join. Point a Spotlight widget at the same queue to show them."
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "id": "receive",
+      "name": "Receive forms site webhook",
+      "runtime": "js",
+      "path": "functions/forms.js",
+      "entryPoint": "receive"
+    },
+    {
+      "id": "show",
+      "name": "Show submission",
+      "runtime": "js",
+      "path": "functions/forms.js",
+      "entryPoint": "show"
+    },
+    {
+      "id": "hide",
+      "name": "Hide submission",
+      "runtime": "js",
+      "path": "functions/forms.js",
+      "entryPoint": "hide"
+    }
+  ],
+  "triggers": [
+    {
+      "id": "forms_webhook",
+      "name": "Forms site webhook",
+      "description": "Paste this URL into the forms site's webhook settings. Every request is checked against the signing secret before anything fires.",
+      "type": "webhook",
+      "handler": "receive"
+    },
+    {
+      "id": "submission_approved",
+      "name": "Form submission approved",
+      "description": "Fires when the forms site sends an approved submission for a linked form.",
+      "type": "eventbus",
+      "event": "forms.submission.approved",
+      "taxonomy": ["platform.forms"],
+      "schema": [
+        {
+          "id": "queue",
+          "label": "Queue",
+          "type": "resource_ref",
+          "resourceKind": "queue",
+          "eventPath": "queue",
+          "operator": "eq",
+          "description": "Only submissions headed for this queue. Leave it as any to act on every form."
+        }
+      ],
+      "sentence": "a form submission is approved for {queue}",
+      "emits": {
+        "fields": [
+          { "path": "submissionId", "type": "string", "description": "The forms site's id for the submission. This is the queue entry." },
+          { "path": "formId", "type": "string" },
+          { "path": "formTitle", "type": "string" },
+          { "path": "queue", "type": "string", "description": "The queue it joins, by canonical id." },
+          { "path": "viewerName", "type": "string", "description": "Who submitted it. Empty for an anonymous submission." }
+        ]
+      }
+    },
+    {
+      "id": "submission_withdrawn",
+      "name": "Form submission withdrawn",
+      "description": "Fires when the forms site takes back a submission it approved.",
+      "type": "eventbus",
+      "event": "forms.submission.withdrawn",
+      "taxonomy": ["platform.forms"],
+      "schema": [
+        {
+          "id": "queue",
+          "label": "Queue",
+          "type": "resource_ref",
+          "resourceKind": "queue",
+          "eventPath": "queue",
+          "operator": "eq",
+          "description": "Only submissions in this queue. Leave it as any to act on every form."
+        }
+      ],
+      "sentence": "a form submission is withdrawn from {queue}",
+      "emits": {
+        "fields": [
+          { "path": "submissionId", "type": "string" },
+          { "path": "formId", "type": "string" },
+          { "path": "queue", "type": "string", "description": "The queue it was sent to, by canonical id." }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "show",
+      "name": "Show form submission",
+      "description": "Put a submission on every Spotlight widget watching the queue. An entry that is not a form submission is left alone, so this can follow any queue.",
+      "type": "function",
+      "function": "show",
+      "schema": [
+        {
+          "id": "queue",
+          "label": "Queue",
+          "type": "resource_ref",
+          "resourceKind": "queue",
+          "required": true,
+          "description": "The queue whose Spotlight widgets show it."
+        },
+        {
+          "id": "entry",
+          "label": "Entry",
+          "type": "text",
+          "required": true,
+          "description": "The queue entry, which is the submission's id."
+        }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "queue", "type": "string" },
+          { "path": "entry", "type": "string" },
+          { "path": "shown", "type": "boolean", "description": "Whether the entry was a form submission that could be shown." }
+        ]
+      },
+      "taxonomy": ["platform.forms"]
+    },
+    {
+      "id": "hide",
+      "name": "Hide form submission",
+      "description": "Clear the Spotlight widgets watching the queue.",
+      "type": "function",
+      "function": "hide",
+      "schema": [
+        {
+          "id": "queue",
+          "label": "Queue",
+          "type": "resource_ref",
+          "resourceKind": "queue",
+          "required": true,
+          "description": "The queue whose Spotlight widgets to clear."
+        }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "queue", "type": "string" }
+        ]
+      },
+      "taxonomy": ["platform.forms"]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "enqueue_approved",
+      "name": "Queue approved form submissions",
+      "trigger": "submission_approved",
+      "steps": [
+        {
+          "id": "enqueue",
+          "action": "woofx3:action:queue.add",
+          "parameters": { "target": "${trigger.data.queue}", "entry": "${trigger.data.submissionId}" }
+        }
+      ],
+      "taxonomy": ["platform.forms"]
+    },
+    {
+      "id": "dequeue_withdrawn",
+      "name": "Remove withdrawn form submissions",
+      "trigger": "submission_withdrawn",
+      "steps": [
+        {
+          "id": "dequeue",
+          "action": "woofx3:action:queue.remove",
+          "parameters": { "target": "${trigger.data.queue}", "entry": "${trigger.data.submissionId}" }
+        }
+      ],
+      "taxonomy": ["platform.forms"]
+    },
+    {
+      "id": "show_next",
+      "name": "Show form submissions as they are taken from a queue",
+      "trigger": "woofx3:trigger:queue_next",
+      "steps": [
+        {
+          "id": "show",
+          "action": "show",
+          "parameters": { "queue": "${trigger.data.target}", "entry": "${trigger.data.entry}" }
+        }
+      ],
+      "taxonomy": ["platform.forms"]
+    }
+  ],
+  "widgets": [
+    {
+      "id": "spotlight",
+      "name": "Form Spotlight",
+      "description": "Shows the form submission most recently taken from a queue, until the next one is taken or it is hidden.",
+      "entry": "widgets/spotlight/index.html",
+      "assets": "widgets/spotlight",
+      "surfaces": ["scene"],
+      "settingsSchema": [
+        {
+          "id": "queue",
+          "label": "Queue",
+          "type": "resource_ref",
+          "resourceKind": "queue",
+          "required": true,
+          "description": "The queue a form is linked to. Each submission taken from it shows here."
+        },
+        {
+          "id": "showName",
+          "label": "Show viewer name",
+          "type": "toggle",
+          "defaultValue": true
+        },
+        {
+          "id": "color",
+          "label": "Text color",
+          "type": "color",
+          "defaultValue": "#ffffff"
+        },
+        {
+          "id": "accentColor",
+          "label": "Accent color",
+          "type": "color",
+          "defaultValue": "#ec6758"
+        },
+        {
+          "id": "backgroundColor",
+          "label": "Card color",
+          "type": "color",
+          "defaultValue": "#1b1b24"
+        },
+        {
+          "id": "fontFamily",
+          "label": "Font",
+          "type": "text",
+          "defaultValue": "Roboto, system-ui, sans-serif"
+        },
+        {
+          "id": "fontSize",
+          "label": "Font size",
+          "type": "number",
+          "unit": "px",
+          "min": 1,
+          "defaultValue": 28
+        }
+      ],
+      "taxonomy": ["platform.forms"]
+    }
+  ]
+}
