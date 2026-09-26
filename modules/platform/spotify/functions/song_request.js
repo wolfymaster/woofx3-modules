@@ -139,5 +139,11 @@ function song_request(ctx) {
         return ctx.response(false, "Failed to queue " + song.name + ".");
     }
 
-    return ctx.response(true, "Added to queue: " + song.name + " by " + song.artist);
+    // The returned object is the workflow step's output, so the song and artist
+    // ride along on the reply for later steps to read as ${stepId.song} and
+    // ${stepId.artist}. Must match the action's `returns` in manifest.json.
+    var reply = ctx.response(true, "Added to queue: " + song.name + " by " + song.artist);
+    reply.song = song.name;
+    reply.artist = song.artist;
+    return reply;
 }
