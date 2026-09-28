@@ -26,6 +26,13 @@ counterpart (`alert.shared.subscription`, `alert.shared.raid`,
 doubling every group with an entry for someone else's channel. The mirror is
 one-to-one: the shared side never nests deeper than the side it mirrors.
 
+The three ad-break triggers carry `stream.ads` in place of an `alert.*` group:
+an ad break is the stream's schedule, not something a viewer did. Two of them
+are not EventSub topics. `channel.ad_break.upcoming` is published by the engine
+from the ad schedule ahead of a scheduled ad, and `channel.ad_break.end` by the
+twitch service when a break is due to end, because Twitch sends neither. All
+three need the `channel:read:ads` scope; without it they never fire.
+
 Source list: [EventSub subscription types](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/).
 Extend `manifest.json` when Twitch adds types, and add the matching member to
 the engine's `EventType` enum — the two must agree or the trigger subscribes
