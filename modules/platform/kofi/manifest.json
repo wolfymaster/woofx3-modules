@@ -1,0 +1,294 @@
+{
+  "id": "woofx3_kofi",
+  "name": "Ko-fi",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Receives Ko-fi webhooks and fires triggers when someone tips, starts or renews a membership, buys from your shop, or orders a commission.",
+  "taxonomy": [
+    "platform.kofi"
+  ],
+  "functions": [
+    {
+      "id": "handle_kofi_webhook",
+      "name": "Handle Ko-fi Webhook",
+      "runtime": "js",
+      "path": "functions/handle_kofi_webhook.js",
+      "entryPoint": "handle_kofi_webhook"
+    }
+  ],
+  "settings": [
+    {
+      "id": "verificationToken",
+      "label": "Ko-fi verification token",
+      "description": "Copy this from Ko-fi's webhook settings, under Advanced. Requests without it are refused.",
+      "type": "secret",
+      "required": true
+    }
+  ],
+  "triggers": [
+    {
+      "id": "kofi_webhook",
+      "name": "Ko-fi webhook",
+      "description": "Paste this URL into Ko-fi's webhook settings. Every request is checked against your verification token before anything fires.",
+      "type": "webhook",
+      "handler": "handle_kofi_webhook"
+    },
+    {
+      "id": "donation",
+      "name": "Ko-fi donation",
+      "description": "Fires when someone sends a one-off tip on Ko-fi.",
+      "type": "eventbus",
+      "event": "kofi.donation",
+      "sentence": "Someone tips on Ko-fi",
+      "taxonomy": [
+        "platform.kofi",
+        "alert.donation"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "messageId",
+            "type": "string",
+            "description": "Ko-fi's id for this payment. A retried delivery carries the same id."
+          },
+          {
+            "path": "fromName",
+            "type": "string",
+            "description": "Who paid. \"Anonymous\" when they asked to stay private.",
+            "example": "Anonymous"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The supporter's message. Empty when they left none or asked to stay private."
+          },
+          {
+            "path": "isPublic",
+            "type": "boolean",
+            "description": "False when the supporter asked that their name and message stay off stream."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 3 is 3.00.",
+            "example": 3
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "3.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "url",
+            "type": "string",
+            "description": "Link to the payment on Ko-fi."
+          }
+        ]
+      }
+    },
+    {
+      "id": "subscription",
+      "name": "Ko-fi membership payment",
+      "description": "Fires when someone starts a Ko-fi membership or monthly tip, and again on each renewal.",
+      "type": "eventbus",
+      "event": "kofi.subscription",
+      "sentence": "Someone pays for a Ko-fi membership",
+      "taxonomy": [
+        "platform.kofi",
+        "alert.subscription"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "messageId",
+            "type": "string",
+            "description": "Ko-fi's id for this payment. A retried delivery carries the same id."
+          },
+          {
+            "path": "fromName",
+            "type": "string",
+            "description": "Who paid. \"Anonymous\" when they asked to stay private.",
+            "example": "Anonymous"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The supporter's message. Empty when they left none or asked to stay private."
+          },
+          {
+            "path": "isPublic",
+            "type": "boolean",
+            "description": "False when the supporter asked that their name and message stay off stream."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 3 is 3.00.",
+            "example": 3
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "3.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "url",
+            "type": "string",
+            "description": "Link to the payment on Ko-fi."
+          },
+          {
+            "path": "tierName",
+            "type": "string",
+            "description": "The membership tier. Empty for a plain monthly tip."
+          },
+          {
+            "path": "isFirstPayment",
+            "type": "boolean",
+            "description": "True for a new member, false for a renewal."
+          }
+        ]
+      }
+    },
+    {
+      "id": "shop_order",
+      "name": "Ko-fi shop order",
+      "description": "Fires when someone buys from your Ko-fi shop.",
+      "type": "eventbus",
+      "event": "kofi.shop_order",
+      "sentence": "Someone buys from your Ko-fi shop",
+      "taxonomy": [
+        "platform.kofi",
+        "alert.purchase"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "messageId",
+            "type": "string",
+            "description": "Ko-fi's id for this payment. A retried delivery carries the same id."
+          },
+          {
+            "path": "fromName",
+            "type": "string",
+            "description": "Who paid. \"Anonymous\" when they asked to stay private.",
+            "example": "Anonymous"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The supporter's message. Empty when they left none or asked to stay private."
+          },
+          {
+            "path": "isPublic",
+            "type": "boolean",
+            "description": "False when the supporter asked that their name and message stay off stream."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 3 is 3.00.",
+            "example": 3
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "3.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "url",
+            "type": "string",
+            "description": "Link to the payment on Ko-fi."
+          },
+          {
+            "path": "itemCount",
+            "type": "number",
+            "description": "How many items were bought.",
+            "example": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "commission",
+      "name": "Ko-fi commission",
+      "description": "Fires when someone orders a commission on Ko-fi.",
+      "type": "eventbus",
+      "event": "kofi.commission",
+      "sentence": "Someone orders a Ko-fi commission",
+      "taxonomy": [
+        "platform.kofi",
+        "alert.purchase"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "messageId",
+            "type": "string",
+            "description": "Ko-fi's id for this payment. A retried delivery carries the same id."
+          },
+          {
+            "path": "fromName",
+            "type": "string",
+            "description": "Who paid. \"Anonymous\" when they asked to stay private.",
+            "example": "Anonymous"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The supporter's message. Empty when they left none or asked to stay private."
+          },
+          {
+            "path": "isPublic",
+            "type": "boolean",
+            "description": "False when the supporter asked that their name and message stay off stream."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 3 is 3.00.",
+            "example": 3
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "3.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "url",
+            "type": "string",
+            "description": "Link to the payment on Ko-fi."
+          }
+        ]
+      }
+    }
+  ]
+}
