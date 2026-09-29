@@ -1,0 +1,279 @@
+{
+  "id": "woofx3_fourthwall",
+  "name": "Fourthwall",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Receives Fourthwall webhooks and fires triggers when someone donates, orders merch, buys gifts for your community, or joins a membership.",
+  "taxonomy": [
+    "platform.fourthwall"
+  ],
+  "functions": [
+    {
+      "id": "handle_fourthwall_webhook",
+      "name": "Handle Fourthwall Webhook",
+      "runtime": "js",
+      "path": "functions/handle_fourthwall_webhook.js",
+      "entryPoint": "handle_fourthwall_webhook"
+    }
+  ],
+  "settings": [
+    {
+      "id": "webhookSecret",
+      "label": "Fourthwall webhook secret",
+      "description": "Found in Fourthwall under Settings, For developers. Requests not signed with it are refused.",
+      "type": "secret",
+      "required": true
+    }
+  ],
+  "triggers": [
+    {
+      "id": "fourthwall_webhook",
+      "name": "Fourthwall webhook",
+      "description": "Paste this URL into Fourthwall's webhook settings. Every request is checked against your webhook secret before anything fires.",
+      "type": "webhook",
+      "handler": "handle_fourthwall_webhook"
+    },
+    {
+      "id": "donation",
+      "name": "Fourthwall donation",
+      "description": "Fires when someone donates through your Fourthwall shop.",
+      "type": "eventbus",
+      "event": "fourthwall.donation",
+      "sentence": "Someone donates on Fourthwall",
+      "taxonomy": [
+        "platform.fourthwall",
+        "alert.donation"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+          },
+          {
+            "path": "username",
+            "type": "string",
+            "description": "Who paid, as they chose to show it. Empty when they gave none."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The buyer's message. Empty when they left none."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 10 is 10.00.",
+            "example": 10
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "10.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True when Fourthwall marks the event as test data."
+          }
+        ]
+      }
+    },
+    {
+      "id": "order_placed",
+      "name": "Fourthwall order placed",
+      "description": "Fires when someone buys merch from your Fourthwall shop.",
+      "type": "eventbus",
+      "event": "fourthwall.order.placed",
+      "sentence": "Someone orders your merch",
+      "taxonomy": [
+        "platform.fourthwall",
+        "alert.purchase"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+          },
+          {
+            "path": "username",
+            "type": "string",
+            "description": "Who paid, as they chose to show it. Empty when they gave none."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The buyer's message. Empty when they left none."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 10 is 10.00.",
+            "example": 10
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "10.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True when Fourthwall marks the event as test data."
+          },
+          {
+            "path": "itemCount",
+            "type": "number",
+            "description": "How many items were in the order.",
+            "example": 2
+          },
+          {
+            "path": "itemNames",
+            "type": "string",
+            "description": "The products ordered, separated by commas.",
+            "example": "Wolf Hoodie, Sticker Pack"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gift_purchase",
+      "name": "Fourthwall gift purchase",
+      "description": "Fires when someone buys items to be given away to your community.",
+      "type": "eventbus",
+      "event": "fourthwall.gift.purchased",
+      "sentence": "Someone buys gifts for your community",
+      "taxonomy": [
+        "platform.fourthwall",
+        "alert.gift"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+          },
+          {
+            "path": "username",
+            "type": "string",
+            "description": "Who paid, as they chose to show it. Empty when they gave none."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The buyer's message. Empty when they left none."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 10 is 10.00.",
+            "example": 10
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "10.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True when Fourthwall marks the event as test data."
+          },
+          {
+            "path": "quantity",
+            "type": "number",
+            "description": "How many gifts they bought.",
+            "example": 5
+          },
+          {
+            "path": "itemName",
+            "type": "string",
+            "description": "The product being gifted.",
+            "example": "Wolf Hoodie"
+          }
+        ]
+      }
+    },
+    {
+      "id": "subscription_purchased",
+      "name": "Fourthwall membership purchased",
+      "description": "Fires when someone joins your Fourthwall membership.",
+      "type": "eventbus",
+      "event": "fourthwall.subscription.purchased",
+      "sentence": "Someone joins your Fourthwall membership",
+      "taxonomy": [
+        "platform.fourthwall",
+        "alert.subscription"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+          },
+          {
+            "path": "username",
+            "type": "string",
+            "description": "The member's nickname."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "What they pay each period, in the currency's main unit.",
+            "example": 5
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "5.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "interval",
+            "type": "string",
+            "description": "MONTHLY or ANNUAL.",
+            "example": "MONTHLY"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True when Fourthwall marks the event as test data."
+          }
+        ]
+      }
+    }
+  ]
+}
