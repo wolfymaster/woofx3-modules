@@ -1,0 +1,229 @@
+{
+  "id": "woofx3_discord",
+  "name": "Discord",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Posts to a Discord channel through a webhook: announce going live and going offline automatically, and post any message from a workflow.",
+  "taxonomy": [
+    "platform.discord"
+  ],
+  "settings": [
+    {
+      "id": "webhookUrl",
+      "label": "Discord webhook URL",
+      "description": "In Discord: Server Settings → Integrations → Webhooks → New Webhook, pick the channel, then Copy Webhook URL and paste it here.",
+      "type": "secret",
+      "required": true
+    },
+    {
+      "id": "announceGoLive",
+      "label": "Announce when you go live",
+      "description": "Post in Discord every time your stream starts.",
+      "type": "toggle",
+      "defaultValue": "true"
+    },
+    {
+      "id": "goLiveMessage",
+      "label": "Go-live message",
+      "description": "What to post when you go live. {channel} becomes your channel name and {link} a link to your stream.",
+      "type": "text",
+      "defaultValue": "{channel} is live on Twitch! Come hang out: {link}"
+    },
+    {
+      "id": "pingEveryoneOnGoLive",
+      "label": "Ping @everyone when you go live",
+      "description": "Notify everyone in the server with the go-live post.",
+      "type": "toggle",
+      "defaultValue": "false"
+    },
+    {
+      "id": "announceOffline",
+      "label": "Post when the stream ends",
+      "description": "Post a thank-you in Discord when your stream goes offline.",
+      "type": "toggle",
+      "defaultValue": "false"
+    },
+    {
+      "id": "offlineMessage",
+      "label": "End-of-stream message",
+      "description": "What to post when the stream ends. {channel} and {link} work here too.",
+      "type": "text",
+      "defaultValue": "{channel} just wrapped up the stream. Thanks to everyone who came by!"
+    },
+    {
+      "id": "channelUrl",
+      "label": "Stream link",
+      "description": "Optional. The link used for {link}. Leave blank to link to your Twitch channel.",
+      "type": "text"
+    }
+  ],
+  "functions": [
+    {
+      "id": "postMessage",
+      "name": "Post message",
+      "runtime": "js",
+      "path": "functions/discord.js",
+      "entryPoint": "postMessage"
+    },
+    {
+      "id": "announceGoLive",
+      "name": "Announce go-live",
+      "runtime": "js",
+      "path": "functions/discord.js",
+      "entryPoint": "announceGoLive"
+    },
+    {
+      "id": "announceOffline",
+      "name": "Announce offline",
+      "runtime": "js",
+      "path": "functions/discord.js",
+      "entryPoint": "announceOffline"
+    }
+  ],
+  "actions": [
+    {
+      "id": "discord.post_message",
+      "name": "Post to Discord",
+      "description": "Post a message, with an optional embed card, to the Discord channel your webhook points at. The step fails, with the reason, when Discord refuses it.",
+      "type": "function",
+      "function": "postMessage",
+      "schema": [
+        {
+          "id": "message",
+          "label": "Message",
+          "type": "text",
+          "placeholder": "Thanks for the raid, ${trigger.data.fromBroadcasterUserName}!",
+          "description": "The text to post. Leave blank to post only the embed."
+        },
+        {
+          "id": "ping",
+          "label": "Ping",
+          "type": "select",
+          "options": [
+            { "value": "", "label": "Nobody" },
+            { "value": "here", "label": "@here (people online)" },
+            { "value": "everyone", "label": "@everyone" }
+          ],
+          "defaultValue": "",
+          "description": "Other mentions in the text never ping, so text from chat can't notify your whole server."
+        },
+        {
+          "id": "embedTitle",
+          "label": "Embed title",
+          "type": "text",
+          "description": "Adds a card under the message. Leave the title and description blank for no card."
+        },
+        {
+          "id": "embedDescription",
+          "label": "Embed description",
+          "type": "text"
+        },
+        {
+          "id": "embedUrl",
+          "label": "Embed link",
+          "type": "text",
+          "placeholder": "https://twitch.tv/yourname",
+          "description": "Makes the card title a link."
+        },
+        {
+          "id": "embedColor",
+          "label": "Embed colour",
+          "type": "color",
+          "defaultValue": "#9146ff"
+        }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "ok", "type": "boolean", "description": "True once Discord accepted the message." },
+          { "path": "messageId", "type": "string", "description": "Discord's id for the posted message." }
+        ]
+      },
+      "taxonomy": [
+        "platform.discord"
+      ]
+    },
+    {
+      "id": "discord.announce_go_live",
+      "name": "Announce go-live on Discord",
+      "description": "Post the go-live message from the module settings. Does nothing when go-live announcements are turned off.",
+      "type": "function",
+      "function": "announceGoLive",
+      "schema": [
+        {
+          "id": "channel",
+          "label": "Channel name",
+          "type": "text",
+          "description": "Leave blank to use the channel that just went live."
+        }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "ok", "type": "boolean" },
+          { "path": "skipped", "type": "boolean", "description": "True when announcements are turned off and nothing was posted." },
+          { "path": "messageId", "type": "string" }
+        ]
+      },
+      "taxonomy": [
+        "platform.discord"
+      ]
+    },
+    {
+      "id": "discord.announce_offline",
+      "name": "Announce stream end on Discord",
+      "description": "Post the end-of-stream message from the module settings. Does nothing when end-of-stream posts are turned off.",
+      "type": "function",
+      "function": "announceOffline",
+      "schema": [
+        {
+          "id": "channel",
+          "label": "Channel name",
+          "type": "text",
+          "description": "Leave blank to use the channel that just went offline."
+        }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "ok", "type": "boolean" },
+          { "path": "skipped", "type": "boolean", "description": "True when end-of-stream posts are turned off and nothing was posted." },
+          { "path": "messageId", "type": "string" }
+        ]
+      },
+      "taxonomy": [
+        "platform.discord"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "go-live-announcement",
+      "name": "Announce going live on Discord",
+      "trigger": "stream.online",
+      "steps": [
+        {
+          "id": "announce",
+          "action": "discord.announce_go_live",
+          "parameters": {}
+        }
+      ],
+      "taxonomy": [
+        "platform.discord"
+      ]
+    },
+    {
+      "id": "offline-announcement",
+      "name": "Post on Discord when the stream ends",
+      "trigger": "stream.offline",
+      "steps": [
+        {
+          "id": "announce",
+          "action": "discord.announce_offline",
+          "parameters": {}
+        }
+      ],
+      "taxonomy": [
+        "platform.discord"
+      ]
+    }
+  ]
+}
