@@ -1,0 +1,212 @@
+{
+  "id": "woofx3_obs",
+  "name": "OBS",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.2",
+  "category": "platform",
+  "description": "Workflow actions that control OBS: switch the program scene, show or hide a source, and mute or unmute an audio input. The engine holds the OBS WebSocket connection; this module reaches it through ctx.obs.",
+  "taxonomy": [
+    "platform.obs"
+  ],
+  "permissions": [
+    "obs.control"
+  ],
+  "functions": [
+    {
+      "id": "switchScene",
+      "name": "Switch scene",
+      "runtime": "js",
+      "path": "functions/switchScene.js",
+      "entryPoint": "switchScene"
+    },
+    {
+      "id": "setSourceVisibility",
+      "name": "Show or hide a source",
+      "runtime": "js",
+      "path": "functions/setSourceVisibility.js",
+      "entryPoint": "setSourceVisibility"
+    },
+    {
+      "id": "setInputMute",
+      "name": "Mute or unmute an input",
+      "runtime": "js",
+      "path": "functions/setInputMute.js",
+      "entryPoint": "setInputMute"
+    },
+    {
+      "id": "listScenes",
+      "name": "List scenes",
+      "runtime": "js",
+      "path": "functions/listScenes.js",
+      "entryPoint": "listScenes"
+    },
+    {
+      "id": "listSources",
+      "name": "List sources",
+      "runtime": "js",
+      "path": "functions/listSources.js",
+      "entryPoint": "listSources"
+    },
+    {
+      "id": "listInputs",
+      "name": "List audio inputs",
+      "runtime": "js",
+      "path": "functions/listInputs.js",
+      "entryPoint": "listInputs"
+    }
+  ],
+  "actions": [
+    {
+      "id": "obs.switch_scene",
+      "name": "Switch OBS scene",
+      "description": "Make a scene the live program scene in OBS. The step fails, with the reason, when OBS is not connected or has no scene by that name.",
+      "type": "function",
+      "function": "switchScene",
+      "schema": [
+        {
+          "id": "sceneName",
+          "label": "Scene",
+          "type": "text",
+          "required": true,
+          "placeholder": "BRB",
+          "description": "The scene's name exactly as OBS shows it.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_obs",
+                "functionId": "listScenes"
+              }
+            },
+            "timeoutMs": 5000
+          }
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.obs"
+      ]
+    },
+    {
+      "id": "obs.set_source_visibility",
+      "name": "Show or hide OBS source",
+      "description": "Show or hide a source in an OBS scene. The step fails, with the reason, when OBS is not connected or the source is not in that scene.",
+      "type": "function",
+      "function": "setSourceVisibility",
+      "schema": [
+        {
+          "id": "sourceName",
+          "label": "Source",
+          "type": "text",
+          "required": true,
+          "placeholder": "Confetti",
+          "description": "The source's name exactly as OBS shows it.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_obs",
+                "functionId": "listSources"
+              }
+            },
+            "timeoutMs": 5000
+          }
+        },
+        {
+          "id": "visible",
+          "label": "Visible",
+          "type": "toggle",
+          "defaultValue": true,
+          "description": "On shows the source; off hides it."
+        },
+        {
+          "id": "sceneName",
+          "label": "Scene",
+          "type": "text",
+          "placeholder": "Current scene",
+          "description": "The scene the source is in. Leave blank for whichever scene is live when the step runs.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_obs",
+                "functionId": "listScenes"
+              }
+            },
+            "timeoutMs": 5000
+          }
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.obs"
+      ]
+    },
+    {
+      "id": "obs.set_input_mute",
+      "name": "Mute or unmute OBS audio",
+      "description": "Mute or unmute an audio input in OBS, such as a microphone or desktop audio. The step fails, with the reason, when OBS is not connected or has no input by that name.",
+      "type": "function",
+      "function": "setInputMute",
+      "schema": [
+        {
+          "id": "inputName",
+          "label": "Audio input",
+          "type": "text",
+          "required": true,
+          "placeholder": "Mic/Aux",
+          "description": "The input's name exactly as OBS's audio mixer shows it.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_obs",
+                "functionId": "listInputs"
+              }
+            },
+            "timeoutMs": 5000
+          }
+        },
+        {
+          "id": "muted",
+          "label": "Muted",
+          "type": "toggle",
+          "defaultValue": true,
+          "description": "On mutes the input; off unmutes it."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.obs"
+      ]
+    }
+  ]
+}
