@@ -1,0 +1,193 @@
+{
+  "id": "woofx3_govee",
+  "name": "Govee",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Workflow actions that control Govee smart lights through the Govee cloud: turn a light on or off, set its colour, and set its brightness. Uses the streamer's Govee API key.",
+  "taxonomy": [
+    "platform.govee"
+  ],
+  "settings": [
+    {
+      "id": "apiKey",
+      "label": "Govee API key",
+      "type": "secret",
+      "required": true,
+      "description": "The API key Govee emails you after you ask for one in the Govee Home app."
+    }
+  ],
+  "functions": [
+    {
+      "id": "setPower",
+      "name": "Turn light on or off",
+      "runtime": "js",
+      "path": "functions/setPower.js",
+      "entryPoint": "setPower"
+    },
+    {
+      "id": "setColor",
+      "name": "Set light colour",
+      "runtime": "js",
+      "path": "functions/setColor.js",
+      "entryPoint": "setColor"
+    },
+    {
+      "id": "setBrightness",
+      "name": "Set light brightness",
+      "runtime": "js",
+      "path": "functions/setBrightness.js",
+      "entryPoint": "setBrightness"
+    },
+    {
+      "id": "listDevices",
+      "name": "List lights",
+      "runtime": "js",
+      "path": "functions/listDevices.js",
+      "entryPoint": "listDevices"
+    }
+  ],
+  "actions": [
+    {
+      "id": "govee.set_power",
+      "name": "Turn Govee light on or off",
+      "type": "function",
+      "function": "setPower",
+      "description": "Turn a Govee light on or off. The step fails, with the reason, when Govee refuses the change or can't reach the light.",
+      "schema": [
+        {
+          "id": "device",
+          "label": "Light",
+          "type": "select",
+          "required": true,
+          "description": "The Govee light to change.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_govee",
+                "functionId": "listDevices"
+              }
+            },
+            "timeoutMs": 10000
+          }
+        },
+        {
+          "id": "on",
+          "label": "On",
+          "type": "toggle",
+          "defaultValue": true,
+          "description": "On turns the light on; off turns it off."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once Govee accepted the change. A change Govee refused fails the step instead, with the reason."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.govee"
+      ]
+    },
+    {
+      "id": "govee.set_color",
+      "name": "Set Govee light colour",
+      "type": "function",
+      "function": "setColor",
+      "description": "Set a Govee light to a colour. The step fails, with the reason, when Govee refuses the change or can't reach the light.",
+      "schema": [
+        {
+          "id": "device",
+          "label": "Light",
+          "type": "select",
+          "required": true,
+          "description": "The Govee light to change.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_govee",
+                "functionId": "listDevices"
+              }
+            },
+            "timeoutMs": 10000
+          }
+        },
+        {
+          "id": "color",
+          "label": "Colour",
+          "type": "color",
+          "required": true,
+          "defaultValue": "#a970ff"
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once Govee accepted the change. A change Govee refused fails the step instead, with the reason."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.govee"
+      ]
+    },
+    {
+      "id": "govee.set_brightness",
+      "name": "Set Govee light brightness",
+      "type": "function",
+      "function": "setBrightness",
+      "description": "Set how bright a Govee light is. The step fails, with the reason, when Govee refuses the change or can't reach the light.",
+      "schema": [
+        {
+          "id": "device",
+          "label": "Light",
+          "type": "select",
+          "required": true,
+          "description": "The Govee light to change.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_govee",
+                "functionId": "listDevices"
+              }
+            },
+            "timeoutMs": 10000
+          }
+        },
+        {
+          "id": "brightness",
+          "label": "Brightness",
+          "type": "number",
+          "unit": "%",
+          "min": 1,
+          "max": 100,
+          "required": true,
+          "defaultValue": 100
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once Govee accepted the change. A change Govee refused fails the step instead, with the reason."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.govee"
+      ]
+    }
+  ]
+}
