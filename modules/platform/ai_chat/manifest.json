@@ -1,0 +1,199 @@
+{
+  "id": "woofx3_ai_chat",
+  "name": "AI Chat",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "An AI helper for chat. Viewers ask it questions with !ask, it can answer when someone @mentions the bot, and workflows can ask it to write text such as a raid welcome. Uses the streamer's own Anthropic or OpenAI API key.",
+  "taxonomy": [
+    "platform.ai"
+  ],
+  "settings": [
+    {
+      "id": "provider",
+      "label": "AI service",
+      "description": "Type anthropic to use Claude, or openai to use ChatGPT.",
+      "type": "text",
+      "defaultValue": "anthropic"
+    },
+    {
+      "id": "apiKey",
+      "label": "API key",
+      "description": "Your API key from the AI service you picked.",
+      "type": "secret",
+      "required": true
+    },
+    {
+      "id": "model",
+      "label": "Model",
+      "description": "Leave blank for the default: claude-sonnet-5-5 for Anthropic, gpt-4.1-mini for OpenAI.",
+      "type": "text",
+      "defaultValue": ""
+    },
+    {
+      "id": "personality",
+      "label": "Personality",
+      "description": "Tell the AI who it is and how to talk, such as a pirate, a hype squad, or a calm helper.",
+      "type": "text",
+      "defaultValue": "You are a friendly, upbeat helper in a live stream's chat. Keep it kind, fun and family friendly."
+    },
+    {
+      "id": "maxReplyChars",
+      "label": "Longest reply (characters)",
+      "description": "Replies are cut to this length. Twitch chat allows up to 500.",
+      "type": "number",
+      "defaultValue": "400"
+    },
+    {
+      "id": "cooldownSeconds",
+      "label": "Wait between questions (seconds)",
+      "description": "How long each viewer waits before the AI answers them again. 0 turns this off.",
+      "type": "number",
+      "defaultValue": "30"
+    },
+    {
+      "id": "answerMentions",
+      "label": "Answer @mentions",
+      "description": "When on, the AI also answers chat messages that @mention the bot's name below.",
+      "type": "toggle",
+      "defaultValue": "false"
+    },
+    {
+      "id": "botName",
+      "label": "Bot name",
+      "description": "The chat name viewers @mention to talk to the AI, without the @.",
+      "type": "text",
+      "defaultValue": ""
+    }
+  ],
+  "functions": [
+    {
+      "id": "ask",
+      "name": "Ask AI",
+      "runtime": "js",
+      "path": "functions/ask.js",
+      "entryPoint": "ask"
+    },
+    {
+      "id": "answerChatQuestion",
+      "name": "Answer a chat question",
+      "runtime": "js",
+      "path": "functions/answerChatQuestion.js",
+      "entryPoint": "answerChatQuestion"
+    },
+    {
+      "id": "answerMention",
+      "name": "Answer a chat mention",
+      "runtime": "js",
+      "path": "functions/answerMention.js",
+      "entryPoint": "answerMention"
+    }
+  ],
+  "actions": [
+    {
+      "id": "ai.ask",
+      "name": "Ask AI",
+      "description": "Ask the AI to write something, such as a welcome for a raider or a hype line for a new sub. The reply is handed to later steps, so a Send chat message step can post it. The step fails, with the reason, when the AI service can't be reached or the API key is wrong.",
+      "type": "function",
+      "function": "ask",
+      "schema": [
+        {
+          "id": "prompt",
+          "label": "What to ask",
+          "type": "text",
+          "required": true,
+          "placeholder": "Write a one-line hype welcome for a raider named ${trigger.data.fromBroadcasterUserName}",
+          "description": "What the AI should write or answer. You can include details from the trigger."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "reply",
+            "type": "string",
+            "description": "The AI's reply on one line, cut to the module's longest-reply setting."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.ai"
+      ]
+    },
+    {
+      "id": "ai.answer_chat_question",
+      "name": "Answer chat question with AI",
+      "description": "Runs from a chat command: answers the text after the command in chat, tagging the viewer. Each viewer waits out the module's cooldown between questions.",
+      "type": "function",
+      "function": "answerChatQuestion",
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True when an answer was posted in chat."
+          },
+          {
+            "path": "reply",
+            "type": "string",
+            "description": "The answer posted in chat. Absent when nothing was posted."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.ai"
+      ]
+    },
+    {
+      "id": "ai.answer_mention",
+      "name": "Answer chat mention with AI",
+      "description": "Runs on a chat message: when the message @mentions the bot and Answer @mentions is on, answers it in chat. Otherwise does nothing.",
+      "type": "function",
+      "function": "answerMention",
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True when an answer was posted in chat."
+          },
+          {
+            "path": "reply",
+            "type": "string",
+            "description": "The answer posted in chat. Absent when nothing was posted."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.ai"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "answer-mentions",
+      "name": "AI answers @mentions",
+      "trigger": "user.message",
+      "steps": [
+        {
+          "id": "answer",
+          "type": "action",
+          "action": "ai.answer_mention"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "id": "ask",
+      "name": "Ask the AI",
+      "pattern": "!ask",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "answer",
+          "action": "ai.answer_chat_question"
+        }
+      ]
+    }
+  ]
+}
