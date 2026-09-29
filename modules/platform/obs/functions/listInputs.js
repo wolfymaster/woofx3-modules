@@ -1,8 +1,15 @@
 // Options for the audio inputs picker, as { value, label, group? }. Runs from the
-// field-options responder, which replies with whatever this returns.
+// field-options responder, which replies with whatever this returns. A failure
+// is returned as { error } rather than thrown: the responder answers a throw
+// with an empty list, and the picker would then show nothing instead of why,
+// such as OBS not being connected.
 function listInputs(ctx) {
-  const options = callObs(ctx, "listInputs");
-  return Array.isArray(options) ? options : [];
+  try {
+    const options = callObs(ctx, "listInputs");
+    return Array.isArray(options) ? options : [];
+  } catch (err) {
+    return { error: err && err.message ? err.message : String(err) };
+  }
 }
 
 // ctx.obs exists only on an engine that reaches OBS through module code; an

@@ -2,7 +2,7 @@
   "id": "woofx3_obs",
   "name": "OBS",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "platform",
   "description": "Workflow actions that control OBS: switch the program scene, show or hide a source, and mute or unmute an audio input. The engine holds the OBS WebSocket connection; this module reaches it through ctx.obs.",
   "taxonomy": [
