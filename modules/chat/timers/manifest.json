@@ -1,0 +1,192 @@
+{
+  "id": "woofx3_timed_messages",
+  "name": "Timed Messages",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "chat",
+  "description": "Posts a rotating set of chat messages on a timer while you are live, and only when chat has been active since the last one, so an empty chat is never spammed.",
+  "taxonomy": [
+    "chat.timers"
+  ],
+  "settings": [
+    {
+      "id": "message1",
+      "label": "Message 1",
+      "description": "A message to post in chat. Leave blank to skip it.",
+      "type": "text",
+      "defaultValue": ""
+    },
+    {
+      "id": "message2",
+      "label": "Message 2",
+      "description": "Leave blank to skip it.",
+      "type": "text",
+      "defaultValue": ""
+    },
+    {
+      "id": "message3",
+      "label": "Message 3",
+      "description": "Leave blank to skip it.",
+      "type": "text",
+      "defaultValue": ""
+    },
+    {
+      "id": "message4",
+      "label": "Message 4",
+      "description": "Leave blank to skip it.",
+      "type": "text",
+      "defaultValue": ""
+    },
+    {
+      "id": "message5",
+      "label": "Message 5",
+      "description": "Leave blank to skip it.",
+      "type": "text",
+      "defaultValue": ""
+    },
+    {
+      "id": "intervalMinutes",
+      "label": "Minutes between messages",
+      "description": "How long to wait after one message before posting the next.",
+      "type": "number",
+      "defaultValue": "15"
+    },
+    {
+      "id": "minChatLines",
+      "label": "Chat messages needed in between",
+      "description": "How many chat messages viewers must send after one timed message before the next is posted. 0 posts on the timer alone.",
+      "type": "number",
+      "defaultValue": "5"
+    },
+    {
+      "id": "onlyWhenLive",
+      "label": "Only while live",
+      "description": "Post only while the stream is live.",
+      "type": "toggle",
+      "defaultValue": "true"
+    }
+  ],
+  "functions": [
+    {
+      "id": "post_timed_message",
+      "name": "Post timed message",
+      "runtime": "js",
+      "path": "functions/post_timed_message.js",
+      "entryPoint": "post_timed_message"
+    },
+    {
+      "id": "count_chat_line",
+      "name": "Count chat line",
+      "runtime": "js",
+      "path": "functions/count_chat_line.js",
+      "entryPoint": "count_chat_line"
+    },
+    {
+      "id": "set_live",
+      "name": "Set live",
+      "runtime": "js",
+      "path": "functions/set_live.js",
+      "entryPoint": "set_live"
+    }
+  ],
+  "actions": [
+    {
+      "id": "count_chat_line",
+      "name": "Count chat line for timed messages",
+      "description": "Counts one chat message toward the chat activity timed messages wait for. The module's own workflow runs this on every chat message.",
+      "type": "function",
+      "function": "count_chat_line",
+      "returns": {
+        "fields": [
+          {
+            "path": "chatLines",
+            "type": "number",
+            "description": "Chat messages counted since the last timed message."
+          }
+        ]
+      },
+      "taxonomy": [
+        "chat.timers"
+      ]
+    },
+    {
+      "id": "set_live",
+      "name": "Mark stream live for timed messages",
+      "description": "Tells timed messages whether the stream is live. The module's own workflows run this when the stream goes online or offline.",
+      "type": "function",
+      "function": "set_live",
+      "schema": [
+        {
+          "id": "live",
+          "label": "Live",
+          "type": "toggle",
+          "defaultValue": true,
+          "description": "On when the stream went live; off when it ended."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "live",
+            "type": "boolean"
+          }
+        ]
+      },
+      "taxonomy": [
+        "chat.timers"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "count-chat-lines",
+      "name": "Timed messages: count chat activity",
+      "trigger": "user.message",
+      "steps": [
+        {
+          "id": "count",
+          "type": "action",
+          "action": "count_chat_line"
+        }
+      ]
+    },
+    {
+      "id": "stream-online",
+      "name": "Timed messages: stream went live",
+      "trigger": "stream.online",
+      "steps": [
+        {
+          "id": "live",
+          "type": "action",
+          "action": "set_live",
+          "parameters": {
+            "live": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "stream-offline",
+      "name": "Timed messages: stream ended",
+      "trigger": "stream.offline",
+      "steps": [
+        {
+          "id": "offline",
+          "type": "action",
+          "action": "set_live",
+          "parameters": {
+            "live": false
+          }
+        }
+      ]
+    }
+  ],
+  "backgroundTasks": [
+    {
+      "id": "post_timed_messages",
+      "function": "post_timed_message",
+      "schedule": "0 * * * * *",
+      "description": "Checks once a minute whether the next timed message is due."
+    }
+  ]
+}
