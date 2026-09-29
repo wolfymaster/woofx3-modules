@@ -1,0 +1,203 @@
+{
+  "id": "woofx3_buymeacoffee",
+  "name": "Buy Me a Coffee",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Receives Buy Me a Coffee webhooks and fires triggers when someone buys you a coffee, joins a membership, or cancels one.",
+  "taxonomy": [
+    "platform.buymeacoffee"
+  ],
+  "functions": [
+    {
+      "id": "handle_bmc_webhook",
+      "name": "Handle Buy Me a Coffee Webhook",
+      "runtime": "js",
+      "path": "functions/handle_bmc_webhook.js",
+      "entryPoint": "handle_bmc_webhook"
+    }
+  ],
+  "settings": [
+    {
+      "id": "signingSecret",
+      "label": "Buy Me a Coffee signing secret",
+      "description": "Shown when you create the webhook in Buy Me a Coffee. Requests not signed with it are refused.",
+      "type": "secret",
+      "required": true
+    }
+  ],
+  "triggers": [
+    {
+      "id": "bmc_webhook",
+      "name": "Buy Me a Coffee webhook",
+      "description": "Paste this URL into Buy Me a Coffee's webhook settings. Every request is checked against your signing secret before anything fires.",
+      "type": "webhook",
+      "handler": "handle_bmc_webhook"
+    },
+    {
+      "id": "donation",
+      "name": "Buy Me a Coffee support",
+      "description": "Fires when someone buys you a coffee.",
+      "type": "eventbus",
+      "event": "buymeacoffee.donation",
+      "sentence": "Someone buys you a coffee",
+      "taxonomy": [
+        "platform.buymeacoffee",
+        "alert.donation"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Buy Me a Coffee's id for this delivery."
+          },
+          {
+            "path": "supporterName",
+            "type": "string",
+            "description": "Who paid, as they chose to show it.",
+            "example": "Alex"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The supporter's note. Empty when they left none or hid it."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 15 is 15.00.",
+            "example": 15
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "15.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True for a test event sent from the Buy Me a Coffee dashboard."
+          },
+          {
+            "path": "coffeeCount",
+            "type": "number",
+            "description": "How many coffees they bought.",
+            "example": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "membership_started",
+      "name": "Buy Me a Coffee membership started",
+      "description": "Fires when someone joins one of your memberships.",
+      "type": "eventbus",
+      "event": "buymeacoffee.membership.started",
+      "sentence": "Someone joins your Buy Me a Coffee membership",
+      "taxonomy": [
+        "platform.buymeacoffee",
+        "alert.subscription"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Buy Me a Coffee's id for this delivery."
+          },
+          {
+            "path": "supporterName",
+            "type": "string",
+            "description": "Who paid, as they chose to show it.",
+            "example": "Alex"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The supporter's note. Empty when they left none or hid it."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "In the currency's main unit: 15 is 15.00.",
+            "example": 15
+          },
+          {
+            "path": "amountDisplay",
+            "type": "string",
+            "description": "The amount with two decimals and no currency symbol.",
+            "example": "15.00"
+          },
+          {
+            "path": "currency",
+            "type": "string",
+            "description": "ISO 4217 code.",
+            "example": "USD"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True for a test event sent from the Buy Me a Coffee dashboard."
+          },
+          {
+            "path": "levelName",
+            "type": "string",
+            "description": "The membership level they joined.",
+            "example": "Gold supporter"
+          },
+          {
+            "path": "interval",
+            "type": "string",
+            "description": "month or year.",
+            "example": "month"
+          }
+        ]
+      }
+    },
+    {
+      "id": "membership_cancelled",
+      "name": "Buy Me a Coffee membership cancelled",
+      "description": "Fires when someone cancels one of your memberships.",
+      "type": "eventbus",
+      "event": "buymeacoffee.membership.cancelled",
+      "sentence": "Someone cancels your Buy Me a Coffee membership",
+      "taxonomy": [
+        "platform.buymeacoffee"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "eventId",
+            "type": "string",
+            "description": "Buy Me a Coffee's id for this delivery."
+          },
+          {
+            "path": "supporterName",
+            "type": "string",
+            "description": "Who cancelled.",
+            "example": "Alex"
+          },
+          {
+            "path": "levelName",
+            "type": "string",
+            "description": "The membership level they left.",
+            "example": "Gold supporter"
+          },
+          {
+            "path": "isTest",
+            "type": "boolean",
+            "description": "True for a test event sent from the Buy Me a Coffee dashboard."
+          }
+        ]
+      }
+    }
+  ]
+}
