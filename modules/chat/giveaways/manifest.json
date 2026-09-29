@@ -1,0 +1,283 @@
+{
+  "id": "woofx3_giveaways",
+  "name": "Giveaways",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "chat",
+  "description": "Chat giveaways. Moderators run them with !giveaway start, draw, end and cancel; viewers enter by typing the entry keyword (!join by default). Subscribers can get extra luck. Mod commands arrive through chat messages because those carry the chatter's badges.",
+  "taxonomy": [
+    "chat.giveaways"
+  ],
+  "settings": [
+    {
+      "id": "defaultKeyword",
+      "label": "Entry word",
+      "description": "What viewers type to enter, unless a moderator picks another word when starting the giveaway.",
+      "type": "text",
+      "defaultValue": "!join"
+    },
+    {
+      "id": "subscriberLuck",
+      "label": "Subscriber luck",
+      "description": "How many chances a subscriber gets compared to everyone else. 1 means everyone has the same chance; 2 means subscribers are twice as likely to win.",
+      "type": "number",
+      "defaultValue": "1"
+    },
+    {
+      "id": "maxEntries",
+      "label": "Most entries",
+      "description": "Entries stop being accepted once this many viewers have joined.",
+      "type": "number",
+      "defaultValue": "1000"
+    },
+    {
+      "id": "announceEntries",
+      "label": "Say when someone enters",
+      "description": "Post a chat message every time a viewer enters. Best left off in busy chats.",
+      "type": "toggle",
+      "defaultValue": "false"
+    }
+  ],
+  "functions": [
+    {
+      "id": "handle_chat_message",
+      "name": "Handle chat message",
+      "runtime": "js",
+      "path": "functions/giveaway.js",
+      "entryPoint": "handle_chat_message"
+    },
+    {
+      "id": "start_giveaway",
+      "name": "Start giveaway",
+      "runtime": "js",
+      "path": "functions/giveaway.js",
+      "entryPoint": "start_giveaway"
+    },
+    {
+      "id": "draw_winner",
+      "name": "Draw winner",
+      "runtime": "js",
+      "path": "functions/giveaway.js",
+      "entryPoint": "draw_winner"
+    },
+    {
+      "id": "end_giveaway",
+      "name": "End giveaway",
+      "runtime": "js",
+      "path": "functions/giveaway.js",
+      "entryPoint": "end_giveaway"
+    }
+  ],
+  "actions": [
+    {
+      "id": "handle_chat_message",
+      "name": "Handle giveaway chat message",
+      "description": "Reads one chat message for giveaway entries and moderator giveaway commands. The module's own workflow runs this on every chat message.",
+      "type": "function",
+      "function": "handle_chat_message",
+      "returns": {
+        "fields": [
+          {
+            "path": "handled",
+            "type": "string",
+            "description": "What the message did: none, entered, started, drawn, ended, cancelled or status."
+          }
+        ]
+      },
+      "taxonomy": [
+        "chat.giveaways"
+      ]
+    },
+    {
+      "id": "start_giveaway",
+      "name": "Start giveaway",
+      "description": "Open a giveaway for entries and announce it in chat. Does nothing when one is already open.",
+      "type": "function",
+      "function": "start_giveaway",
+      "schema": [
+        {
+          "id": "keyword",
+          "label": "Entry word",
+          "type": "text",
+          "placeholder": "!join",
+          "description": "What viewers type to enter. Leave blank for the module's entry word."
+        },
+        {
+          "id": "prize",
+          "label": "Prize",
+          "type": "text",
+          "placeholder": "A game key",
+          "description": "Named in the announcement. Optional."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "started",
+            "type": "boolean",
+            "description": "False when a giveaway was already open."
+          },
+          {
+            "path": "keyword",
+            "type": "string"
+          }
+        ]
+      },
+      "taxonomy": [
+        "chat.giveaways"
+      ]
+    },
+    {
+      "id": "draw_winner",
+      "name": "Draw giveaway winner",
+      "description": "Close entries and pick a random winner, announcing them in chat. Drawing again picks someone new.",
+      "type": "function",
+      "function": "draw_winner",
+      "returns": {
+        "fields": [
+          {
+            "path": "winnerName",
+            "type": "string",
+            "description": "Empty when nobody had entered."
+          },
+          {
+            "path": "winnerId",
+            "type": "string"
+          },
+          {
+            "path": "entryCount",
+            "type": "number"
+          }
+        ]
+      },
+      "taxonomy": [
+        "chat.giveaways"
+      ]
+    },
+    {
+      "id": "end_giveaway",
+      "name": "End giveaway entries",
+      "description": "Stop taking entries without drawing. The entries are kept, so a winner can still be drawn.",
+      "type": "function",
+      "function": "end_giveaway",
+      "returns": {
+        "fields": [
+          {
+            "path": "entryCount",
+            "type": "number"
+          }
+        ]
+      },
+      "taxonomy": [
+        "chat.giveaways"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "id": "giveaway_started",
+      "name": "Giveaway started",
+      "description": "Fires when a giveaway opens for entries.",
+      "type": "eventbus",
+      "event": "giveaways.started",
+      "sentence": "A giveaway starts",
+      "taxonomy": [
+        "chat.giveaways"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "keyword",
+            "type": "string",
+            "description": "What viewers type to enter.",
+            "example": "!join"
+          },
+          {
+            "path": "prize",
+            "type": "string",
+            "description": "Empty when none was given."
+          },
+          {
+            "path": "startedBy",
+            "type": "string",
+            "description": "The moderator who started it. Empty when a workflow started it."
+          }
+        ]
+      }
+    },
+    {
+      "id": "giveaway_entered",
+      "name": "Giveaway entry",
+      "description": "Fires when a viewer enters the giveaway.",
+      "type": "eventbus",
+      "event": "giveaways.entered",
+      "sentence": "Someone enters the giveaway",
+      "taxonomy": [
+        "chat.giveaways"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "userName",
+            "type": "string"
+          },
+          {
+            "path": "userId",
+            "type": "string"
+          },
+          {
+            "path": "entryCount",
+            "type": "number",
+            "description": "How many viewers have entered, including this one."
+          }
+        ]
+      }
+    },
+    {
+      "id": "giveaway_winner",
+      "name": "Giveaway winner drawn",
+      "description": "Fires when a winner is drawn.",
+      "type": "eventbus",
+      "event": "giveaways.winner",
+      "sentence": "A giveaway winner is drawn",
+      "taxonomy": [
+        "chat.giveaways"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "winnerName",
+            "type": "string"
+          },
+          {
+            "path": "winnerId",
+            "type": "string"
+          },
+          {
+            "path": "prize",
+            "type": "string",
+            "description": "Empty when none was given."
+          },
+          {
+            "path": "entryCount",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "id": "giveaway-chat",
+      "name": "Giveaways: read chat",
+      "trigger": "user.message",
+      "steps": [
+        {
+          "id": "giveaway",
+          "type": "action",
+          "action": "handle_chat_message"
+        }
+      ]
+    }
+  ]
+}
