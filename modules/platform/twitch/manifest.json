@@ -2,9 +2,13 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
+  "permissions": [
+    "twitch.moderation",
+    "twitch.channel"
+  ],
   "triggers": [
     {
       "id": "channel_follow",
@@ -1981,6 +1985,34 @@
       "runtime": "js",
       "path": "functions/shoutout.js",
       "entryPoint": "shoutout"
+    },
+    {
+      "id": "clip",
+      "name": "Clip the stream",
+      "runtime": "js",
+      "path": "functions/clip.js",
+      "entryPoint": "clip"
+    },
+    {
+      "id": "createMarker",
+      "name": "Place a stream marker",
+      "runtime": "js",
+      "path": "functions/createMarker.js",
+      "entryPoint": "createMarker"
+    },
+    {
+      "id": "updateStream",
+      "name": "Update stream info",
+      "runtime": "js",
+      "path": "functions/updateStream.js",
+      "entryPoint": "updateStream"
+    },
+    {
+      "id": "timeout",
+      "name": "Time out a chatter",
+      "runtime": "js",
+      "path": "functions/timeout.js",
+      "entryPoint": "timeout"
     }
   ],
   "actions": [
@@ -2005,7 +2037,7 @@
     {
       "id": "twitch.shoutout",
       "name": "Shoutout",
-      "description": "Send a Twitch shoutout for another channel, the same one the /shoutout chat command sends.",
+      "description": "Send a Twitch shoutout for another channel, the same one the /shoutout chat command sends. Fails the step when Twitch refuses, unless the refusal is a rate limit and skipping is turned on.",
       "type": "function",
       "function": "shoutout",
       "schema": [
@@ -2017,8 +2049,195 @@
           "placeholder": "Channel name or user id",
           "description": "The channel to shout out. A numeric user id is used as-is; anything else is resolved as a login name.",
           "hint": "Supports template substitution, so a raid trigger can pass its raider straight through."
+        },
+        {
+          "id": "skipIfRateLimited",
+          "label": "Skip when rate limited",
+          "type": "toggle",
+          "defaultValue": false,
+          "description": "Succeed without a shoutout instead of failing the step when Twitch's shoutout rate limit is hit.",
+          "hint": "Twitch allows one shoutout every 2 minutes and one per channel every 60 minutes, so back-to-back raids often hit the limit. Turn this on to let the rest of the workflow run anyway; the step's skipped output says whether it happened."
         }
-      ]
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "The Twitch user id of the channel that was shouted out. Absent when skipped."
+          },
+          {
+            "path": "skipped",
+            "type": "boolean",
+            "description": "Whether the shoutout was skipped because of Twitch's rate limit."
+          }
+        ]
+      }
+    },
+    {
+      "id": "twitch.clip",
+      "name": "Create clip",
+      "description": "Clip the last moments of the live stream, the same as the Clip button on Twitch.",
+      "type": "function",
+      "function": "clip",
+      "returns": {
+        "fields": [
+          {
+            "path": "id",
+            "type": "string",
+            "description": "The clip's id."
+          },
+          {
+            "path": "url",
+            "type": "string",
+            "description": "Where the clip can be viewed and edited."
+          }
+        ]
+      }
+    },
+    {
+      "id": "twitch.marker",
+      "name": "Place stream marker",
+      "description": "Drop a stream marker at the current point of the live stream, to find the moment again in the VOD.",
+      "type": "function",
+      "function": "createMarker",
+      "schema": [
+        {
+          "id": "description",
+          "label": "Description",
+          "type": "text",
+          "placeholder": "What happened?",
+          "description": "Optional note shown next to the marker in the VOD. Twitch allows up to 140 characters.",
+          "hint": "Supports template substitution, e.g. a hype train's level. Twitch only places markers while the stream is live."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "id",
+            "type": "string",
+            "description": "The marker's id."
+          },
+          {
+            "path": "createdAt",
+            "type": "string",
+            "description": "When the marker was created, as an ISO 8601 timestamp."
+          },
+          {
+            "path": "description",
+            "type": "string",
+            "description": "The marker's description."
+          },
+          {
+            "path": "positionSeconds",
+            "type": "number",
+            "description": "How far into the stream the marker sits, in seconds."
+          }
+        ]
+      }
+    },
+    {
+      "id": "twitch.update_stream",
+      "name": "Update stream info",
+      "description": "Change the stream's title, category or tags. Blank fields are left as they are.",
+      "type": "function",
+      "function": "updateStream",
+      "schema": [
+        {
+          "id": "title",
+          "label": "Title",
+          "type": "text",
+          "placeholder": "Leave blank to keep the current title",
+          "description": "The new stream title. Twitch allows up to 140 characters.",
+          "hint": "Supports template substitution, so a chat command can pass what the chatter typed."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "text",
+          "placeholder": "e.g. Just Chatting",
+          "description": "A game or category name. The closest match on Twitch is used: an exact name wins, otherwise the most relevant search result."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "placeholder": "e.g. English, Chill, Speedrun",
+          "description": "Comma-separated. Replaces all of the stream's tags. Twitch allows up to 10 tags of letters and numbers, 25 characters each."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "title",
+            "type": "string",
+            "description": "The title that was set. Absent when unchanged."
+          },
+          {
+            "path": "categoryId",
+            "type": "string",
+            "description": "The id of the category that was set. Absent when unchanged."
+          },
+          {
+            "path": "categoryName",
+            "type": "string",
+            "description": "The name of the category the text resolved to. Absent when unchanged."
+          },
+          {
+            "path": "tags",
+            "type": "array",
+            "description": "The tags that were set. Absent when unchanged."
+          }
+        ]
+      }
+    },
+    {
+      "id": "twitch.timeout",
+      "name": "Time out chatter",
+      "description": "Time a chatter out of Twitch chat, the same as the /timeout chat command.",
+      "type": "function",
+      "function": "timeout",
+      "schema": [
+        {
+          "id": "user",
+          "label": "Chatter",
+          "type": "text",
+          "required": true,
+          "placeholder": "Chatter name or user id",
+          "description": "The chatter to time out. A numeric user id is used as-is; anything else is resolved as a login name.",
+          "hint": "Supports template substitution, so a chat trigger can pass its chatter's id straight through."
+        },
+        {
+          "id": "durationSeconds",
+          "label": "Duration",
+          "type": "number",
+          "required": true,
+          "defaultValue": 600,
+          "unit": "seconds",
+          "description": "How long the timeout lasts. Twitch allows 1 second to 2 weeks."
+        },
+        {
+          "id": "reason",
+          "label": "Reason",
+          "type": "text",
+          "placeholder": "Optional",
+          "description": "Shown to the chatter and in the moderation log."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "The Twitch user id of the chatter who was timed out."
+          },
+          {
+            "path": "durationSeconds",
+            "type": "number",
+            "description": "How long the timeout lasts, in seconds."
+          }
+        ]
+      }
     }
   ]
 }
