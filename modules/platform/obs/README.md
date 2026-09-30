@@ -30,9 +30,12 @@ No typing names by hand!
 1. Open OBS (version 28 or newer).
 2. Go to **Tools → WebSocket Server Settings** and turn on the WebSocket
    server.
-3. Connect OBS to WoofX3.
+3. Click **Show Connect Info** there and note the server port and password.
+4. In WoofX3, open the OBS module's settings and enter the OBS address, the
+   port and the password.
 
-You can open OBS before or after WoofX3. They find each other on their own.
+You can open OBS before or after WoofX3. WoofX3 connects as soon as OBS is
+running.
 
 ## Good to know
 

@@ -2,7 +2,7 @@
   "id": "woofx3_obs",
   "name": "OBS",
   "author": "WolfyMaster LLC",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "category": "platform",
   "description": "Workflow actions that control OBS: switch the program scene, show or hide a source, and mute or unmute an audio input. The engine holds the OBS WebSocket connection; this module reaches it through ctx.obs.",
   "taxonomy": [
@@ -10,6 +10,31 @@
   ],
   "permissions": [
     "obs.control"
+  ],
+  "settings": [
+    {
+      "id": "host",
+      "label": "OBS address",
+      "description": "The computer running OBS. Use 127.0.0.1 when WoofX3 runs on the same computer as OBS.",
+      "type": "text",
+      "defaultValue": "127.0.0.1",
+      "required": true
+    },
+    {
+      "id": "port",
+      "label": "WebSocket port",
+      "description": "The Server Port in OBS under Tools → WebSocket Server Settings. OBS uses 4455 unless you changed it.",
+      "type": "number",
+      "defaultValue": "4455",
+      "required": true
+    },
+    {
+      "id": "password",
+      "label": "WebSocket password",
+      "description": "The Server Password in OBS under Tools → WebSocket Server Settings. Leave it empty if authentication is turned off.",
+      "type": "secret",
+      "required": false
+    }
   ],
   "functions": [
     {
