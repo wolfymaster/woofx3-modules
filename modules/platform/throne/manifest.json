@@ -2,7 +2,7 @@
   "id": "woofx3_throne",
   "name": "Throne Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "platform",
   "description": "Receives Throne webhooks and fires triggers when someone buys a gift, makes a contribution, or completes a crowdfunded gift on your Throne wishlist.",
   "functions": [
