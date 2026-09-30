@@ -1,0 +1,223 @@
+{
+  "id": "woofx3_lifx",
+  "name": "LIFX",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "Workflow actions that control LIFX smart lights through the LIFX cloud: turn them on or off, set colour and brightness, and flash them for alerts. Uses the streamer's LIFX personal access token.",
+  "taxonomy": [
+    "platform.lifx"
+  ],
+  "settings": [
+    {
+      "id": "apiToken",
+      "label": "LIFX token",
+      "type": "secret",
+      "required": true,
+      "description": "Your personal access token from cloud.lifx.com, under Settings."
+    }
+  ],
+  "functions": [
+    {
+      "id": "setState",
+      "name": "Set light state",
+      "runtime": "js",
+      "path": "functions/setState.js",
+      "entryPoint": "setState"
+    },
+    {
+      "id": "flash",
+      "name": "Flash lights",
+      "runtime": "js",
+      "path": "functions/flash.js",
+      "entryPoint": "flash"
+    },
+    {
+      "id": "listLights",
+      "name": "List lights",
+      "runtime": "js",
+      "path": "functions/listLights.js",
+      "entryPoint": "listLights"
+    }
+  ],
+  "actions": [
+    {
+      "id": "lifx.set_state",
+      "name": "Set LIFX lights",
+      "type": "function",
+      "function": "setState",
+      "description": "Turn LIFX lights on or off and set their colour and brightness. Anything left blank stays as it is. The step fails, with the reason, when LIFX refuses the change.",
+      "schema": [
+        {
+          "id": "selector",
+          "label": "Lights",
+          "type": "text",
+          "required": true,
+          "defaultValue": "all",
+          "placeholder": "all",
+          "description": "Which lights to change: all of them, a group, or one light.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_lifx",
+                "functionId": "listLights"
+              }
+            },
+            "timeoutMs": 10000
+          }
+        },
+        {
+          "id": "power",
+          "label": "Power",
+          "type": "select",
+          "defaultValue": "",
+          "options": [
+            {
+              "value": "",
+              "label": "Leave as is"
+            },
+            {
+              "value": "on",
+              "label": "On"
+            },
+            {
+              "value": "off",
+              "label": "Off"
+            }
+          ]
+        },
+        {
+          "id": "color",
+          "label": "Colour",
+          "type": "color",
+          "description": "Leave blank to keep the current colour."
+        },
+        {
+          "id": "brightness",
+          "label": "Brightness",
+          "type": "number",
+          "unit": "%",
+          "min": 0,
+          "max": 100,
+          "placeholder": "Keep current",
+          "description": "Leave blank to keep the current brightness."
+        },
+        {
+          "id": "durationSeconds",
+          "label": "Fade time",
+          "type": "number",
+          "unit": "seconds",
+          "min": 0,
+          "max": 3600,
+          "defaultValue": 0,
+          "description": "How long the change takes. 0 is instant."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once LIFX accepted the change."
+          },
+          {
+            "path": "lightsChanged",
+            "type": "number",
+            "description": "How many lights answered. A light that is offline or unplugged isn't counted."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.lifx"
+      ]
+    },
+    {
+      "id": "lifx.flash",
+      "name": "Flash LIFX lights",
+      "type": "function",
+      "function": "flash",
+      "description": "Flash LIFX lights in a colour a few times, then return them to how they were. Great for alerts. The step fails, with the reason, when LIFX refuses the effect.",
+      "schema": [
+        {
+          "id": "selector",
+          "label": "Lights",
+          "type": "text",
+          "required": true,
+          "defaultValue": "all",
+          "placeholder": "all",
+          "description": "Which lights to change: all of them, a group, or one light.",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "barkloader.module.field_options",
+              "payload": {
+                "moduleId": "woofx3_lifx",
+                "functionId": "listLights"
+              }
+            },
+            "timeoutMs": 10000
+          }
+        },
+        {
+          "id": "color",
+          "label": "Colour",
+          "type": "color",
+          "required": true,
+          "defaultValue": "#a970ff"
+        },
+        {
+          "id": "style",
+          "label": "Style",
+          "type": "select",
+          "defaultValue": "pulse",
+          "options": [
+            {
+              "value": "pulse",
+              "label": "Pulse: sharp on and off"
+            },
+            {
+              "value": "breathe",
+              "label": "Breathe: smooth fade in and out"
+            }
+          ]
+        },
+        {
+          "id": "cycles",
+          "label": "Flashes",
+          "type": "number",
+          "min": 1,
+          "max": 50,
+          "defaultValue": 3
+        },
+        {
+          "id": "periodSeconds",
+          "label": "Time per flash",
+          "type": "number",
+          "unit": "seconds",
+          "min": 0.1,
+          "max": 10,
+          "defaultValue": 1
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "True once LIFX accepted the change."
+          },
+          {
+            "path": "lightsChanged",
+            "type": "number",
+            "description": "How many lights answered. A light that is offline or unplugged isn't counted."
+          }
+        ]
+      },
+      "taxonomy": [
+        "platform.lifx"
+      ]
+    }
+  ]
+}

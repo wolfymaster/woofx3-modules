@@ -1,0 +1,536 @@
+{
+  "id": "woofx3_chat_essentials",
+  "name": "Chat Essentials",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "chat",
+  "description": "The everyday chat commands: !uptime, !lurk, !unlurk, !8ball, !roll, !coinflip, !quote, plus !addquote and !delquote for mods.",
+  "taxonomy": [
+    "function.chat"
+  ],
+  "functions": [
+    {
+      "id": "uptime",
+      "name": "Uptime",
+      "runtime": "js",
+      "path": "functions/uptime.js",
+      "entryPoint": "uptime"
+    },
+    {
+      "id": "recordStreamStart",
+      "name": "Record stream start",
+      "runtime": "js",
+      "path": "functions/streamState.js",
+      "entryPoint": "recordStreamStart"
+    },
+    {
+      "id": "clearStreamStart",
+      "name": "Clear stream start",
+      "runtime": "js",
+      "path": "functions/streamState.js",
+      "entryPoint": "clearStreamStart"
+    },
+    {
+      "id": "lurk",
+      "name": "Lurk",
+      "runtime": "js",
+      "path": "functions/lurk.js",
+      "entryPoint": "lurk"
+    },
+    {
+      "id": "unlurk",
+      "name": "Unlurk",
+      "runtime": "js",
+      "path": "functions/lurk.js",
+      "entryPoint": "unlurk"
+    },
+    {
+      "id": "eightBall",
+      "name": "Magic 8-ball",
+      "runtime": "js",
+      "path": "functions/games.js",
+      "entryPoint": "eightBall"
+    },
+    {
+      "id": "roll",
+      "name": "Roll dice",
+      "runtime": "js",
+      "path": "functions/games.js",
+      "entryPoint": "roll"
+    },
+    {
+      "id": "coinflip",
+      "name": "Flip a coin",
+      "runtime": "js",
+      "path": "functions/games.js",
+      "entryPoint": "coinflip"
+    },
+    {
+      "id": "quote",
+      "name": "Quote",
+      "runtime": "js",
+      "path": "functions/quotes.js",
+      "entryPoint": "quote"
+    },
+    {
+      "id": "manageQuotes",
+      "name": "Manage quotes",
+      "runtime": "js",
+      "path": "functions/quotes.js",
+      "entryPoint": "manageQuotes"
+    }
+  ],
+  "actions": [
+    {
+      "id": "uptime",
+      "name": "Say stream uptime",
+      "description": "Says in chat how long the stream has been live.",
+      "type": "function",
+      "function": "uptime",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "live",
+            "type": "boolean"
+          },
+          {
+            "path": "uptimeSeconds",
+            "type": "number",
+            "description": "Absent while offline."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lurk",
+      "name": "Announce lurk",
+      "description": "Thanks a viewer in chat for lurking. Uses the Lurk message setting.",
+      "type": "function",
+      "function": "lurk",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "schema": [
+        {
+          "id": "user",
+          "label": "Viewer",
+          "type": "text",
+          "placeholder": "${trigger.data.chatter}",
+          "description": "Leave blank to use whoever typed the command."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "user",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unlurk",
+      "name": "Welcome back from lurk",
+      "description": "Welcomes a lurker back in chat. Uses the Welcome back message setting.",
+      "type": "function",
+      "function": "unlurk",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "schema": [
+        {
+          "id": "user",
+          "label": "Viewer",
+          "type": "text",
+          "placeholder": "${trigger.data.chatter}",
+          "description": "Leave blank to use whoever typed the command."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "user",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "eight_ball",
+      "name": "Ask the magic 8-ball",
+      "description": "Answers a question in chat with a random 8-ball answer.",
+      "type": "function",
+      "function": "eightBall",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "schema": [
+        {
+          "id": "question",
+          "label": "Question",
+          "type": "text",
+          "description": "Leave blank to use the text after the command."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "answer",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "roll",
+      "name": "Roll dice",
+      "description": "Rolls dice and says the result in chat. Accepts 20, d20 or 3d6; up to 20 dice with 1000 sides.",
+      "type": "function",
+      "function": "roll",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "schema": [
+        {
+          "id": "dice",
+          "label": "Dice",
+          "type": "text",
+          "placeholder": "1d6",
+          "description": "Leave blank to use the text after the command, or 1d6."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "total",
+            "type": "number"
+          },
+          {
+            "path": "rolls",
+            "type": "array"
+          }
+        ]
+      }
+    },
+    {
+      "id": "coinflip",
+      "name": "Flip a coin",
+      "description": "Flips a coin and says heads or tails in chat.",
+      "type": "function",
+      "function": "coinflip",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "side",
+            "type": "string",
+            "description": "heads or tails",
+            "example": "heads"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quote",
+      "name": "Say a quote",
+      "description": "Says a saved quote in chat: a random one, or a numbered one.",
+      "type": "function",
+      "function": "quote",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "schema": [
+        {
+          "id": "number",
+          "label": "Quote number",
+          "type": "text",
+          "description": "Leave blank to use the text after the command, or pick at random."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the request couldn't be answered, such as a bad dice roll."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "number",
+            "type": "number"
+          },
+          {
+            "path": "text",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "record_stream_start",
+      "name": "Remember stream start",
+      "description": "Stores when the stream went live, for !uptime. Runs by itself when the stream goes live.",
+      "type": "function",
+      "function": "recordStreamStart",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "startedAt",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "clear_stream_start",
+      "name": "Forget stream start",
+      "description": "Marks the stream offline, for !uptime. Runs by itself when the stream ends.",
+      "type": "function",
+      "function": "clearStreamStart",
+      "taxonomy": [
+        "function.chat"
+      ]
+    },
+    {
+      "id": "manage_quotes",
+      "name": "Handle quote commands",
+      "description": "Reads a chat message and runs !addquote or !delquote when a mod or the broadcaster typed it. Ignores every other message.",
+      "type": "function",
+      "function": "manageQuotes",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "handled",
+            "type": "boolean",
+            "description": "Whether the message was a quote command."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "number",
+            "type": "number"
+          }
+        ]
+      }
+    }
+  ],
+  "commands": [
+    {
+      "id": "uptime",
+      "name": "Uptime",
+      "pattern": "!uptime",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "uptime"
+        }
+      ]
+    },
+    {
+      "id": "lurk",
+      "name": "Lurk",
+      "pattern": "!lurk",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "lurk"
+        }
+      ]
+    },
+    {
+      "id": "unlurk",
+      "name": "Unlurk",
+      "pattern": "!unlurk",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "unlurk"
+        }
+      ]
+    },
+    {
+      "id": "8ball",
+      "name": "Magic 8-ball",
+      "pattern": "!8ball",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "eight_ball"
+        }
+      ]
+    },
+    {
+      "id": "roll",
+      "name": "Roll dice",
+      "pattern": "!roll",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "roll"
+        }
+      ]
+    },
+    {
+      "id": "coinflip",
+      "name": "Coin flip",
+      "pattern": "!coinflip",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "coinflip"
+        }
+      ]
+    },
+    {
+      "id": "quote",
+      "name": "Quote",
+      "pattern": "!quote",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "quote"
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "track-stream-start",
+      "name": "Remember when the stream goes live",
+      "trigger": "stream.online",
+      "steps": [
+        {
+          "id": "record",
+          "action": "record_stream_start"
+        }
+      ]
+    },
+    {
+      "id": "track-stream-end",
+      "name": "Remember when the stream ends",
+      "trigger": "stream.offline",
+      "steps": [
+        {
+          "id": "clear",
+          "action": "clear_stream_start"
+        }
+      ]
+    },
+    {
+      "id": "quote-commands",
+      "name": "Let mods add and delete quotes",
+      "trigger": "user.message",
+      "steps": [
+        {
+          "id": "manage",
+          "action": "manage_quotes"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "id": "lurkMessage",
+      "label": "Lurk message",
+      "type": "text",
+      "description": "What the bot says for !lurk. {user} becomes the viewer's name. Leave blank for the built-in message."
+    },
+    {
+      "id": "unlurkMessage",
+      "label": "Welcome back message",
+      "type": "text",
+      "description": "What the bot says for !unlurk. {user} becomes the viewer's name. Leave blank for the built-in message."
+    },
+    {
+      "id": "eightBallAnswers",
+      "label": "8-ball answers",
+      "type": "text",
+      "description": "Your own 8-ball answers, separated by | (for example: Yes!|No way|Ask chat). Leave blank for the classic answers."
+    }
+  ]
+}
