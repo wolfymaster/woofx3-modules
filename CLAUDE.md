@@ -163,7 +163,82 @@ belongs, and it happens because the module is gone from the tree on purpose.
   parameters).
 - **Cross-module references use canonical ids** — `{moduleId}:trigger:{manifestId}`,
   e.g. `twitch_platform:trigger:cheer.channel.twitch`. A module that references
-  another declares that dependency in its README; install order matters.
+  another declares that dependency in its README, in plain words ("Install the
+  Twitch module first"); install order matters.
+
+## Module READMEs
+
+**Every module ships a `README.md`** in its module directory, next to
+`manifest.json`. A new module isn't done without one.
+
+The README is for **streamers**, not developers. They don't know how WoofX3
+works inside and don't need to. So:
+
+- **Never mention the engine**, barkloader, the marketplace, or anything else
+  internal: no `ctx.*` calls, permissions, function names, action/trigger ids,
+  env vars, issue numbers, JSON, or file paths.
+- **No technical language.** Say "switch scenes when someone raids", not
+  "invokes `obs.switch_scene` from a workflow step".
+- **5th-grade reading level.** Short sentences, everyday words.
+- **Energetic, semi-formal tone.** Upbeat and friendly, but not slangy or full
+  of emoji.
+- **Lead with what it does for the stream.** Focus on the features, how a
+  streamer can use them live, and why that makes their stream better (more hype,
+  less busywork, happier chat).
+
+Setup a streamer must do (connect OBS, install another module first) belongs in
+the README too, written as simple steps in the same voice. Developer notes about
+how a module works belong in code comments, not the README.
+
+## Module images
+
+Each module has a marketplace **icon** and **banner**. They are **not stored in
+this repo** — they're uploaded out of band with
+`marketplace-cli image set <id> <icon|banner> <file.png>` (and removed with
+`image clear`). An uploaded icon outranks any `icon` a manifest declares, so
+don't add `icon` fields or image files to modules.
+
+New images must match the existing set. The look is **flat, bold, geometric**:
+a two-tone gradient, one simple white glyph, one accent colour. Draw them in
+code (PIL at 4× and downsampled for antialiasing) rather than with an image
+model, so every image comes out pixel-consistent.
+
+**Icon — 512×512 PNG, opaque RGB.**
+- Full-bleed square, **no rounded corners and no transparency**: the storefront
+  rounds icons itself, and a transparent corner reads as a halo on dark cards.
+- Diagonal gradient from a light colour (top-left) to a dark shade of the same
+  hue (bottom-right), plus a soft, blurred white highlight across the top.
+- The glyph sits inside a 12% padding, drawn in solid white, with exactly one
+  element in the accent colour (a record dot, a "+" badge, a ribbon).
+
+**Banner — 1600×512 PNG, opaque RGB.**
+- Same gradient as the icon, full width.
+- A large (≈760px) copy of the glyph in faint white (~9–13% opacity) bleeding
+  off the right edge, as texture.
+- A 200px rounded tile (22% corner radius) of the icon with a soft drop shadow,
+  then the module name and a tagline to its right. The tile-and-text group is
+  centred horizontally.
+- Name in **Nimbus Sans Bold** at 92px (shrink down to 56px to fit), tagline in
+  **Nimbus Sans Regular** at 42px in 85% white. Both white.
+- Keep the tile and text between x=215 and x=1385: storefront cards crop the
+  banner to that middle region.
+- The tagline is one short line (about 40 characters) in the README's voice —
+  what the streamer gets, not how it works. It must fit without being cut off.
+
+**Glyphs are original.** Never copy a third-party logo (Twitch, Spotify, OBS…);
+draw a simple symbol for what the module *does*. Each module gets its own hue so
+cards stay distinguishable — pick one not already taken:
+
+| Module | Glyph | Gradient | Accent |
+|---|---|---|---|
+| `woofx3_twitch` | broadcast signal: dot with arcs either side | `#a970ff` → `#4b12a8` | `#ff4f6d` |
+| `woofx3_spotify` | beamed music note with a "+" request badge | `#2fe07a` → `#0b6b31` | `#0e3b20` |
+| `woofx3_obs` | stacked scene frames with a record dot | `#4a5160` → `#121419` | `#ff4d4d` |
+| `woofx3_throne` | gift box with a ribbon | `#ff7a8f` → `#9e1f55` | `#ffd166` |
+| `woofx3_wolfy_profile` | workflow graph: one node feeding two | `#4f9cff` → `#16357d` | `#ffb347` |
+
+Before uploading, check a contact sheet: each banner full size, its card crop,
+and the icon at 256px and 64px. The glyph must still read at 64px.
 
 ## Commits and pull requests
 

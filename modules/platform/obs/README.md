@@ -1,48 +1,40 @@
-# woofx3_obs
+# OBS
 
-Workflow actions that control OBS:
+Let your stream run OBS for you! Switch scenes, pop things on and off the
+screen, and mute your mic without ever reaching for your mouse. Your stream can
+do it the moment something happens, so you can keep your eyes on your game and
+your chat.
 
-| Action | What it does |
-|---|---|
-| `obs.switch_scene` | Makes a scene the live program scene. |
-| `obs.set_source_visibility` | Shows or hides a source in a scene, or in the live scene when none is named. |
-| `obs.set_input_mute` | Mutes or unmutes an audio input, such as a microphone or desktop audio. |
+## What it can do
 
-A step fails, with OBS's reason, when OBS is not connected or has no scene,
-source or input by that name. Names are OBS's own, case included, so renaming a
-scene in OBS breaks the steps that name it.
+- **Switch scenes.** Jump to any scene, like your "Be Right Back" screen or a
+  big celebration scene.
+- **Show or hide things on screen.** Make a webcam, image, video or overlay
+  appear or disappear.
+- **Mute or unmute audio.** Turn your microphone, game sound or music on and
+  off.
 
-## How it reaches OBS
+When you set these up, just pick your scenes, sources and audio from a list.
+No typing names by hand!
 
-The engine holds the one OBS WebSocket connection (its scene manager), and this
-module reaches it through `ctx.obs`. Each action is a function that calls
-`ctx.obs`, which asks the engine to act and throws OBS's reason when OBS
-refuses:
+## Ideas to try
 
-- `ctx.obs.switchScene({ sceneName })`
-- `ctx.obs.setSourceVisibility({ sceneName?, sourceName, visible })`
-- `ctx.obs.setInputMute({ inputName, muted })`
+- When someone raids, switch to a special welcome scene.
+- When a viewer redeems a channel point reward, show a funny image on screen.
+- When an ad break starts, switch to your break scene and mute your mic. When
+  it ends, switch back.
+- When you go live, start on your "Starting Soon" scene.
 
-The scene, source and input pickers are filled by this module's own
-`listScenes`, `listSources` and `listInputs` functions. They call
-`ctx.obs.listScenes()` and so on, and are run by the engine's field-options
-responder (`barkloader.module.field_options`).
+## Getting started
 
-`ctx.obs` needs an engine that provides it (woofx3#167). An older engine rejects
-the install because it does not know the `obs.control` permission.
+1. Open OBS (version 28 or newer).
+2. Go to **Tools → WebSocket Server Settings** and turn on the WebSocket
+   server.
+3. Connect OBS to WoofX3.
 
-## Permission
+You can open OBS before or after WoofX3. They find each other on their own.
 
-The module declares `obs.control`, which lets its functions change OBS: switch
-scenes, show and hide sources, and mute or unmute inputs. The engine refuses
-those `ctx.obs` calls from a module that does not declare it. Listing OBS's
-scenes, sources and inputs needs no permission.
+## Good to know
 
-## Connecting OBS
-
-OBS is connected to the engine, not to this module. The engine's
-`docs/services/obs.md` covers it: enable the WebSocket server in OBS
-(**Tools → WebSocket Server Settings**, OBS 28 or later), then give the engine
-its address and password (`WOOFX3_OBS_HOST`, `WOOFX3_OBS_PORT`,
-`WOOFX3_OBS_RPC_TOKEN`). The engine reconnects on its own, so OBS can be started
-in any order.
+Your stream picks scenes and sources by their names in OBS. If you rename a
+scene or source, update anything that uses it so it keeps working.
