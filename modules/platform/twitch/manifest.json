@@ -2,12 +2,22 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
     "twitch.moderation",
     "twitch.channel"
+  ],
+  "settings": [
+    {
+      "id": "adBreakLeadSeconds",
+      "label": "Ad break heads-up (seconds)",
+      "description": "How many seconds before an ad break the \"ad break is coming up soon\" trigger fires.",
+      "type": "number",
+      "defaultValue": "60",
+      "required": true
+    }
   ],
   "triggers": [
     {
