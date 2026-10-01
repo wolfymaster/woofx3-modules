@@ -75,3 +75,8 @@ needed.
 ## Getting started
 
 Link your Twitch account to WoofX3, and you're ready to go!
+
+## Settings
+
+- **Ad break heads-up (seconds)**: how long before an ad break the "ad break
+  is coming up soon" trigger fires. It starts at 60 seconds.
