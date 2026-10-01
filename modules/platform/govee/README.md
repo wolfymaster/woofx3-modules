@@ -18,8 +18,8 @@ Just pick your light from the list. No typing names by hand!
 
 - When someone follows, turn your light strip purple.
 - When someone cheers bits, set your lights to gold.
-- When a viewer redeems a channel point reward, let them pick your light
-  colour for the rest of the stream.
+- When a viewer redeems a channel point reward, switch your lights to a
+  party colour.
 - When you go live, turn on your lights and set them to full brightness.
 
 ## Getting started
