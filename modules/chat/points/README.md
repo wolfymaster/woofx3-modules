@@ -29,7 +29,7 @@ Anyone in chat can use these:
 - **!gamble 100** bets 100 points. You can also bet **half** or **all**.
 - **!leaderboard** or **!top** shows the top five.
 
-Only your moderators can use these:
+Only you and your moderators can use these:
 
 - **!addpoints wolfy 500** gives wolfy 500 points.
 - **!removepoints wolfy 500** takes 500 points away from wolfy.
@@ -37,7 +37,7 @@ Only your moderators can use these:
 ## Ideas to try
 
 - Give 100 points to every new follower.
-- Give 500 points to a raider, and more when they bring a big crowd.
+- Give 500 points to anyone who raids you.
 - Give a big bonus to anyone who gifts subs.
 - Cheer on a big win: when someone's points jump, show an alert on screen.
 
