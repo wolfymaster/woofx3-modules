@@ -2,7 +2,7 @@
   "id": "woofx3_lifx",
   "name": "LIFX",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "platform",
   "description": "Workflow actions that control LIFX smart lights through the LIFX cloud: turn them on or off, set colour and brightness, and flash them for alerts. Uses the streamer's LIFX personal access token.",
   "taxonomy": [

@@ -19,10 +19,9 @@ from the list.
 ## Ideas to try
 
 - When someone subscribes, flash your lights in your stream's colour.
-- When someone raids, turn the whole room red and fade back after the raid
-  welcome.
-- When a viewer redeems a channel point reward, let them pick the colour of
-  your lights.
+- When someone raids, flash the whole room red.
+- When a viewer redeems a channel point reward, slowly fade your lights to a
+  new colour.
 - When an ad break starts, dim the lights. When it ends, bring them back up.
 
 ## Getting started

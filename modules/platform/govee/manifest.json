@@ -2,7 +2,7 @@
   "id": "woofx3_govee",
   "name": "Govee",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "platform",
   "description": "Workflow actions that control Govee smart lights through the Govee cloud: turn a light on or off, set its colour, and set its brightness. Uses the streamer's Govee API key.",
   "taxonomy": [
