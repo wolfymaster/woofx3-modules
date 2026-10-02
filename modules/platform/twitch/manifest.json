@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
@@ -388,7 +388,7 @@
         },
         {
           "id": "minQuantity",
-          "label": "Minimum gift count",
+          "label": "Gift count",
           "type": "number",
           "unit": "subs",
           "required": true,
@@ -396,7 +396,14 @@
           "defaultValue": 1,
           "placeholder": "e.g. 5",
           "eventPath": "amount",
-          "operator": "gte"
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of subs",
+          "missingText": "a number of subs",
+          "description": "Only fire when the gift is at least, or exactly, this many subs."
         }
       ]
     },
@@ -505,7 +512,7 @@
         },
         {
           "id": "minQuantity",
-          "label": "Minimum gift count",
+          "label": "Gift count",
           "type": "number",
           "unit": "subs",
           "required": true,
@@ -513,7 +520,14 @@
           "defaultValue": 1,
           "placeholder": "e.g. 5",
           "eventPath": "amount",
-          "operator": "gte"
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of subs",
+          "missingText": "a number of subs",
+          "description": "Only fire when the gift is at least, or exactly, this many subs."
         }
       ]
     },
@@ -747,7 +761,7 @@
       "schema": [
         {
           "id": "minViewers",
-          "label": "Minimum viewers",
+          "label": "Viewers",
           "type": "number",
           "unit": "viewers",
           "required": true,
@@ -756,7 +770,13 @@
           "placeholder": "e.g. 25",
           "eventPath": "viewers",
           "operator": "gte",
-          "description": "Only fire when the raid brings at least this many viewers.",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of viewers",
+          "missingText": "a number of viewers",
+          "description": "Only fire when the raid brings at least, or exactly, this many viewers.",
           "examplePayload": "{\n  \"fromBroadcasterUserId\": \"123456\",\n  \"fromBroadcasterUserName\": \"raider99\",\n  \"viewers\": 50\n}"
         }
       ]
@@ -835,7 +855,7 @@
       "schema": [
         {
           "id": "minViewers",
-          "label": "Minimum viewers",
+          "label": "Viewers",
           "type": "number",
           "unit": "viewers",
           "required": true,
@@ -844,7 +864,13 @@
           "placeholder": "e.g. 25",
           "eventPath": "viewers",
           "operator": "gte",
-          "description": "Only fire when the raid brings at least this many viewers."
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of viewers",
+          "missingText": "a number of viewers",
+          "description": "Only fire when the raid brings at least, or exactly, this many viewers."
         }
       ]
     },
@@ -854,7 +880,7 @@
       "description": "Twitch EventSub: channel.chat.notification (resub)",
       "type": "eventbus",
       "event": "channel.resub",
-      "sentence": "Someone resubscribes at {tier}",
+      "sentence": "Someone resubscribes at {tier} for {months}",
       "taxonomy": [
         "platform.twitch",
         "alert.subscription"
@@ -961,6 +987,25 @@
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"chatterIsAnonymous\": false,\n  \"tier\": \"1000\",\n  \"isPrime\": false,\n  \"durationMonths\": 1,\n  \"cumulativeMonths\": 6,\n  \"streakMonths\": 3,\n  \"isGift\": false,\n  \"gifterIsAnonymous\": null,\n  \"gifterId\": null,\n  \"gifterName\": null,\n  \"messageId\": \"...\",\n  \"messageText\": \"...\"\n}"
         },
         {
+          "id": "months",
+          "label": "Months",
+          "type": "number",
+          "unit": "months",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 12",
+          "eventPath": "cumulativeMonths",
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of months",
+          "missingText": "a number of months",
+          "description": "Only fire when the viewer's total months subscribed is at least, or exactly, this many."
+        },
+        {
           "id": "isGift",
           "label": "Gifted subs",
           "type": "select",
@@ -991,7 +1036,7 @@
       "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) — fires when the resub is announced in another broadcaster's chat during a shared chat session.",
       "type": "eventbus",
       "event": "channel.sharedResub",
-      "sentence": "Someone resubscribes at {tier} in another channel's shared chat",
+      "sentence": "Someone resubscribes at {tier} for {months} in another channel's shared chat",
       "taxonomy": [
         "platform.twitch",
         "alert.shared.subscription"
@@ -1105,6 +1150,25 @@
             }
           ],
           "defaultValue": "1000"
+        },
+        {
+          "id": "months",
+          "label": "Months",
+          "type": "number",
+          "unit": "months",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 12",
+          "eventPath": "cumulativeMonths",
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of months",
+          "missingText": "a number of months",
+          "description": "Only fire when the viewer's total months subscribed is at least, or exactly, this many."
         },
         {
           "id": "isGift",
