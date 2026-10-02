@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
@@ -560,7 +560,7 @@
       "schema": [
         {
           "id": "amount",
-          "label": "Minimum bits",
+          "label": "Bits",
           "type": "number",
           "unit": "bits",
           "required": true,
@@ -569,7 +569,13 @@
           "placeholder": "e.g. 100",
           "eventPath": "amount",
           "operator": "gte",
-          "description": "Only fire when the cheer meets or exceeds this amount.",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any amount of bits",
+          "missingText": "an amount of bits",
+          "description": "Only fire when the cheer is at least, or exactly, this amount.",
           "hint": "Compares against the cheer amount on the Twitch channel.cheer event payload (see wolfy_profile workflows).",
           "examplePayload": "{\n  \"amount\": 1000,\n  \"isAnonymous\": false,\n  \"userName\": \"viewer42\",\n  \"userId\": \"123456\",\n  \"message\": \"Cheer1000 woof\"\n}"
         }
