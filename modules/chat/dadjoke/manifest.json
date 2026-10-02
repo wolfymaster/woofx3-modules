@@ -1,0 +1,63 @@
+{
+  "id": "woofx3_dadjoke",
+  "name": "Dad Jokes",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "chat",
+  "description": "Adds !dadjoke, which says a random dad joke in chat from a built-in list of 500. Jokes told recently are skipped so chat doesn't hear repeats.",
+  "taxonomy": [
+    "function.chat"
+  ],
+  "functions": [
+    {
+      "id": "dadjoke",
+      "name": "Dad joke",
+      "runtime": "js",
+      "path": "functions/dadjoke.js",
+      "entryPoint": "dadjoke"
+    }
+  ],
+  "actions": [
+    {
+      "id": "dadjoke",
+      "name": "Tell a dad joke",
+      "description": "Says a random dad joke in chat.",
+      "type": "function",
+      "function": "dadjoke",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "joke",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ],
+  "commands": [
+    {
+      "id": "dadjoke",
+      "name": "Dad joke",
+      "pattern": "!dadjoke",
+      "type": "prefix",
+      "actions": [
+        {
+          "id": "run",
+          "action": "dadjoke"
+        }
+      ]
+    }
+  ]
+}
