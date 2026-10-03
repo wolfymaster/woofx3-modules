@@ -2,12 +2,15 @@
   "id": "woofx3_hype_board",
   "name": "Hype Board",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "overlay",
   "description": "An on-stream board for bits, subs and tips: who cheered, gifted and tipped the most, running totals, a goal with milestones, and a subathon timer that grows with every sub, cheer and tip. Ships three themes, and the board's own settings choose which parts show.",
   "taxonomy": [
     "overlay.support"
   ],
+  "requires": {
+    "woofx3": ">=0.19.0"
+  },
   "settings": [
     {
       "id": "keepTotals",
@@ -24,11 +27,16 @@
       "defaultValue": "$"
     },
     {
-      "id": "timerStartMinutes",
-      "label": "Subathon starting length (minutes)",
-      "description": "How long the subathon timer runs when you start it without saying how long.",
-      "type": "number",
-      "defaultValue": "60"
+      "id": "timer",
+      "label": "Subathon timer",
+      "description": "The timer support adds time to. One is made for you; pick another to use a timer you already have. How long it runs when you start it without saying how long is set on the timer itself.",
+      "type": "resource_ref",
+      "resourceKind": "timer",
+      "create": {
+        "instanceId": "hype_board_subathon",
+        "displayName": "Hype Board subathon",
+        "settings": { "duration": 3600, "lifetime": "forever" }
+      }
     },
     {
       "id": "secondsPerSub",
@@ -78,7 +86,8 @@
     { "id": "resume_timer", "name": "Resume subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "resume_timer" },
     { "id": "add_time", "name": "Add subathon time", "runtime": "js", "path": "functions/hype.js", "entryPoint": "add_time" },
     { "id": "end_timer", "name": "End subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "end_timer" },
-    { "id": "reset_totals", "name": "Reset totals", "runtime": "js", "path": "functions/hype.js", "entryPoint": "reset_totals" }
+    { "id": "reset_totals", "name": "Reset totals", "runtime": "js", "path": "functions/hype.js", "entryPoint": "reset_totals" },
+    { "id": "sync_timer", "name": "Follow the subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "sync_timer" }
   ],
   "actions": [
     {
@@ -141,11 +150,11 @@
     {
       "id": "start_timer",
       "name": "Start the subathon timer",
-      "description": "Starts the subathon timer from the length given, replacing any timer already running.",
+      "description": "Starts the subathon timer from the length given, or from the timer's own length when none is given, replacing any subathon already running.",
       "type": "function",
       "function": "start_timer",
       "schema": [
-        { "id": "minutes", "label": "Minutes", "type": "number", "min": 1, "description": "Leave empty to use the starting length from the module settings." }
+        { "id": "minutes", "label": "Minutes", "type": "number", "min": 1, "description": "Leave empty to start from the timer's own length." }
       ],
       "returns": { "fields": [ { "path": "remainingMs", "type": "number" } ] },
       "taxonomy": [ "overlay.support" ]
@@ -188,6 +197,15 @@
       "taxonomy": [ "overlay.support" ]
     },
     {
+      "id": "sync_timer",
+      "name": "Follow the Hype Board's subathon timer",
+      "description": "Notices when the subathon timer is started, paused or runs out, however that happened. The module's own workflows run this on every timer change.",
+      "type": "function",
+      "function": "sync_timer",
+      "returns": { "fields": [ { "path": "followed", "type": "boolean", "description": "Whether the change was to the subathon timer." } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
       "id": "reset_totals",
       "name": "Reset the Hype Board totals",
       "description": "Sets totals and top supporters back to zero. The subathon timer is left alone.",
@@ -209,7 +227,10 @@
     { "id": "count-fourthwall", "name": "Hype Board: count Fourthwall tips", "trigger": "fourthwall.donation", "steps": [ { "id": "count", "action": "record_tip" } ] },
     { "id": "stream-online", "name": "Hype Board: stream went live", "trigger": "stream.online", "steps": [ { "id": "live", "action": "set_live", "parameters": { "live": true } } ] },
     { "id": "stream-offline", "name": "Hype Board: stream ended", "trigger": "stream.offline", "steps": [ { "id": "offline", "action": "set_live", "parameters": { "live": false } } ] },
-    { "id": "chat-commands", "name": "Hype Board: chat commands", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] }
+    { "id": "chat-commands", "name": "Hype Board: chat commands", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] },
+    { "id": "timer-started", "name": "Hype Board: subathon timer started", "trigger": "timer.started", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
+    { "id": "timer-paused", "name": "Hype Board: subathon timer paused", "trigger": "timer.paused", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
+    { "id": "timer-ended", "name": "Hype Board: subathon timer ran out", "trigger": "timer.ended", "steps": [ { "id": "follow", "action": "sync_timer" } ] }
   ],
   "widgets": [
     {
