@@ -34,6 +34,10 @@ No typing names by hand!
 4. In WoofX3, open the OBS module's settings and enter the OBS address, the
    port and the password.
 
+Using the WoofX3 companion app on the computer that runs OBS? Then you can
+skip step 4. The companion fills in the address, port and password for you.
+If not, just type them in by hand.
+
 You can open OBS before or after WoofX3. WoofX3 connects as soon as OBS is
 running.
 
