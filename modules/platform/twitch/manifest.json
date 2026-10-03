@@ -1897,7 +1897,7 @@
       "schema": [
         {
           "id": "minAmount",
-          "label": "Minimum donation amount",
+          "label": "Donation amount",
           "type": "number",
           "required": true,
           "min": 0,
@@ -1905,7 +1905,13 @@
           "placeholder": "e.g. 5",
           "eventPath": "amount",
           "operator": "gte",
-          "description": "Only fire when the donation meets or exceeds this amount, in the currency's major unit (e.g. dollars, not cents).",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any amount",
+          "missingText": "an amount",
+          "description": "Only fire when the donation is at least, or exactly, this amount, in the currency's major unit (e.g. dollars, not cents).",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"charityName\": \"Direct Relief\",\n  \"amount\": 25.5,\n  \"currency\": \"USD\"\n}"
         }
       ]
@@ -1965,15 +1971,22 @@
       "schema": [
         {
           "id": "minTier",
-          "label": "Minimum tier",
+          "label": "Badge tier",
           "type": "number",
+          "unit": "bits",
           "required": true,
           "min": 1,
           "defaultValue": 1,
           "placeholder": "e.g. 1000",
           "eventPath": "newTier",
           "operator": "gte",
-          "description": "Only fire when the newly reached bits badge tier meets or exceeds this value.",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any tier",
+          "missingText": "a tier",
+          "description": "Only fire when the newly reached bits badge tier is at least, or exactly, this value.",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"newTier\": 1000\n}"
         }
       ]
@@ -2036,7 +2049,7 @@
       "schema": [
         {
           "id": "minStreakCount",
-          "label": "Minimum streak count",
+          "label": "Streak",
           "type": "number",
           "unit": "streams",
           "required": true,
@@ -2045,7 +2058,13 @@
           "placeholder": "e.g. 5",
           "eventPath": "streakCount",
           "operator": "gte",
-          "description": "Only fire when the watch streak meets or exceeds this many consecutive broadcasts.",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any length",
+          "missingText": "some number of streams",
+          "description": "Only fire when the watch streak is at least, or exactly, this many consecutive broadcasts.",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"streakCount\": 5,\n  \"channelPointsAwarded\": 500\n}"
         }
       ]
