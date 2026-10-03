@@ -1,0 +1,272 @@
+/* Boss Battle — cozy autumn badges over each top supporter.
+   Loaded after the widget's own board.css; artwork arrives through the
+   theme's asset slots (var(--theme-asset-*)), never a url() here, because the
+   widget frame only loads files from the engine. */
+
+#board {
+  gap: 18px;
+  padding: 14px 18px;
+}
+
+/* Every part drops the base card: the look is outlined text and badges
+   floating on the stream. */
+.section {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+}
+
+/* Bubbly outlined lettering, used by every label and value. */
+.boss-label,
+.section-label,
+.total-label,
+.goal-metric,
+.goal-title,
+.boss-name,
+.boss-amount,
+.timer-value,
+.goal-count,
+.total-value,
+.note-text,
+.milestone {
+  font-family: "HypeBoardFont", var(--theme-fontFamily);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-shadow:
+    -2px -2px 0 #3a1604, 2px -2px 0 #3a1604, -2px 2px 0 #3a1604, 2px 2px 0 #3a1604,
+    0 -2px 0 #3a1604, 0 2px 0 #3a1604, -2px 0 0 #3a1604, 2px 0 0 #3a1604,
+    0 4px 6px rgba(0, 0, 0, 0.55);
+}
+
+/* The orange badge: a pill with a dark outline, its icon breaking out of
+   the left end. Shared by the supporter badges and every section head. */
+.boss-badge,
+.section-head,
+.goal-metric,
+.total {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 46px;
+  padding: 0 18px 0 46px;
+  border: 3px solid #4a1e06;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffd27a 0%, #ffad45 45%, #f07c1e 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -4px 0 rgba(150, 50, 0, 0.35),
+    0 0 0 3px #ffb347,
+    0 0 0 6px #4a1e06,
+    0 6px 10px rgba(0, 0, 0, 0.45);
+}
+
+.boss-label,
+.section-label,
+.total-label {
+  color: var(--theme-text, #fff8ec);
+  font-size: 30px;
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.boss-badge .icon,
+.section-head .icon,
+.total .icon {
+  position: absolute;
+  left: -26px;
+  top: 50%;
+  width: 70px;
+  height: 70px;
+  transform: translateY(-54%) rotate(-8deg);
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45));
+}
+
+/* With no icon the pill needs no room for one. */
+body:not(.has-timerIcon) .section-head,
+body:not(.has-bitsIcon) .boss[data-kind="bits"] .boss-badge,
+body:not(.has-giftsIcon) .boss[data-kind="gifts"] .boss-badge,
+body:not(.has-tipsIcon) .boss[data-kind="tips"] .boss-badge {
+  padding-left: 18px;
+}
+
+/* Top supporters: three badges in a row, the champion's name under each. */
+#bosses {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 42px;
+  padding-left: 24px;
+}
+
+.boss {
+  min-width: 190px;
+}
+
+.boss-name {
+  margin-top: 34px;
+  color: var(--theme-text, #fff8ec);
+  font-size: 34px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.boss-amount {
+  margin-top: 4px;
+  color: var(--theme-muted, #d8cfc4);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.boss.empty .boss-name {
+  opacity: 1;
+  color: var(--theme-muted, #d8cfc4);
+  font-size: 26px;
+  text-transform: none;
+}
+
+/* Timer: a badge, then the time in big outlined digits. */
+#timer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-left: 24px;
+}
+
+.timer-value {
+  color: var(--theme-text, #fff8ec);
+  font-size: 54px;
+  font-weight: 400;
+}
+
+/* Goal: name and count either side of a chunky pumpkin bar. */
+#goal {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "metric title count"
+    "bar    bar   bar";
+  align-items: center;
+  column-gap: 18px;
+  padding-left: 24px;
+}
+
+.goal-metric {
+  grid-area: metric;
+  padding-left: 18px;
+  color: var(--theme-text, #fff8ec);
+  font-size: 28px;
+  text-transform: uppercase;
+}
+
+.goal-title {
+  grid-area: title;
+  color: var(--theme-text, #fff8ec);
+  font-size: 32px;
+}
+
+.goal-count {
+  grid-area: count;
+  color: var(--theme-text, #fff8ec);
+  font-size: 32px;
+}
+
+.goal-bar {
+  grid-area: bar;
+  height: 22px;
+  margin: 16px 0 0;
+  border: 3px solid #4a1e06;
+  background: rgba(58, 22, 4, 0.55);
+  box-shadow: 0 0 0 3px #ffb347, 0 0 0 6px #4a1e06;
+}
+
+.goal-fill {
+  background: linear-gradient(180deg, #ffd27a, #f07c1e);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Totals: one small badge each, value inside. */
+#totals {
+  justify-content: flex-start;
+  gap: 48px;
+  padding-left: 24px;
+}
+
+.total {
+  gap: 10px;
+}
+
+.total-value {
+  order: 2;
+  color: var(--theme-text, #fff8ec);
+  font-size: 30px;
+}
+
+.total-label {
+  font-size: 22px;
+}
+
+/* Note: a leaf and a line of outlined text. */
+#note {
+  gap: 10px;
+  padding-left: 6px;
+}
+
+#note .icon {
+  width: 40px;
+  height: 40px;
+}
+
+.note-text {
+  color: var(--theme-text, #fff8ec);
+  font-size: 30px;
+}
+
+/* Milestones: a list in the same lettering, a leaf on each one passed. */
+.milestone-list {
+  gap: 8px;
+  padding-left: 24px;
+}
+
+.milestone {
+  color: var(--theme-text, #fff8ec);
+  font-size: 26px;
+}
+
+.milestone-target {
+  color: #ffd27a;
+}
+
+.milestone.reached {
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.milestone.next {
+  color: #ffd27a;
+}
+
+/* A pile of leaves tucked into the top corner. */
+.has-decoration .decoration-a {
+  display: block;
+  top: -6px;
+  right: -10px;
+  width: 64px;
+  height: 64px;
+  transform: rotate(18deg);
+  opacity: 0.9;
+}
+
+/* Only the badges row on screen: the leaves would crowd the last badge. */
+body.show-bosses:not(.show-timer):not(.show-goal):not(.show-totals):not(.show-milestones) .decoration-a {
+  display: none;
+}
+
+.bump {
+  animation: boss-bump 700ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes boss-bump {
+  0% { transform: scale(1) rotate(0); }
+  35% { transform: scale(1.2) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0); }
+}

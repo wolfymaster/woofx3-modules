@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<g transform="translate(28 40) rotate(-35) scale(0.5)">
+  <defs><linearGradient id="la" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#e8571b"/></linearGradient></defs>
+  <path d="M0,-50 L8,-30 L20,-36 L16,-12 L36,-20 L30,-6 L44,0 L22,12 L26,22 L6,18 L3,38 L-3,38 L-6,18 L-26,22 L-22,12 L-44,0 L-30,-6 L-36,-20 L-16,-12 L-20,-36 L-8,-30 Z" fill="url(#la)" stroke="#4a1e06" stroke-width="8.00" stroke-linejoin="round"/>
+  <path d="M0,36 L0,-34 M0,4 L28,-10 M0,4 L-28,-10 M0,18 L18,16 M0,18 L-18,16" stroke="#4a1e06" stroke-opacity="0.45" stroke-width="5.00" fill="none" stroke-linecap="round"/>
+</g>
+<g transform="translate(102 36) rotate(32) scale(0.48)">
+  <defs><linearGradient id="lb" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#ffd25e"/><stop offset="1" stop-color="#e8571b"/></linearGradient></defs>
+  <path d="M0,-50 L8,-30 L20,-36 L16,-12 L36,-20 L30,-6 L44,0 L22,12 L26,22 L6,18 L3,38 L-3,38 L-6,18 L-26,22 L-22,12 L-44,0 L-30,-6 L-36,-20 L-16,-12 L-20,-36 L-8,-30 Z" fill="url(#lb)" stroke="#4a1e06" stroke-width="8.33" stroke-linejoin="round"/>
+  <path d="M0,36 L0,-34 M0,4 L28,-10 M0,4 L-28,-10 M0,18 L18,16 M0,18 L-18,16" stroke="#4a1e06" stroke-opacity="0.45" stroke-width="5.21" fill="none" stroke-linecap="round"/>
+</g>
+<defs>
+  <linearGradient id="box" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6b4a"/><stop offset="1" stop-color="#b8231c"/></linearGradient>
+  <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8a5c"/><stop offset="1" stop-color="#d33a22"/></linearGradient>
+  <linearGradient id="rib" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f2a81d"/></linearGradient>
+</defs>
+<rect x="26" y="62" width="76" height="56" rx="6" fill="url(#box)" stroke="#4a1e06" stroke-width="4"/>
+<rect x="20" y="48" width="88" height="20" rx="6" fill="url(#lid)" stroke="#4a1e06" stroke-width="4"/>
+<rect x="56" y="48" width="16" height="70" fill="url(#rib)" stroke="#4a1e06" stroke-width="4"/>
+<path d="M64,48 C46,26 30,32 36,42 C40,50 56,50 64,48 Z" fill="url(#rib)" stroke="#4a1e06" stroke-width="4" stroke-linejoin="round"/>
+<path d="M64,48 C82,26 98,32 92,42 C88,50 72,50 64,48 Z" fill="url(#rib)" stroke="#4a1e06" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="64" cy="47" r="7" fill="#f2a81d" stroke="#4a1e06" stroke-width="4"/>
+<path d="M32,72 L32,96" stroke="#ffffff" stroke-opacity="0.45" stroke-width="5" stroke-linecap="round"/>
+</svg>

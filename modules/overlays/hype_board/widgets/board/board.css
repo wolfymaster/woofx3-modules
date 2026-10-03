@@ -1,0 +1,245 @@
+/* Hype Board — the unthemed look, and the structure every theme builds on.
+   The --theme-* properties are this widget's theme contract (manifest
+   `theme`); each fallback is the contract default. A theme stylesheet loads
+   after this file, so it only has to restyle what it wants different.
+
+   Body classes the script sets, for themes to key layouts off:
+     show-<section>   a section is on screen (timer, goal, note, bosses,
+                      totals, milestones)
+     has-<slot>       a theme asset slot is filled (bitsIcon, decoration, …)
+     timer-idle | timer-running | timer-paused | timer-done
+     goal-reached
+   and on sections, first-shown marks the first one on screen. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  color: var(--theme-text, #ffffff);
+  font-family: "HypeBoardFont", var(--theme-fontFamily, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#board {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: max-content;
+  min-width: 320px;
+  padding: 12px;
+  background: var(--theme-asset-background, none) center / cover no-repeat;
+}
+
+.section {
+  position: relative;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--theme-surface, rgba(14, 16, 24, 0.78));
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label,
+.boss-label,
+.total-label,
+.goal-metric {
+  color: var(--theme-muted, rgba(255, 255, 255, 0.7));
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* An icon shows only when its theme slot is filled. */
+.icon {
+  display: none;
+  flex: none;
+  width: 1.4em;
+  height: 1.4em;
+  background: center / contain no-repeat;
+}
+
+.has-bitsIcon .icon-bits { display: inline-block; background-image: var(--theme-asset-bitsIcon); }
+.has-giftsIcon .icon-gifts { display: inline-block; background-image: var(--theme-asset-giftsIcon); }
+.has-tipsIcon .icon-tips { display: inline-block; background-image: var(--theme-asset-tipsIcon); }
+.has-subsIcon .icon-subs { display: inline-block; background-image: var(--theme-asset-subsIcon); }
+.has-timerIcon .icon-timer { display: inline-block; background-image: var(--theme-asset-timerIcon); }
+.has-noteIcon .icon-note { display: inline-block; background-image: var(--theme-asset-noteIcon); }
+
+.decoration {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+  background: var(--theme-asset-decoration, none) center / contain no-repeat;
+}
+
+/* Timer */
+.timer-value {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.timer-paused .timer-value {
+  opacity: 0.6;
+}
+
+/* Goal */
+.goal-title {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.goal-bar {
+  height: 10px;
+  margin: 8px 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.goal-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--theme-accent, #7ad7ff);
+  transition: width 600ms ease-out;
+}
+
+.goal-count {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.goal-sep {
+  margin: 0 2px;
+  opacity: 0.7;
+}
+
+/* Note */
+#note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Top supporters */
+#bosses {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.boss {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.boss-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.boss-name {
+  max-width: 100%;
+  margin-top: 6px;
+  overflow: hidden;
+  font-size: 22px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boss-amount {
+  color: var(--theme-accent, #7ad7ff);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.boss.empty .boss-name {
+  opacity: 0.6;
+}
+
+/* Totals */
+#totals {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+}
+
+.total {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.total-value {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* Milestones */
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.milestone {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.milestone.reached {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.milestone-target {
+  color: var(--theme-accent, #7ad7ff);
+}
+
+/* A value that just changed gets .bump for one animation. */
+.bump {
+  animation: hype-bump 600ms ease-out;
+}
+
+@keyframes hype-bump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}

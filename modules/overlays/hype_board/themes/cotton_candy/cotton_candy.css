@@ -1,0 +1,294 @@
+/* Cotton Candy — pastel gradient cards with sparkles, built around the
+   subathon timer and the goal. Loaded after the widget's own board.css;
+   artwork arrives through the theme's asset slots (var(--theme-asset-*)),
+   never a url() here, because the widget frame only loads files from the
+   engine. */
+
+#board {
+  display: grid;
+  grid-template-columns: minmax(220px, auto) minmax(190px, auto);
+  grid-template-areas:
+    "timer      goal"
+    "note       goal"
+    "milestones milestones"
+    "bosses     bosses"
+    "totals     totals";
+  align-items: start;
+  gap: 12px 14px;
+  padding: 22px 20px 20px;
+  font-family: "HypeBoardFont", var(--theme-fontFamily);
+}
+
+/* The two-up top row needs both the timer and the goal; with either one
+   missing everything stacks. */
+body:not(.show-timer) #board,
+body:not(.show-goal) #board {
+  grid-template-columns: minmax(260px, auto);
+  grid-template-areas: "timer" "goal" "note" "milestones" "bosses" "totals";
+}
+
+#timer { grid-area: timer; }
+#goal { grid-area: goal; }
+#note { grid-area: note; }
+#milestones { grid-area: milestones; }
+#bosses { grid-area: bosses; }
+#totals { grid-area: totals; }
+
+/* The cotton-candy card: cyan through lavender to pink. */
+#timer,
+#goal,
+.milestone,
+.boss,
+.total {
+  border-radius: 18px;
+  background: linear-gradient(115deg, #7fd8f0 0%, #b3b0f2 52%, #ec9be0 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 4px 14px rgba(120, 80, 170, 0.35);
+}
+
+.section {
+  padding: 0;
+  background: none;
+}
+
+/* Soft white text with a lavender halo, so it reads on every stop of the
+   gradient. */
+#board {
+  --cc-text-shadow: 0 1px 0 rgba(120, 90, 200, 0.45), 0 0 8px rgba(130, 100, 210, 0.45);
+}
+
+.timer-value,
+.goal-title,
+.goal-metric,
+.goal-count,
+.milestone,
+.boss,
+.total,
+.note-text {
+  color: var(--theme-text, #ffffff);
+  text-shadow: var(--cc-text-shadow);
+}
+
+/* Timer: a pink tab hanging off the top-left corner, then big digits. */
+#timer {
+  padding: 30px 18px 12px;
+  background: linear-gradient(200deg, #9fc4f4 0%, #c8a6ee 55%, #f0a3dc 100%);
+}
+
+#timer .section-head {
+  position: absolute;
+  top: -16px;
+  left: -8px;
+  gap: 8px;
+  padding: 4px 22px 4px 8px;
+  border-radius: 12px 14px 14px 4px;
+  background: linear-gradient(90deg, #ee7fd0, #f59bdc);
+  box-shadow: 0 3px 8px rgba(200, 80, 170, 0.45);
+  transform: rotate(-3deg);
+}
+
+#timer .icon {
+  width: 30px;
+  height: 30px;
+}
+
+#timer .section-label {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.timer-value {
+  font-size: 44px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Goal: a tall card, name over the unit over the count. */
+#goal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 150px;
+  padding: 16px 22px 14px;
+  text-align: center;
+  background: linear-gradient(160deg, #c4a8f0 0%, #b7b9f3 45%, #84d4f0 100%);
+}
+
+.goal-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.goal-metric {
+  margin-top: 2px;
+  color: var(--theme-text, #ffffff);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.goal-bar {
+  width: 100%;
+  height: 8px;
+  margin: 10px 0 6px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.goal-fill {
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.goal-count {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.goal-reached #goal {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 0 18px rgba(255, 170, 230, 0.9);
+}
+
+/* Note: a pink star and a line of white text, no card. */
+#note {
+  gap: 8px;
+  padding: 0 0 0 4px;
+}
+
+#note .icon {
+  width: 34px;
+  height: 34px;
+}
+
+.note-text {
+  font-size: 24px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(60, 30, 90, 0.7), 0 0 8px rgba(60, 30, 90, 0.4);
+}
+
+/* Milestones: one wide card each, reward on the left, count on the right. */
+.milestone-list {
+  gap: 8px;
+}
+
+.milestone {
+  align-items: center;
+  padding: 8px 22px;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #7fd8f0 0%, #b3b0f2 50%, #e7a0e6 100%);
+}
+
+.milestone-label {
+  flex: 1;
+  text-align: center;
+}
+
+.milestone-target {
+  color: var(--theme-text, #ffffff);
+}
+
+.milestone.reached {
+  opacity: 0.72;
+  filter: saturate(0.6);
+  text-decoration: none;
+}
+
+.milestone.reached .milestone-label::after {
+  content: " ✓";
+}
+
+/* Top supporters: three small cards side by side. */
+#bosses {
+  gap: 10px;
+}
+
+.boss {
+  padding: 10px 12px;
+}
+
+.boss-label {
+  color: var(--theme-text, #ffffff);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.boss-name {
+  margin-top: 2px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.boss-amount {
+  color: var(--theme-text, #ffffff);
+  font-size: 18px;
+}
+
+/* Totals: three pills in a row. */
+#totals {
+  gap: 10px;
+}
+
+.total {
+  flex: 1;
+  justify-content: center;
+  padding: 8px 14px;
+}
+
+.total-label {
+  color: var(--theme-text, #ffffff);
+  font-size: 15px;
+}
+
+/* Sparkles: one on the timer card, one on the goal card, one by the note. */
+.has-decoration .decoration {
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.9));
+}
+
+.decoration-a {
+  top: 8px;
+  left: 236px;
+  width: 34px;
+  height: 34px;
+}
+
+.decoration-b {
+  top: 110px;
+  right: 6px;
+  width: 40px;
+  height: 40px;
+}
+
+.decoration-c {
+  top: 86px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+}
+
+/* The sparkles are placed for the two-up layout; stacked, keep just one. */
+body:not(.show-timer) .decoration-a,
+body:not(.show-goal) .decoration-a,
+body:not(.show-timer) .decoration-c,
+body:not(.show-goal) .decoration-c {
+  display: none;
+}
+
+.bump {
+  animation: cc-bump 700ms ease-out;
+}
+
+@keyframes cc-bump {
+  0% { transform: scale(1); filter: brightness(1); }
+  30% { transform: scale(1.12); filter: brightness(1.25); }
+  100% { transform: scale(1); filter: brightness(1); }
+}

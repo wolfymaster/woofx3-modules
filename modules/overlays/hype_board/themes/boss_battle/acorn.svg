@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<g transform="translate(36 40) rotate(-30) scale(0.62)">
+  <defs><linearGradient id="la" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#e8571b"/></linearGradient></defs>
+  <path d="M0,-50 L8,-30 L20,-36 L16,-12 L36,-20 L30,-6 L44,0 L22,12 L26,22 L6,18 L3,38 L-3,38 L-6,18 L-26,22 L-22,12 L-44,0 L-30,-6 L-36,-20 L-16,-12 L-20,-36 L-8,-30 Z" fill="url(#la)" stroke="#4a1e06" stroke-width="6.45" stroke-linejoin="round"/>
+  <path d="M0,36 L0,-34 M0,4 L28,-10 M0,4 L-28,-10 M0,18 L18,16 M0,18 L-18,16" stroke="#4a1e06" stroke-opacity="0.45" stroke-width="4.03" fill="none" stroke-linecap="round"/>
+</g>
+<g transform="translate(94 46) rotate(28) scale(0.55)">
+  <defs><linearGradient id="lb" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#ffd25e"/><stop offset="1" stop-color="#f08a24"/></linearGradient></defs>
+  <path d="M0,-50 L8,-30 L20,-36 L16,-12 L36,-20 L30,-6 L44,0 L22,12 L26,22 L6,18 L3,38 L-3,38 L-6,18 L-26,22 L-22,12 L-44,0 L-30,-6 L-36,-20 L-16,-12 L-20,-36 L-8,-30 Z" fill="url(#lb)" stroke="#4a1e06" stroke-width="7.27" stroke-linejoin="round"/>
+  <path d="M0,36 L0,-34 M0,4 L28,-10 M0,4 L-28,-10 M0,18 L18,16 M0,18 L-18,16" stroke="#4a1e06" stroke-opacity="0.45" stroke-width="4.55" fill="none" stroke-linecap="round"/>
+</g>
+<defs>
+  <radialGradient id="nut" cx="0.38" cy="0.35" r="0.75"><stop offset="0" stop-color="#ffcf7a"/><stop offset="0.55" stop-color="#e8892e"/><stop offset="1" stop-color="#a64b12"/></radialGradient>
+  <linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8743a"/><stop offset="1" stop-color="#6e3812"/></linearGradient>
+</defs>
+<path d="M36,62 C36,92 52,116 64,120 C76,116 92,92 92,62 Z" fill="url(#nut)" stroke="#4a1e06" stroke-width="4" stroke-linejoin="round"/>
+<path d="M46,72 C48,90 56,104 62,110" stroke="#fff3d6" stroke-opacity="0.7" stroke-width="5" fill="none" stroke-linecap="round"/>
+<path d="M28,64 C28,44 44,34 64,34 C84,34 100,44 100,64 C100,70 92,72 64,72 C36,72 28,70 28,64 Z" fill="url(#cap)" stroke="#4a1e06" stroke-width="4" stroke-linejoin="round"/>
+<path d="M38,50 L50,64 M48,42 L66,64 M62,38 L80,62 M76,40 L92,58 M90,50 L80,64 M76,40 L58,64 M60,38 L44,62" stroke="#4a1e06" stroke-opacity="0.35" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<path d="M64,36 C64,26 68,20 76,16" stroke="#4a1e06" stroke-width="7" fill="none" stroke-linecap="round"/>
+<path d="M64,36 C64,26 68,20 76,16" stroke="#8a4a1c" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

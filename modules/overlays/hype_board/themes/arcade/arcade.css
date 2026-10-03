@@ -1,0 +1,280 @@
+/* Arcade — a slim scoreboard strip: glowing timer, segmented goal bar and
+   the high scores side by side, made to sit along the top or bottom of the
+   screen. Loaded after the widget's own board.css; artwork arrives through
+   the theme's asset slots (var(--theme-asset-*)), never a url() here,
+   because the widget frame only loads files from the engine. */
+
+#board {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border: 2px solid rgba(46, 242, 196, 0.55);
+  background: linear-gradient(180deg, #121833 0%, var(--theme-surface, #0c1020) 100%);
+  box-shadow:
+    0 0 0 1px #05070f,
+    0 0 22px rgba(46, 242, 196, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+  font-family: "HypeBoardFont", var(--theme-fontFamily);
+  /* Faint scanlines over the whole strip. */
+  background-image:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #121833 0%, var(--theme-surface, #0c1020) 100%);
+}
+
+/* Each part is a cell of the strip, split by a thin glowing rule. */
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 22px;
+  border-radius: 0;
+  background: none;
+}
+
+.section {
+  border-left: 1px solid rgba(46, 242, 196, 0.22);
+}
+
+.section.first-shown {
+  border-left: 0;
+}
+
+.section-label,
+.boss-label,
+.total-label,
+.goal-metric {
+  color: var(--theme-muted, #7f93a8);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 0 4px rgba(46, 242, 196, 0.6));
+}
+
+/* Timer: the big glowing readout. */
+#timer {
+  min-width: 210px;
+}
+
+.timer-value {
+  margin-top: 2px;
+  color: var(--theme-accent, #2ef2c4);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 10px rgba(46, 242, 196, 0.7), 0 0 26px rgba(46, 242, 196, 0.35);
+}
+
+.timer-paused .timer-value {
+  opacity: 1;
+  color: #ffb000;
+  text-shadow: 0 0 10px rgba(255, 176, 0, 0.6);
+  animation: arcade-blink 1.2s steps(2, start) infinite;
+}
+
+.timer-done .timer-value {
+  color: #ff4f6d;
+  text-shadow: 0 0 10px rgba(255, 79, 109, 0.7);
+}
+
+/* Goal: title and count over a segmented bar. */
+#goal {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "title  count"
+    "metric metric"
+    "bar    bar";
+  align-content: center;
+  column-gap: 18px;
+  min-width: 250px;
+}
+
+.goal-title {
+  grid-area: title;
+  color: var(--theme-text, #e9f6ff);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.goal-metric {
+  grid-area: metric;
+}
+
+.goal-count {
+  grid-area: count;
+  align-self: end;
+  color: #ffb000;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.goal-sep {
+  color: var(--theme-muted, #7f93a8);
+}
+
+.goal-target {
+  color: var(--theme-muted, #7f93a8);
+}
+
+.goal-bar {
+  grid-area: bar;
+  height: 12px;
+  margin: 6px 0 0;
+  border: 1px solid rgba(46, 242, 196, 0.45);
+  border-radius: 0;
+  background: rgba(46, 242, 196, 0.06);
+}
+
+/* Segments: the fill is cut into blocks like an old health bar. */
+.goal-fill {
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 10px, #0c1020 10px 12px),
+    linear-gradient(90deg, #1fc9a2, var(--theme-accent, #2ef2c4));
+  box-shadow: 0 0 10px rgba(46, 242, 196, 0.6);
+}
+
+.goal-reached .goal-fill {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 10px, #0c1020 10px 12px),
+    linear-gradient(90deg, #ffb000, #ffd36b);
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.6);
+}
+
+/* High scores: three columns of label / name / score. */
+#bosses {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 26px;
+}
+
+.boss {
+  align-items: flex-start;
+  min-width: 120px;
+  text-align: left;
+}
+
+.boss-badge {
+  gap: 6px;
+}
+
+.boss-name {
+  margin-top: 4px;
+  max-width: 170px;
+  color: var(--theme-text, #e9f6ff);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.boss-amount {
+  color: #ffb000;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.boss.empty .boss-name {
+  color: var(--theme-muted, #7f93a8);
+  font-size: 16px;
+  animation: arcade-blink 1.6s steps(2, start) infinite;
+}
+
+/* Totals: a stacked mini-table. */
+#totals {
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.total {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.total .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.total-value {
+  order: 3;
+  color: var(--theme-text, #e9f6ff);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* Note: a marquee-style line. */
+#note {
+  flex-direction: row;
+  max-width: 260px;
+  color: var(--theme-text, #e9f6ff);
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Milestones: the strip has room for chips, not a list. Passed ones light
+   up; the next one pulses. */
+.milestone-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.milestone {
+  gap: 8px;
+  padding: 3px 8px;
+  border: 1px solid rgba(127, 147, 168, 0.5);
+  color: var(--theme-muted, #7f93a8);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.milestone-target {
+  color: inherit;
+}
+
+.milestone.reached {
+  opacity: 1;
+  border-color: var(--theme-accent, #2ef2c4);
+  background: rgba(46, 242, 196, 0.14);
+  color: var(--theme-accent, #2ef2c4);
+  text-decoration: none;
+}
+
+.milestone.next {
+  border-color: #ffb000;
+  color: #ffb000;
+  box-shadow: 0 0 8px rgba(255, 176, 0, 0.45);
+}
+
+.bump {
+  animation: arcade-flash 650ms ease-out;
+}
+
+@keyframes arcade-flash {
+  0% { filter: brightness(1); transform: scale(1); }
+  20% { filter: brightness(2.2); transform: scale(1.08); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+
+@keyframes arcade-blink {
+  50% { opacity: 0.35; }
+}
