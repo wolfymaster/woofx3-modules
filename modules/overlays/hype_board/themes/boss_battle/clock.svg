@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+<defs><radialGradient id="face" cx="0.4" cy="0.35" r="0.8"><stop offset="0" stop-color="#fff6e0"/><stop offset="1" stop-color="#f0c98a"/></radialGradient>
+<linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#d9601a"/></linearGradient></defs>
+<circle cx="64" cy="68" r="50" fill="url(#rim)" stroke="#4a1e06" stroke-width="4"/>
+<circle cx="64" cy="68" r="38" fill="url(#face)" stroke="#4a1e06" stroke-width="4"/>
+<path d="M64,68 L64,42 M64,68 L82,78" stroke="#4a1e06" stroke-width="6" stroke-linecap="round"/>
+<circle cx="64" cy="68" r="5" fill="#4a1e06"/>
+<g transform="translate(100 26) rotate(25) scale(0.4)">
+  <defs><linearGradient id="la" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#ffd25e"/><stop offset="1" stop-color="#e8571b"/></linearGradient></defs>
+  <path d="M0,-50 L8,-30 L20,-36 L16,-12 L36,-20 L30,-6 L44,0 L22,12 L26,22 L6,18 L3,38 L-3,38 L-6,18 L-26,22 L-22,12 L-44,0 L-30,-6 L-36,-20 L-16,-12 L-20,-36 L-8,-30 Z" fill="url(#la)" stroke="#4a1e06" stroke-width="10.00" stroke-linejoin="round"/>
+  <path d="M0,36 L0,-34 M0,4 L28,-10 M0,4 L-28,-10 M0,18 L18,16 M0,18 L-18,16" stroke="#4a1e06" stroke-opacity="0.45" stroke-width="6.25" fill="none" stroke-linecap="round"/>
+</g>
+</svg>

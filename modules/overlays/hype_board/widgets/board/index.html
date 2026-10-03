@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hype Board</title>
+  <link rel="stylesheet" href="board.css" />
+</head>
+<body>
+  <!--
+    Every part of the board is always here; the theme stylesheet lays them
+    out and the script hides the ones neither the theme nor the settings
+    show. Themes key off the ids and classes below, so treat them as the
+    theme contract alongside the --theme-* variables.
+  -->
+  <main id="board">
+    <section id="timer" class="section" hidden>
+      <div class="section-head">
+        <span class="icon icon-timer" aria-hidden="true"></span>
+        <span class="section-label" id="timerLabel"></span>
+      </div>
+      <div class="timer-value" id="timerValue">0:00:00</div>
+    </section>
+
+    <section id="goal" class="section" hidden>
+      <div class="goal-title" id="goalTitle"></div>
+      <div class="goal-metric" id="goalMetric"></div>
+      <div class="goal-bar"><div class="goal-fill" id="goalFill"></div></div>
+      <div class="goal-count">
+        <span class="goal-current" id="goalCurrent">0</span><span class="goal-sep">/</span><span class="goal-target" id="goalTarget">0</span>
+      </div>
+    </section>
+
+    <section id="note" class="section" hidden>
+      <span class="icon icon-note" aria-hidden="true"></span>
+      <span class="note-text" id="noteText"></span>
+    </section>
+
+    <section id="bosses" class="section" hidden>
+      <div class="boss empty" data-kind="bits">
+        <div class="boss-badge"><span class="icon icon-bits" aria-hidden="true"></span><span class="boss-label"></span></div>
+        <div class="boss-name"></div>
+        <div class="boss-amount"></div>
+      </div>
+      <div class="boss empty" data-kind="gifts">
+        <div class="boss-badge"><span class="icon icon-gifts" aria-hidden="true"></span><span class="boss-label"></span></div>
+        <div class="boss-name"></div>
+        <div class="boss-amount"></div>
+      </div>
+      <div class="boss empty" data-kind="tips">
+        <div class="boss-badge"><span class="icon icon-tips" aria-hidden="true"></span><span class="boss-label"></span></div>
+        <div class="boss-name"></div>
+        <div class="boss-amount"></div>
+      </div>
+    </section>
+
+    <section id="totals" class="section" hidden>
+      <div class="total" data-kind="subs"><span class="icon icon-subs" aria-hidden="true"></span><span class="total-value">0</span><span class="total-label">Subs</span></div>
+      <div class="total" data-kind="bits"><span class="icon icon-bits" aria-hidden="true"></span><span class="total-value">0</span><span class="total-label">Bits</span></div>
+      <div class="total" data-kind="tips"><span class="icon icon-tips" aria-hidden="true"></span><span class="total-value">0</span><span class="total-label">Tips</span></div>
+    </section>
+
+    <section id="milestones" class="section" hidden>
+      <ol class="milestone-list" id="milestoneList"></ol>
+    </section>
+
+    <span class="decoration decoration-a" aria-hidden="true"></span>
+    <span class="decoration decoration-b" aria-hidden="true"></span>
+    <span class="decoration decoration-c" aria-hidden="true"></span>
+  </main>
+  <script src="board.js"></script>
+</body>
+</html>

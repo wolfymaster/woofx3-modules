@@ -1,0 +1,359 @@
+{
+  "id": "woofx3_hype_board",
+  "name": "Hype Board",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "overlay",
+  "description": "An on-stream board for bits, subs and tips: who cheered, gifted and tipped the most, running totals, a goal with milestones, and a subathon timer that grows with every sub, cheer and tip. Ships three themes, and the board's own settings choose which parts show.",
+  "taxonomy": [
+    "overlay.support"
+  ],
+  "settings": [
+    {
+      "id": "keepTotals",
+      "label": "Keep totals between streams",
+      "description": "Off: totals and top supporters start fresh every stream. On: they keep counting until you reset them with !resetboard.",
+      "type": "toggle",
+      "defaultValue": "false"
+    },
+    {
+      "id": "currencySymbol",
+      "label": "Currency symbol",
+      "description": "Shown in front of tip amounts.",
+      "type": "text",
+      "defaultValue": "$"
+    },
+    {
+      "id": "timerStartMinutes",
+      "label": "Subathon starting length (minutes)",
+      "description": "How long the subathon timer runs when you start it without saying how long.",
+      "type": "number",
+      "defaultValue": "60"
+    },
+    {
+      "id": "secondsPerSub",
+      "label": "Seconds added per sub",
+      "description": "Tier 2 subs add twice this and tier 3 subs five times. Gift subs count too. 0 turns it off.",
+      "type": "number",
+      "defaultValue": "60"
+    },
+    {
+      "id": "secondsPer100Bits",
+      "label": "Seconds added per 100 bits",
+      "description": "Smaller cheers add their share. 0 turns it off.",
+      "type": "number",
+      "defaultValue": "12"
+    },
+    {
+      "id": "secondsPerTip",
+      "label": "Seconds added per 1 of your currency tipped",
+      "description": "For example, 12 means a 5 dollar tip adds one minute. 0 turns it off.",
+      "type": "number",
+      "defaultValue": "12"
+    },
+    {
+      "id": "timerMaxHours",
+      "label": "Most hours the timer can hold",
+      "description": "Time stops being added once this much is left. 0 means no limit.",
+      "type": "number",
+      "defaultValue": "0"
+    },
+    {
+      "id": "pauseWhenOffline",
+      "label": "Pause the timer while offline",
+      "description": "The timer stops when your stream ends and picks up again when you go live.",
+      "type": "toggle",
+      "defaultValue": "true"
+    }
+  ],
+  "functions": [
+    { "id": "record_cheer", "name": "Record cheer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "record_cheer" },
+    { "id": "record_sub", "name": "Record sub", "runtime": "js", "path": "functions/hype.js", "entryPoint": "record_sub" },
+    { "id": "record_gift", "name": "Record gift subs", "runtime": "js", "path": "functions/hype.js", "entryPoint": "record_gift" },
+    { "id": "record_tip", "name": "Record tip", "runtime": "js", "path": "functions/hype.js", "entryPoint": "record_tip" },
+    { "id": "set_live", "name": "Set live", "runtime": "js", "path": "functions/hype.js", "entryPoint": "set_live" },
+    { "id": "handle_chat_message", "name": "Handle chat message", "runtime": "js", "path": "functions/hype.js", "entryPoint": "handle_chat_message" },
+    { "id": "start_timer", "name": "Start subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "start_timer" },
+    { "id": "pause_timer", "name": "Pause subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "pause_timer" },
+    { "id": "resume_timer", "name": "Resume subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "resume_timer" },
+    { "id": "add_time", "name": "Add subathon time", "runtime": "js", "path": "functions/hype.js", "entryPoint": "add_time" },
+    { "id": "end_timer", "name": "End subathon timer", "runtime": "js", "path": "functions/hype.js", "entryPoint": "end_timer" },
+    { "id": "reset_totals", "name": "Reset totals", "runtime": "js", "path": "functions/hype.js", "entryPoint": "reset_totals" }
+  ],
+  "actions": [
+    {
+      "id": "record_cheer",
+      "name": "Count a cheer on the Hype Board",
+      "description": "Adds a cheer's bits to the totals, the top cheerer and the subathon timer. The module's own workflow runs this on every cheer.",
+      "type": "function",
+      "function": "record_cheer",
+      "returns": { "fields": [ { "path": "bits", "type": "number", "description": "Bits counted this stream (or since the last reset)." } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "record_sub",
+      "name": "Count a sub on the Hype Board",
+      "description": "Adds a new sub or resub to the totals and the subathon timer. Gifted subs are counted once, for the gifter, by the gift workflow.",
+      "type": "function",
+      "function": "record_sub",
+      "returns": { "fields": [ { "path": "subs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "record_gift",
+      "name": "Count gift subs on the Hype Board",
+      "description": "Adds a gifter's subs to the totals, the top gifter and the subathon timer. The module's own workflow runs this on every gift.",
+      "type": "function",
+      "function": "record_gift",
+      "returns": { "fields": [ { "path": "subs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "record_tip",
+      "name": "Count a tip on the Hype Board",
+      "description": "Adds a tip to the totals, the top tipper and the subathon timer. The module's own workflows run this for Ko-fi, Throne, Buy Me a Coffee and Fourthwall.",
+      "type": "function",
+      "function": "record_tip",
+      "returns": { "fields": [ { "path": "tips", "type": "number", "description": "Tips counted, in whole currency units." } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "set_live",
+      "name": "Mark stream live for the Hype Board",
+      "description": "Pauses or resumes the subathon timer with the stream. The module's own workflows run this when the stream goes online or offline.",
+      "type": "function",
+      "function": "set_live",
+      "schema": [
+        { "id": "live", "label": "Live", "type": "toggle", "defaultValue": true, "description": "On when the stream went live; off when it ended." }
+      ],
+      "returns": { "fields": [ { "path": "live", "type": "boolean" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "handle_chat",
+      "name": "Answer Hype Board chat commands",
+      "description": "Answers !subathon for everyone and lets moderators run the timer and !resetboard. The module's own workflow runs this on every chat message.",
+      "type": "function",
+      "function": "handle_chat_message",
+      "returns": { "fields": [ { "path": "command", "type": "string" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "start_timer",
+      "name": "Start the subathon timer",
+      "description": "Starts the subathon timer from the length given, replacing any timer already running.",
+      "type": "function",
+      "function": "start_timer",
+      "schema": [
+        { "id": "minutes", "label": "Minutes", "type": "number", "min": 1, "description": "Leave empty to use the starting length from the module settings." }
+      ],
+      "returns": { "fields": [ { "path": "remainingMs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "pause_timer",
+      "name": "Pause the subathon timer",
+      "type": "function",
+      "function": "pause_timer",
+      "returns": { "fields": [ { "path": "remainingMs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "resume_timer",
+      "name": "Resume the subathon timer",
+      "type": "function",
+      "function": "resume_timer",
+      "returns": { "fields": [ { "path": "remainingMs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "add_time",
+      "name": "Add time to the subathon timer",
+      "description": "Adds minutes to a running or paused subathon timer, or takes them away with a negative number.",
+      "type": "function",
+      "function": "add_time",
+      "schema": [
+        { "id": "minutes", "label": "Minutes", "type": "number", "required": true, "defaultValue": 5, "description": "A negative number takes time away." }
+      ],
+      "returns": { "fields": [ { "path": "remainingMs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "end_timer",
+      "name": "End the subathon timer",
+      "description": "Stops the subathon timer and clears it from the board.",
+      "type": "function",
+      "function": "end_timer",
+      "returns": { "fields": [ { "path": "remainingMs", "type": "number" } ] },
+      "taxonomy": [ "overlay.support" ]
+    },
+    {
+      "id": "reset_totals",
+      "name": "Reset the Hype Board totals",
+      "description": "Sets totals and top supporters back to zero. The subathon timer is left alone.",
+      "type": "function",
+      "function": "reset_totals",
+      "returns": { "fields": [ { "path": "ok", "type": "boolean" } ] },
+      "taxonomy": [ "overlay.support" ]
+    }
+  ],
+  "workflows": [
+    { "id": "count-cheers", "name": "Hype Board: count cheers", "trigger": "channel.cheer", "steps": [ { "id": "count", "action": "record_cheer" } ] },
+    { "id": "count-subs", "name": "Hype Board: count new subs", "trigger": "channel.subscribe", "steps": [ { "id": "count", "action": "record_sub" } ] },
+    { "id": "count-resubs", "name": "Hype Board: count resubs", "trigger": "channel.resub", "steps": [ { "id": "count", "action": "record_sub" } ] },
+    { "id": "count-gifts", "name": "Hype Board: count gift subs", "trigger": "channel.subscriptionGift", "steps": [ { "id": "count", "action": "record_gift" } ] },
+    { "id": "count-kofi", "name": "Hype Board: count Ko-fi tips", "trigger": "kofi.donation", "steps": [ { "id": "count", "action": "record_tip" } ] },
+    { "id": "count-throne-gifts", "name": "Hype Board: count Throne gifts", "trigger": "throne.gift.purchased", "steps": [ { "id": "count", "action": "record_tip" } ] },
+    { "id": "count-throne-contributions", "name": "Hype Board: count Throne contributions", "trigger": "throne.contribution.purchased", "steps": [ { "id": "count", "action": "record_tip" } ] },
+    { "id": "count-buymeacoffee", "name": "Hype Board: count Buy Me a Coffee tips", "trigger": "buymeacoffee.donation", "steps": [ { "id": "count", "action": "record_tip" } ] },
+    { "id": "count-fourthwall", "name": "Hype Board: count Fourthwall tips", "trigger": "fourthwall.donation", "steps": [ { "id": "count", "action": "record_tip" } ] },
+    { "id": "stream-online", "name": "Hype Board: stream went live", "trigger": "stream.online", "steps": [ { "id": "live", "action": "set_live", "parameters": { "live": true } } ] },
+    { "id": "stream-offline", "name": "Hype Board: stream ended", "trigger": "stream.offline", "steps": [ { "id": "offline", "action": "set_live", "parameters": { "live": false } } ] },
+    { "id": "chat-commands", "name": "Hype Board: chat commands", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] }
+  ],
+  "widgets": [
+    {
+      "id": "board",
+      "name": "Hype Board",
+      "description": "Top cheerer, gifter and tipper, totals, a goal with milestones, and the subathon timer. The theme picks the look and which parts show; the settings below can show or hide any part.",
+      "entry": "widgets/board/index.html",
+      "assets": "widgets/board",
+      "surfaces": [ "scene" ],
+      "taxonomy": [ "overlay.support" ],
+      "settingsSchema": [
+        { "id": "showBosses", "label": "Top supporters", "type": "select", "defaultValue": "theme", "options": [ { "value": "theme", "label": "Theme decides" }, { "value": "show", "label": "Show" }, { "value": "hide", "label": "Hide" } ], "description": "Who cheered, gifted and tipped the most." },
+        { "id": "showTimer", "label": "Subathon timer", "type": "select", "defaultValue": "theme", "options": [ { "value": "theme", "label": "Theme decides" }, { "value": "show", "label": "Show" }, { "value": "hide", "label": "Hide" } ] },
+        { "id": "showGoal", "label": "Goal", "type": "select", "defaultValue": "theme", "options": [ { "value": "theme", "label": "Theme decides" }, { "value": "show", "label": "Show" }, { "value": "hide", "label": "Hide" } ] },
+        { "id": "showMilestones", "label": "Milestones", "type": "select", "defaultValue": "theme", "options": [ { "value": "theme", "label": "Theme decides" }, { "value": "show", "label": "Show" }, { "value": "hide", "label": "Hide" } ] },
+        { "id": "showTotals", "label": "Totals", "type": "select", "defaultValue": "theme", "options": [ { "value": "theme", "label": "Theme decides" }, { "value": "show", "label": "Show" }, { "value": "hide", "label": "Hide" } ], "description": "Subs, bits and tips added up." },
+        { "id": "showNote", "label": "Note", "type": "select", "defaultValue": "theme", "options": [ { "value": "theme", "label": "Theme decides" }, { "value": "show", "label": "Show" }, { "value": "hide", "label": "Hide" } ], "description": "Shows only when the note below has text." },
+        { "id": "goalTitle", "label": "Goal name", "type": "text", "placeholder": "Sub-a-thon" },
+        { "id": "goalMetric", "label": "Goal counts", "type": "select", "defaultValue": "subs", "options": [ { "value": "subs", "label": "Subs" }, { "value": "bits", "label": "Bits" }, { "value": "tips", "label": "Tips" } ], "description": "Milestones count the same thing." },
+        { "id": "goalTarget", "label": "Goal", "type": "number", "min": 1, "defaultValue": 100 },
+        { "id": "milestones", "label": "Milestones", "type": "list", "itemFields": [ { "id": "target", "label": "At", "type": "number", "required": true }, { "id": "label", "label": "What happens", "type": "text", "required": true } ], "description": "Rewards chat unlocks along the way, like a movie night at 500 subs." },
+        { "id": "note", "label": "Note", "type": "text", "placeholder": "Bday: Aug 15th", "description": "A short line of your own, like a birthday or schedule." },
+        { "id": "bitsLabel", "label": "Top cheerer title", "type": "text", "description": "Leave empty to use the theme's." },
+        { "id": "giftsLabel", "label": "Top gifter title", "type": "text", "description": "Leave empty to use the theme's." },
+        { "id": "tipsLabel", "label": "Top tipper title", "type": "text", "description": "Leave empty to use the theme's." },
+        { "id": "timerLabel", "label": "Timer title", "type": "text", "description": "Leave empty to use the theme's." },
+        { "id": "emptyName", "label": "Before anyone supports", "type": "text", "defaultValue": "Be first!", "description": "Shown in a top supporter's spot until someone takes it." },
+        { "id": "scale", "label": "Size", "type": "range", "min": 50, "max": 200, "unit": "%", "defaultValue": 100 }
+      ],
+      "theme": {
+        "contractVersion": 1,
+        "variables": [
+          { "id": "sections", "type": "text", "default": "timer goal bosses" },
+          { "id": "bitsLabel", "type": "text", "default": "Top cheer" },
+          { "id": "giftsLabel", "type": "text", "default": "Top gifter" },
+          { "id": "tipsLabel", "type": "text", "default": "Top tip" },
+          { "id": "timerLabel", "type": "text", "default": "Subathon" },
+          { "id": "subsUnit", "type": "text", "default": "subs" },
+          { "id": "fontFamily", "type": "text", "default": "system-ui, sans-serif" },
+          { "id": "text", "type": "color", "default": "#ffffff" },
+          { "id": "muted", "type": "color", "default": "rgba(255, 255, 255, 0.7)" },
+          { "id": "accent", "type": "color", "default": "#7ad7ff" },
+          { "id": "surface", "type": "color", "default": "rgba(14, 16, 24, 0.78)" }
+        ],
+        "assetSlots": [
+          { "id": "font", "kinds": [ "font" ] },
+          { "id": "bitsIcon", "kinds": [ "image" ] },
+          { "id": "giftsIcon", "kinds": [ "image" ] },
+          { "id": "tipsIcon", "kinds": [ "image" ] },
+          { "id": "subsIcon", "kinds": [ "image" ] },
+          { "id": "timerIcon", "kinds": [ "image" ] },
+          { "id": "noteIcon", "kinds": [ "image" ] },
+          { "id": "decoration", "kinds": [ "image" ] },
+          { "id": "background", "kinds": [ "image" ] }
+        ]
+      }
+    }
+  ],
+  "themes": [
+    {
+      "id": "boss_battle",
+      "name": "Boss Battle",
+      "description": "Cozy autumn badges crown your Bit Boss, Gift Boss and Tip Boss.",
+      "target": "woofx3_hype_board:widget:board",
+      "contractVersion": 1,
+      "variables": {
+        "sections": "bosses",
+        "bitsLabel": "Bit Boss:",
+        "giftsLabel": "Gift Boss:",
+        "tipsLabel": "Tip Boss:",
+        "timerLabel": "Time Left:",
+        "fontFamily": "\"Arial Black\", sans-serif",
+        "text": "#fff8ec",
+        "muted": "#d8cfc4",
+        "accent": "#f6922e",
+        "surface": "#5a2a0c"
+      },
+      "assets": {
+        "font": "themes/boss_battle/LilitaOne-Regular.ttf",
+        "bitsIcon": "themes/boss_battle/acorn.svg",
+        "giftsIcon": "themes/boss_battle/gift.svg",
+        "tipsIcon": "themes/boss_battle/latte.svg",
+        "subsIcon": "themes/boss_battle/pumpkin.svg",
+        "timerIcon": "themes/boss_battle/clock.svg",
+        "noteIcon": "themes/boss_battle/leaf.svg",
+        "decoration": "themes/boss_battle/leaves.svg"
+      },
+      "stylesheet": "themes/boss_battle/boss_battle.css",
+      "preview": "themes/boss_battle/preview.png"
+    },
+    {
+      "id": "cotton_candy",
+      "name": "Cotton Candy",
+      "description": "Dreamy pastel cards with sparkles for a subathon timer, a goal and milestones.",
+      "target": "woofx3_hype_board:widget:board",
+      "contractVersion": 1,
+      "variables": {
+        "sections": "timer goal note milestones",
+        "timerLabel": "Timer",
+        "subsUnit": "subs ♡",
+        "fontFamily": "\"Trebuchet MS\", sans-serif",
+        "text": "#ffffff",
+        "muted": "rgba(255, 255, 255, 0.92)",
+        "accent": "#f07ccf",
+        "surface": "#a9b4f2"
+      },
+      "assets": {
+        "font": "themes/cotton_candy/Fredoka.ttf",
+        "timerIcon": "themes/cotton_candy/clock.svg",
+        "noteIcon": "themes/cotton_candy/star.svg",
+        "decoration": "themes/cotton_candy/sparkle.svg"
+      },
+      "stylesheet": "themes/cotton_candy/cotton_candy.css",
+      "preview": "themes/cotton_candy/preview.png"
+    },
+    {
+      "id": "arcade",
+      "name": "Arcade",
+      "description": "A sleek scoreboard strip with a glowing timer, a goal bar and the high scores.",
+      "target": "woofx3_hype_board:widget:board",
+      "contractVersion": 1,
+      "variables": {
+        "sections": "timer goal bosses",
+        "bitsLabel": "Hi-score bits",
+        "giftsLabel": "Hi-score gifts",
+        "tipsLabel": "Hi-score tips",
+        "timerLabel": "Time left",
+        "fontFamily": "\"DejaVu Sans Mono\", monospace",
+        "text": "#e9f6ff",
+        "muted": "#7f93a8",
+        "accent": "#2ef2c4",
+        "surface": "#0c1020"
+      },
+      "assets": {
+        "font": "themes/arcade/ChakraPetch-Bold.ttf",
+        "bitsIcon": "themes/arcade/bits.svg",
+        "giftsIcon": "themes/arcade/gift.svg",
+        "tipsIcon": "themes/arcade/coin.svg",
+        "subsIcon": "themes/arcade/star.svg",
+        "timerIcon": "themes/arcade/clock.svg",
+        "noteIcon": "themes/arcade/star.svg"
+      },
+      "stylesheet": "themes/arcade/arcade.css",
+      "preview": "themes/arcade/preview.png"
+    }
+  ]
+}
