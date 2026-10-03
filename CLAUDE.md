@@ -237,6 +237,7 @@ cards stay distinguishable — pick one not already taken:
 | `woofx3_throne` | gift box with a ribbon | `#ff7a8f` → `#9e1f55` | `#ffd166` |
 | `woofx3_wolfy_profile` | workflow graph: one node feeding two | `#4f9cff` → `#16357d` | `#ffb347` |
 | `woofx3_dadjoke` | speech bubble with a mustache inside | `#ffc82e` → `#9a5200` | `#4a2a0e` |
+| `woofx3_hype_board` | trophy with a star on the cup | `#3cd8e0` → `#0b4f6c` | `#ff5fa2` |
 
 Before uploading, check a contact sheet: each banner full size, its card crop,
 and the icon at 256px and 64px. The glyph must still read at 64px.
