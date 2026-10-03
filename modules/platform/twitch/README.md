@@ -50,9 +50,10 @@ needed.
 - **Send a chat message.** Thank a new follower or welcome a raid, all on its
   own.
 - **Give a shoutout.** Share another streamer's channel with your viewers, just
-  like the shoutout button. Twitch only allows one shoutout every two minutes.
-  If two raids land close together, your stream can skip the extra shoutout
-  instead of stopping.
+  like the shoutout button. Twitch only allows one shoutout every two minutes,
+  so every shoutout waits its turn in your shoutout queue. If three raids land
+  at once, every raider still gets their shoutout. You can see the line, and
+  change it, in the shoutout queue on your dashboard.
 - **Look up a streamer.** Find out who someone is, what game they played
   last, and whether they're live right now. Then use it in your next step,
   like a shoutout message that tells chat what the raider was playing.

@@ -2245,7 +2245,7 @@
     {
       "id": "twitch.shoutout",
       "name": "Shoutout",
-      "description": "Send a Twitch shoutout for another channel, the same one the /shoutout chat command sends. Fails the step when Twitch refuses, unless the refusal is a rate limit and skipping is turned on.",
+      "description": "Send a Twitch shoutout for another channel, the same one the /shoutout chat command sends. Twitch allows one shoutout every 2 minutes, so it joins the dashboard's shoutout queue and is sent in turn; someone already waiting keeps their place.",
       "type": "function",
       "function": "shoutout",
       "schema": [
@@ -2255,7 +2255,7 @@
           "type": "text",
           "required": true,
           "placeholder": "Channel name or user id",
-          "description": "The channel to shout out. A numeric user id is used as-is; anything else is resolved as a login name.",
+          "description": "The channel to shout out. A leading @ and extra spaces are removed. A numeric user id is used as-is; anything else is resolved as a login name.",
           "hint": "Supports template substitution, so a raid trigger can pass its raider straight through."
         },
         {
@@ -2263,8 +2263,8 @@
           "label": "Skip when rate limited",
           "type": "toggle",
           "defaultValue": false,
-          "description": "Succeed without a shoutout instead of failing the step when Twitch's shoutout rate limit is hit.",
-          "hint": "Twitch allows one shoutout every 2 minutes and one per channel every 60 minutes, so back-to-back raids often hit the limit. Turn this on to let the rest of the workflow run anyway; the step's skipped output says whether it happened."
+          "description": "Only used when shoutouts can't wait in the shoutout queue and are sent right away: succeed without a shoutout instead of failing the step when Twitch's shoutout rate limit is hit.",
+          "hint": "Queued shoutouts are never dropped, so this rarely matters. The step's skipped output says whether it happened."
         }
       ],
       "returns": {
@@ -2272,12 +2272,27 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "The Twitch user id of the channel that was shouted out. Absent when skipped."
+            "description": "The Twitch user id of the channel being shouted out."
+          },
+          {
+            "path": "queued",
+            "type": "boolean",
+            "description": "Whether the shoutout joined the shoutout queue. False only when it was sent right away because there is no queue."
+          },
+          {
+            "path": "position",
+            "type": "number",
+            "description": "The shoutout's place in the queue, starting at 1. 0 when it was sent right away."
+          },
+          {
+            "path": "alreadyQueued",
+            "type": "boolean",
+            "description": "Whether that channel was already waiting in the queue, so it kept its place instead of being added twice."
           },
           {
             "path": "skipped",
             "type": "boolean",
-            "description": "Whether the shoutout was skipped because of Twitch's rate limit."
+            "description": "Whether the shoutout was skipped because of Twitch's rate limit. Only when it was sent right away instead of queued."
           }
         ]
       }
