@@ -5,7 +5,12 @@
 //
 //   board     {"currency","subs","bits","tipsCents",
 //              "bosses":{"bits"|"gifts"|"tips": {"name","amount"} | null}}
-//   subathon  {"status":"idle"|"running"|"paused","endsAt","remainingMs"}
+//   subathon  {"active","ended"}: whether a subathon is on, or ran out
+//
+// and the subathon timer itself: the WoofX3 timer the module's `timer`
+// setting links, at `state:<its canonical id>`, which the host answers with
+// `{ running, remainingMs, durationMs }` whenever it changes, measured as it
+// is sent.
 //
 // Which parts show is the theme's `sections` variable, overridden per part by
 // the show* settings. Labels come from the theme too, overridden by settings.
@@ -48,7 +53,12 @@
   var body = document.body;
 
   var board = null;
-  var timer = null;
+  var subathon = null;
+  // The timer's reading as last sent, and when it arrived on this page's
+  // monotonic clock: the time left counts down from those alone, so this
+  // page's clock never has to agree with the engine's.
+  var reading = null;
+  var syncedAt = 0;
   var tick = null;
 
   applyTheme();
@@ -59,9 +69,20 @@
     renderBoard();
   });
   host.storage.subscribe("subathon", function (raw) {
-    timer = parse(raw);
+    subathon = parse(raw);
     renderTimer();
   });
+  var linkedTimer = host.linkedResources ? host.linkedResources.timer : "";
+  if (linkedTimer) {
+    host.storage.subscribe("state:" + linkedTimer, function (raw) {
+      var r = parse(raw);
+      reading = r && typeof r.running === "boolean" && typeof r.remainingMs === "number" ? r : null;
+      syncedAt = performance.now();
+      renderTimer();
+    });
+  } else {
+    renderTimer();
+  }
 
   // -------------------------------------------------------------------------
   // Setup
@@ -251,9 +272,16 @@
       clearTimeout(tick);
       tick = null;
     }
-    var t = timer || { status: "idle" };
-    var left = remaining(t);
-    var state = t.status === "running" && left <= 0 ? "done" : t.status === "running" || t.status === "paused" ? t.status : "idle";
+    var left = remaining();
+    var sub = subathon || {};
+    var state;
+    if (sub.active !== true && sub.ended !== true) {
+      state = "idle";
+    } else if (left <= 0) {
+      state = "done";
+    } else {
+      state = reading && reading.running ? "running" : "paused";
+    }
     ["idle", "running", "paused", "done"].forEach(function (s) {
       body.classList.toggle("timer-" + s, s === state);
     });
@@ -264,14 +292,14 @@
     }
   }
 
-  function remaining(t) {
-    if (t.status === "running") {
-      return Math.max(0, Number(t.endsAt) - Date.now());
+  function remaining() {
+    if (!reading) {
+      return 0;
     }
-    if (t.status === "paused") {
-      return Math.max(0, Number(t.remainingMs) || 0);
+    if (!reading.running) {
+      return Math.max(0, reading.remainingMs);
     }
-    return 0;
+    return Math.max(0, reading.remainingMs - (performance.now() - syncedAt));
   }
 
   // H:MM:SS with hours unbounded, so a long subathon reads 214:39:09. Seconds

@@ -48,9 +48,14 @@ best, and you can turn any part on or off.
 
 Start the timer from chat, then let your community keep it going!
 
+The Hype Board makes a timer for you called **Hype Board subathon**. You'll
+find it with your other timers. It's a regular timer, so you can also show it,
+start it or pause it anywhere else you use timers. Want to use a timer you
+already have? Pick it in the Hype Board settings instead.
+
 - **!subathon** tells anyone in chat how much time is left.
-- **!subathon start 4h** starts the timer. Leave off the time to use your
-  starting length.
+- **!subathon start 4h** starts the timer. Leave off the time to start from
+  the timer's own length. You set that length on the timer itself.
 - **!subathon add 10m** and **!subathon remove 10m** change the time.
 - **!subathon pause** and **!subathon resume** stop and restart the clock.
 - **!subathon end** ends the subathon.
