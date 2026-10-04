@@ -1,0 +1,205 @@
+/* Stream Credits. --accent and --text are set from the widget settings by
+   credits.js; --fade-ms is the length of every fade.
+
+   One .slide is on screen at a time. It arrives without .in, gains .in to
+   fade up (each .credit following with a stagger), and gains .out to fade
+   away before the next one is built. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+:root {
+  --accent: #ffcc4d;
+  --text: #ffffff;
+  --fade-ms: 900ms;
+}
+
+body {
+  color: var(--text);
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  padding: 48px 32px;
+}
+
+#headline {
+  flex: none;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+#slides {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+}
+
+/* ---- One list --------------------------------------------------------- */
+
+.slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, 1100px);
+  max-height: 100%;
+  min-height: 0;
+  padding: 28px 40px 32px;
+  border-radius: 24px;
+  opacity: 0;
+  transform: translateY(18px) scale(0.98);
+  transition:
+    opacity var(--fade-ms) ease,
+    transform var(--fade-ms) cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.panel .slide {
+  background: rgba(10, 12, 20, 0.72);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.slide.in {
+  opacity: 1;
+  transform: none;
+}
+
+.slide.out {
+  opacity: 0;
+  transform: translateY(-18px) scale(0.98);
+}
+
+.slide-title {
+  flex: none;
+  margin: 0 0 6px;
+  font-size: 54px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+
+.slide-rule {
+  flex: none;
+  width: 0;
+  height: 4px;
+  margin-bottom: 24px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width calc(var(--fade-ms) * 1.4) cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--fade-ms) * 0.3);
+}
+
+.slide.in .slide-rule {
+  width: 120px;
+}
+
+/* The window the list shows through, and scrolls inside when it's long. */
+.viewport {
+  flex: 0 1 auto;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.viewport.scrolls {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 14px 40px;
+  margin: 0;
+  padding: 8px 0;
+  list-style: none;
+}
+
+.viewport.scrolls .list {
+  padding: 40px 0;
+}
+
+.credit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.slide.in .credit {
+  animation: credit-in 600ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes credit-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.credit-name {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+}
+
+.credit-amount {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+/* Chatters are a sea of names: smaller, and no amounts to line up. */
+.slide[data-section="chatters"] .list {
+  gap: 10px 32px;
+}
+
+.slide[data-section="chatters"] .credit-name {
+  font-size: 28px;
+  font-weight: 700;
+}

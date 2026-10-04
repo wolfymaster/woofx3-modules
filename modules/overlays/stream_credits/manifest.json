@@ -1,0 +1,112 @@
+{
+  "id": "woofx3_stream_credits",
+  "name": "Stream Credits",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "overlay",
+  "description": "End-of-stream credits for your scene: everyone who cheered bits or gifted subs, every channel that raided, and everyone who chatted, each list fading in and out in turn.",
+  "taxonomy": [
+    "overlay.credits"
+  ],
+  "settings": [
+    {
+      "id": "ignoredNames",
+      "label": "Leave out of the credits",
+      "description": "Chatters to skip, like your bots. Separate names with commas.",
+      "type": "text",
+      "defaultValue": "nightbot, streamelements, streamlabs, moobot, fossabot, sery_bot, wizebot, soundalerts"
+    }
+  ],
+  "functions": [
+    { "id": "record_cheer", "name": "Record cheer", "runtime": "js", "path": "functions/credits.js", "entryPoint": "record_cheer" },
+    { "id": "record_gift", "name": "Record gift subs", "runtime": "js", "path": "functions/credits.js", "entryPoint": "record_gift" },
+    { "id": "record_raid", "name": "Record raid", "runtime": "js", "path": "functions/credits.js", "entryPoint": "record_raid" },
+    { "id": "handle_chat_message", "name": "Handle chat message", "runtime": "js", "path": "functions/credits.js", "entryPoint": "handle_chat_message" },
+    { "id": "reset_credits", "name": "Reset credits", "runtime": "js", "path": "functions/credits.js", "entryPoint": "reset_credits" }
+  ],
+  "actions": [
+    {
+      "id": "record_cheer",
+      "name": "Add a cheer to the Stream Credits",
+      "description": "Adds the cheerer and their bits to the supporters list. The module's own workflow runs this on every cheer.",
+      "type": "function",
+      "function": "record_cheer",
+      "returns": { "fields": [ { "path": "supporters", "type": "number", "description": "Supporters in the credits this stream." } ] },
+      "taxonomy": [ "overlay.credits" ]
+    },
+    {
+      "id": "record_gift",
+      "name": "Add gift subs to the Stream Credits",
+      "description": "Adds the gifter and their gift subs to the supporters list. The module's own workflow runs this on every gift.",
+      "type": "function",
+      "function": "record_gift",
+      "returns": { "fields": [ { "path": "supporters", "type": "number", "description": "Supporters in the credits this stream." } ] },
+      "taxonomy": [ "overlay.credits" ]
+    },
+    {
+      "id": "record_raid",
+      "name": "Add a raid to the Stream Credits",
+      "description": "Adds the raiding channel and its viewers to the raiders list. The module's own workflow runs this on every raid.",
+      "type": "function",
+      "function": "record_raid",
+      "returns": { "fields": [ { "path": "raiders", "type": "number", "description": "Raiders in the credits this stream." } ] },
+      "taxonomy": [ "overlay.credits" ]
+    },
+    {
+      "id": "handle_chat",
+      "name": "Add chatters to the Stream Credits",
+      "description": "Adds each chatter the first time they speak, and lets moderators clear the credits with !resetcredits. The module's own workflow runs this on every chat message.",
+      "type": "function",
+      "function": "handle_chat_message",
+      "returns": {
+        "fields": [
+          { "path": "command", "type": "string" },
+          { "path": "added", "type": "boolean", "description": "Whether this message added a new chatter." }
+        ]
+      },
+      "taxonomy": [ "overlay.credits" ]
+    },
+    {
+      "id": "reset_credits",
+      "name": "Reset the Stream Credits",
+      "description": "Clears the supporters, raiders and chatters lists.",
+      "type": "function",
+      "function": "reset_credits",
+      "returns": { "fields": [ { "path": "ok", "type": "boolean" } ] },
+      "taxonomy": [ "overlay.credits" ]
+    }
+  ],
+  "workflows": [
+    { "id": "credit-cheers", "name": "Stream Credits: cheers", "trigger": "channel.cheer", "steps": [ { "id": "credit", "action": "record_cheer" } ] },
+    { "id": "credit-gifts", "name": "Stream Credits: gift subs", "trigger": "channel.subscriptionGift", "steps": [ { "id": "credit", "action": "record_gift" } ] },
+    { "id": "credit-raids", "name": "Stream Credits: raids", "trigger": "channel.raid", "steps": [ { "id": "credit", "action": "record_raid" } ] },
+    { "id": "credit-chatters", "name": "Stream Credits: chatters", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] }
+  ],
+  "widgets": [
+    {
+      "id": "credits",
+      "name": "Stream Credits",
+      "description": "Supporters, raiders and chatters, one list at a time, fading in and out on a loop. Long lists scroll like movie credits.",
+      "entry": "widgets/credits/index.html",
+      "assets": "widgets/credits",
+      "surfaces": [ "scene" ],
+      "taxonomy": [ "overlay.credits" ],
+      "settingsSchema": [
+        { "id": "headline", "label": "Headline", "type": "text", "placeholder": "Thanks for watching!", "description": "Shown above every list. Leave empty for none." },
+        { "id": "showSupports", "label": "Show supporters", "type": "toggle", "defaultValue": true },
+        { "id": "supportsTitle", "label": "Supporters title", "type": "text", "defaultValue": "Supports" },
+        { "id": "showRaids", "label": "Show raiders", "type": "toggle", "defaultValue": true },
+        { "id": "raidsTitle", "label": "Raiders title", "type": "text", "defaultValue": "Raids" },
+        { "id": "showChatters", "label": "Show chatters", "type": "toggle", "defaultValue": true },
+        { "id": "chattersTitle", "label": "Chatters title", "type": "text", "defaultValue": "Chatters" },
+        { "id": "showAmounts", "label": "Show amounts", "type": "toggle", "defaultValue": true, "description": "Bits, gift subs and raid sizes under each name." },
+        { "id": "secondsPerList", "label": "Seconds per list", "type": "number", "min": 3, "defaultValue": 8, "description": "Long lists stay up longer, until they finish scrolling." },
+        { "id": "scrollSpeed", "label": "Scroll speed", "type": "range", "min": 20, "max": 200, "unit": "px/s", "defaultValue": 60 },
+        { "id": "accent", "label": "Accent colour", "type": "color", "defaultValue": "#ffcc4d" },
+        { "id": "textColor", "label": "Text colour", "type": "color", "defaultValue": "#ffffff" },
+        { "id": "showPanel", "label": "Dark panel behind the credits", "type": "toggle", "defaultValue": true },
+        { "id": "scale", "label": "Size", "type": "range", "min": 50, "max": 200, "unit": "%", "defaultValue": 100 }
+      ]
+    }
+  ]
+}
