@@ -84,6 +84,17 @@
     renderTimer();
   }
 
+  // Redrawn as the streamer edits it in the scene editor, rather than
+  // reloaded. A host without live settings reloads the widget instead.
+  if (host.onSettings) {
+    host.onSettings(function (next) {
+      settings = next || {};
+      applySettings();
+      renderBoard();
+      renderTimer();
+    });
+  }
+
   // -------------------------------------------------------------------------
   // Setup
   // -------------------------------------------------------------------------
@@ -148,9 +159,8 @@
     });
 
     var scale = Number(settings.scale);
-    if (Number.isFinite(scale) && scale > 0 && scale !== 100) {
-      document.getElementById("board").style.zoom = String(scale / 100);
-    }
+    document.getElementById("board").style.zoom =
+      Number.isFinite(scale) && scale > 0 && scale !== 100 ? String(scale / 100) : "";
   }
 
   // -------------------------------------------------------------------------
