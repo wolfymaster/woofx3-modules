@@ -1,6 +1,9 @@
 function shoutout(ctx) {
   const params = (ctx.event && ctx.event.parameters) || ctx.event || {};
-  const raw = String(params.user == null ? "" : params.user).trim();
+  const raw = String(params.user == null ? "" : params.user)
+    .trim()
+    .replace(/^@+/, "")
+    .trim();
   if (!raw) {
     return ctx.response(false, "No channel to shout out.");
   }
@@ -9,24 +12,41 @@ function shoutout(ctx) {
   // chat command carries whatever the chatter typed. The engine resolves a
   // name to an id before calling Twitch.
   const isId = /^[0-9]+$/.test(raw);
-  const target = isId ? { userId: raw } : { userName: raw.replace(/^@/, "") };
+  const target = isId ? { userId: raw } : { userName: raw };
 
+  // Twitch allows one shoutout every 2 minutes, so the engine queues it on
+  // the dashboard's shoutout queue, which sends each in turn and retries a
+  // refusal, instead of dropping one that lands too soon after another. Only
+  // an engine with no dashboard queue sends at once (queued is false).
   let result;
   try {
     result = callTwitch(ctx, "shoutout", target);
   } catch (err) {
-    // Twitch allows one shoutout every 2 minutes, so back-to-back raids hit
-    // the limit; a workflow that shouts out raiders can opt to carry on.
+    // Only a direct send meets Twitch's rate limit; a queued shoutout waits.
     if (isOn(params.skipIfRateLimited) && err && err.code === "rate_limited") {
       const skipped = ctx.response(true, "Shoutout skipped: " + err.message);
+      skipped.queued = false;
+      skipped.position = 0;
+      skipped.alreadyQueued = false;
       skipped.skipped = true;
       return skipped;
     }
     throw err;
   }
 
-  const reply = ctx.response(true, "Shouted out " + raw + ".");
+  let message;
+  if (!result.queued) {
+    message = "Shouted out " + raw + ".";
+  } else if (result.alreadyQueued) {
+    message = raw + " is already in the shoutout queue at #" + result.position + ".";
+  } else {
+    message = "Queued a shoutout for " + raw + " at #" + result.position + ".";
+  }
+  const reply = ctx.response(true, message);
   reply.userId = result.userId;
+  reply.queued = result.queued === true;
+  reply.position = result.queued ? result.position : 0;
+  reply.alreadyQueued = result.alreadyQueued === true;
   reply.skipped = false;
   return reply;
 }

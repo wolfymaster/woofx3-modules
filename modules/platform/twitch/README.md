@@ -50,9 +50,13 @@ needed.
 - **Send a chat message.** Thank a new follower or welcome a raid, all on its
   own.
 - **Give a shoutout.** Share another streamer's channel with your viewers, just
-  like the shoutout button. Twitch only allows one shoutout every two minutes.
-  If two raids land close together, your stream can skip the extra shoutout
-  instead of stopping.
+  like the shoutout button. Twitch only allows one shoutout every two minutes,
+  so every shoutout waits its turn in your shoutout queue. If three raids land
+  at once, every raider still gets their shoutout. You can see the line, and
+  change it, in the shoutout queue on your dashboard.
+- **Look up a streamer.** Find out who someone is, what game they played
+  last, and whether they're live right now. Then use it in your next step,
+  like a shoutout message that tells chat what the raider was playing.
 - **Make a clip.** Grab the last few moments of your stream the second
   something amazing happens.
 - **Place a stream marker.** Mark a moment so you can find it again in your
@@ -65,6 +69,9 @@ needed.
 ## Ideas to try
 
 - When you get raided, give the raider a shoutout and a warm welcome in chat.
+- When someone raids, look them up and post "Thanks for the raid! Go check
+  them out, they were just playing Minecraft!" with the game they really
+  played.
 - Make a clip every time a Hype Train starts, so you never miss the big
   moments.
 - Before an ad break, post a heads-up in chat. When it ends, welcome everyone
