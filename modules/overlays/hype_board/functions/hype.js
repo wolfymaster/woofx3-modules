@@ -1,8 +1,9 @@
 /// <reference types="@woofx3/module-sdk/function-ctx" />
 
 // Hype Board: counts bits, subs and tips, crowns the biggest supporter of
-// each, and runs a subathon timer those events add time to. The board widget
-// only reads storage; everything it shows is written here.
+// each, and runs a subathon on a WoofX3 timer those events add time to. The
+// board widget only reads storage; everything it shows is written here, except
+// the timer, which the widget reads from the timer itself.
 //
 // Storage layout. Values are JSON *strings* this file serialises itself,
 // because compareAndSet compares the stored bytes: handing back the exact
@@ -12,8 +13,7 @@
 //              "bosses":{"bits"|"gifts"|"tips": {"key","name","amount"} | null},
 //              "updatedAt"}
 //   fan:<round>:<kind>:<name key>   a supporter's running total for one kind
-//   subathon  {"status":"idle"|"running"|"paused","endsAt","remainingMs",
-//              "pausedBy","updatedAt"}
+//   subathon  {"active","ended","pausedBy"}
 //
 // Why `round` is in each fan key: storage can't be listed or deleted from a
 // sandbox, so a reset can't clear every supporter's tally. Starting a new
@@ -22,13 +22,22 @@
 // between streams" the orphaned tallies are a few bytes per supporter, left
 // behind only when the streamer resets.
 //
-// The subathon timer is never cleared with the session: a subathon commonly
-// spans several streams, and pausing while offline is what carries it over.
+// The timer is the one the `timer` setting links: install makes one and links
+// it, and the streamer can pick another. Its time lives with the timer, and
+// everything here changes it through ctx.resources.run, the same actions a
+// workflow uses. What the timer cannot say is whether a subathon is on — a
+// stopped timer at its full length is both "not started" and "paused" — so
+// `subathon` records that, and who paused it: a pause the stream going offline
+// caused is undone when it comes back, one a moderator made is not. It is kept
+// in step with changes made elsewhere (the dashboard, a workflow) by
+// sync_timer, which the timer's started, paused and ended events run.
+//
+// The subathon is never cleared with the session: a subathon commonly spans
+// several streams, and pausing while offline is what carries it over.
 
 var CAS_ATTEMPTS = 8;
 var KINDS = ["bits", "gifts", "tips"];
 var TIER_MULTIPLIER = { "1000": 1, "2000": 2, "3000": 5 };
-var DEFAULT_START_MINUTES = 60;
 var DEFAULT_SECONDS_PER_SUB = 60;
 var DEFAULT_SECONDS_PER_100_BITS = 12;
 var DEFAULT_SECONDS_PER_TIP = 12;
@@ -99,24 +108,57 @@ function record_tip(ctx) {
     return { tips: tipsUnits(board) };
 }
 
+
 /** stream.online / stream.offline, with parameters.live. */
 function set_live(ctx) {
     var params = eventParams(ctx);
     var live = params.live === true || params.live === "true";
-    if (toggle(ctx, "pauseWhenOffline", true)) {
-        if (live) {
-            // Only undo a pause the stream ending caused: a timer a moderator
-            // paused stays paused until they resume it.
-            updateTimer(ctx, function (t, now) {
-                return t.status === "paused" && t.pausedBy === "offline" ? resumed(t, now) : null;
-            });
-        } else {
-            updateTimer(ctx, function (t, now) {
-                return t.status === "running" ? paused(t, now, "offline") : null;
-            });
+    var timer = linkedTimer(ctx);
+    if (!timer || !toggle(ctx, "pauseWhenOffline", true)) {
+        return { live: live };
+    }
+    var sub = readSubathon(ctx).state;
+    if (!sub.active) {
+        return { live: live };
+    }
+    if (live) {
+        // Only undo a pause the stream ending caused: a timer a moderator
+        // paused stays paused until they resume it.
+        if (sub.pausedBy === "offline") {
+            resumeTimer(ctx, timer);
         }
+    } else if (sub.pausedBy === "" && runTimer(ctx, timer, "get").running) {
+        pauseTimer(ctx, timer, "offline");
     }
     return { live: live };
+}
+
+/**
+ * timer.started / timer.paused / timer.ended, for any timer. Follows the
+ * subathon timer's changes however they were made, so a start or pause from
+ * the dashboard or a workflow counts the same as one from chat.
+ */
+function sync_timer(ctx) {
+    var data = eventData(ctx);
+    var timer = linkedTimer(ctx);
+    if (!timer || data.target !== timer) {
+        return { followed: false };
+    }
+    var type = str(ctx.event && ctx.event.type);
+    updateSubathon(ctx, function (sub) {
+        if (type === "timer.started") {
+            return { active: true, ended: false, pausedBy: "" };
+        }
+        if (type === "timer.ended") {
+            return { active: false, ended: true, pausedBy: "" };
+        }
+        if (type === "timer.paused" && sub.active && sub.pausedBy === "") {
+            // Paused somewhere other than here: leave it for whoever did it.
+            return { active: true, ended: false, pausedBy: "elsewhere" };
+        }
+        return null;
+    });
+    return { followed: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -148,34 +190,41 @@ function handle_chat_message(ctx) {
         return { command: "resetboard" };
     }
 
-    if (sub === "" || !isMod) {
-        say(ctx, timerStatusLine(currentTimer(ctx), Date.now()));
+    var timer = linkedTimer(ctx);
+    if (!timer) {
+        say(ctx, "The Hype Board has no subathon timer picked yet.");
         return { command: "subathon" };
     }
 
-    var t;
+    if (sub === "" || !isMod) {
+        say(ctx, timerStatusLine(ctx, timer));
+        return { command: "subathon" };
+    }
+
     switch (sub) {
         case "start": {
-            var length = words[2] ? parseDuration(words[2]) : startLengthMs(ctx);
-            if (length === null || length <= 0) {
+            var length = words[2] ? parseDuration(words[2]) : null;
+            if (words[2] && (length === null || length <= 0)) {
                 say(ctx, "Try !subathon start 4h, 90m or 1h30m.");
                 return { command: "subathon start" };
             }
-            t = startTimer(ctx, length);
-            say(ctx, "The subathon is on! " + formatDuration(remainingMs(t, Date.now())) + " on the clock.");
+            var started = startSubathon(ctx, timer, length);
+            say(ctx, "The subathon is on! " + formatDuration(started.remaining * 1000) + " on the clock.");
             return { command: "subathon start" };
         }
         case "pause":
-            t = updateTimer(ctx, function (cur, now) {
-                return cur.status === "running" ? paused(cur, now, "mod") : null;
-            });
-            say(ctx, t.status === "paused" ? "Subathon timer paused at " + formatDuration(t.remainingMs) + "." : timerStatusLine(t, Date.now()));
+            if (readSubathon(ctx).state.active && runTimer(ctx, timer, "get").running) {
+                var held = pauseTimer(ctx, timer, "mod");
+                say(ctx, "Subathon timer paused at " + formatDuration(held.remaining * 1000) + ".");
+            } else {
+                say(ctx, timerStatusLine(ctx, timer));
+            }
             return { command: "subathon pause" };
         case "resume":
-            t = updateTimer(ctx, function (cur, now) {
-                return cur.status === "paused" ? resumed(cur, now) : null;
-            });
-            say(ctx, timerStatusLine(t, Date.now()));
+            if (readSubathon(ctx).state.active && runTimer(ctx, timer, "get").remaining > 0) {
+                resumeTimer(ctx, timer);
+            }
+            say(ctx, timerStatusLine(ctx, timer));
             return { command: "subathon resume" };
         case "add":
         case "remove": {
@@ -184,15 +233,16 @@ function handle_chat_message(ctx) {
                 say(ctx, "Try !subathon " + sub + " 10m.");
                 return { command: "subathon " + sub };
             }
-            t = addTime(ctx, sub === "add" ? amount : -amount, true);
-            say(ctx, t.status === "idle"
-                ? "There's no subathon running. Start one with !subathon start."
-                : (sub === "add" ? "Added " : "Took away ") + formatDuration(amount) + ". " + timerStatusLine(t, Date.now()));
+            if (!moderatorAddTime(ctx, timer, sub === "add" ? amount : -amount)) {
+                say(ctx, "There's no subathon running. Start one with !subathon start.");
+                return { command: "subathon " + sub };
+            }
+            say(ctx, (sub === "add" ? "Added " : "Took away ") + formatDuration(amount) + ". " + timerStatusLine(ctx, timer));
             return { command: "subathon " + sub };
         }
         case "end":
         case "stop":
-            writeTimer(ctx, idleTimer());
+            endSubathon(ctx, timer);
             say(ctx, "The subathon timer is done. Thank you all!");
             return { command: "subathon end" };
         default:
@@ -207,33 +257,37 @@ function handle_chat_message(ctx) {
 
 function start_timer(ctx) {
     var minutes = Number(eventParams(ctx).minutes);
-    var length = Number.isFinite(minutes) && minutes > 0 ? minutes * 60000 : startLengthMs(ctx);
-    return timerResult(startTimer(ctx, length));
+    var length = Number.isFinite(minutes) && minutes > 0 ? minutes * 60000 : null;
+    return startSubathon(ctx, requireTimer(ctx), length);
 }
 
 function pause_timer(ctx) {
-    return timerResult(updateTimer(ctx, function (t, now) {
-        return t.status === "running" ? paused(t, now, "mod") : null;
-    }));
+    var timer = requireTimer(ctx);
+    if (!readSubathon(ctx).state.active || !runTimer(ctx, timer, "get").running) {
+        return runTimer(ctx, timer, "get");
+    }
+    return pauseTimer(ctx, timer, "mod");
 }
 
 function resume_timer(ctx) {
-    return timerResult(updateTimer(ctx, function (t, now) {
-        return t.status === "paused" ? resumed(t, now) : null;
-    }));
+    var timer = requireTimer(ctx);
+    if (!readSubathon(ctx).state.active || runTimer(ctx, timer, "get").remaining <= 0) {
+        return runTimer(ctx, timer, "get");
+    }
+    return resumeTimer(ctx, timer);
 }
 
 function add_time(ctx) {
+    var timer = requireTimer(ctx);
     var minutes = Number(eventParams(ctx).minutes);
-    if (!Number.isFinite(minutes) || minutes === 0) {
-        return timerResult(currentTimer(ctx));
+    if (Number.isFinite(minutes) && minutes !== 0) {
+        moderatorAddTime(ctx, timer, minutes * 60000);
     }
-    return timerResult(addTime(ctx, minutes * 60000, true));
+    return runTimer(ctx, timer, "get");
 }
 
 function end_timer(ctx) {
-    writeTimer(ctx, idleTimer());
-    return { remainingMs: 0 };
+    return endSubathon(ctx, requireTimer(ctx));
 }
 
 function reset_totals(ctx) {
@@ -362,141 +416,165 @@ function tipsUnits(board) {
     return (Number(board.tipsCents) || 0) / 100;
 }
 
+
 // ---------------------------------------------------------------------------
 // Subathon timer
 // ---------------------------------------------------------------------------
 
-function idleTimer() {
-    return { status: "idle", endsAt: 0, remainingMs: 0, pausedBy: "", updatedAt: Date.now() };
+// The canonical id the `timer` setting links, or null when none is picked.
+function linkedTimer(ctx) {
+    var id = str(moduleSettings(ctx).timer).trim();
+    return id === "" ? null : id;
 }
 
-function readTimer(ctx) {
-    var raw = ctx.storage.get("subathon");
-    var t = parseJson(raw);
-    if (!t || typeof t !== "object" || !t.status) {
-        return { raw: raw === undefined ? null : raw, timer: idleTimer() };
+function requireTimer(ctx) {
+    var timer = linkedTimer(ctx);
+    if (!timer) {
+        throw new Error("hype board: no subathon timer is picked in the module settings");
     }
-    return { raw: raw, timer: t };
+    return timer;
 }
 
-function currentTimer(ctx) {
-    return readTimer(ctx).timer;
+// Runs one of the timer's own actions: get, start, pause, reset, add, set.
+// Each answers { running, remaining (seconds), endsAt, ... }.
+function runTimer(ctx, timer, verb, params) {
+    return ctx.resources.run(timer, verb, params || {});
 }
 
-function writeTimer(ctx, t) {
-    t.updatedAt = Date.now();
-    ctx.storage.set("subathon", JSON.stringify(t));
-    return t;
+function readSubathon(ctx) {
+    var raw = ctx.storage.get("subathon");
+    var state = parseJson(raw);
+    if (!state || typeof state !== "object") {
+        state = { active: false, ended: false, pausedBy: "" };
+    }
+    state.active = state.active === true;
+    state.ended = state.ended === true;
+    state.pausedBy = str(state.pausedBy);
+    return { raw: raw === undefined ? null : raw, state: state };
 }
 
-// Read-modify-write the timer. `change(timer, now)` returns the new timer, or
-// null to leave it as it is; either way the timer as it now stands comes back.
-function updateTimer(ctx, change) {
+// Read-modify-write the subathon. `change(state)` returns the new state, or
+// null to leave it as it is.
+function updateSubathon(ctx, change) {
     for (var attempt = 0; attempt < CAS_ATTEMPTS; attempt++) {
-        var read = readTimer(ctx);
-        var now = Date.now();
-        var next = change(JSON.parse(JSON.stringify(read.timer)), now);
+        var read = readSubathon(ctx);
+        var next = change(read.state);
         if (!next) {
-            return read.timer;
+            return read.state;
         }
-        next.updatedAt = now;
         if (ctx.storage.compareAndSet("subathon", read.raw, JSON.stringify(next)).swapped) {
             return next;
         }
     }
-    throw new Error("the subathon timer kept changing underneath this update; try again.");
+    throw new Error("the subathon kept changing underneath this update; try again.");
 }
 
-function startTimer(ctx, lengthMs) {
-    var length = Math.min(lengthMs, maxRemainingMs(ctx));
-    return updateTimer(ctx, function (_, now) {
-        return { status: "running", endsAt: now + length, remainingMs: length, pausedBy: "" };
+function setSubathon(ctx, state) {
+    updateSubathon(ctx, function () {
+        return state;
     });
 }
 
-// Moves a running or paused timer by `deltaMs`, capped at the most time the
-// timer may hold. A timer that already ran out is over, so support after the
-// end adds nothing; a moderator can still `add` to bring it back.
-function addTime(ctx, deltaMs, revive) {
-    var cap = maxRemainingMs(ctx);
-    return updateTimer(ctx, function (t, now) {
-        if (t.status === "idle") {
-            return null;
-        }
-        var left = remainingMs(t, now);
-        if (left <= 0 && !revive) {
-            return null;
-        }
-        var next = Math.max(0, Math.min(cap, left + deltaMs));
-        if (next === left) {
-            return null;
-        }
-        t.remainingMs = next;
-        if (t.status === "running") {
-            t.endsAt = now + next;
-        }
-        return t;
-    });
+// Starts a subathon from `lengthMs`, or from the timer's own length when
+// null, replacing one already running.
+function startSubathon(ctx, timer, lengthMs) {
+    // Recorded first, so the timer.started this causes finds it already on.
+    setSubathon(ctx, { active: true, ended: false, pausedBy: "" });
+    if (lengthMs === null) {
+        runTimer(ctx, timer, "reset");
+    } else {
+        runTimer(ctx, timer, "set", { seconds: Math.round(Math.min(lengthMs, maxSecondsLeft(ctx) * 1000) / 1000) });
+    }
+    return runTimer(ctx, timer, "start");
 }
 
+// Who paused it is recorded before the pause, so the timer.paused this
+// causes does not read as a pause from somewhere else.
+function pauseTimer(ctx, timer, by) {
+    setSubathon(ctx, { active: true, ended: false, pausedBy: by });
+    return runTimer(ctx, timer, "pause");
+}
+
+function resumeTimer(ctx, timer) {
+    setSubathon(ctx, { active: true, ended: false, pausedBy: "" });
+    return runTimer(ctx, timer, "start");
+}
+
+// Stops the timer at zero and ends the subathon, so the board shows it over
+// rather than paused.
+function endSubathon(ctx, timer) {
+    setSubathon(ctx, { active: false, ended: false, pausedBy: "" });
+    runTimer(ctx, timer, "pause");
+    return runTimer(ctx, timer, "set", { seconds: 0 });
+}
+
+// Time a moderator adds or takes away. A subathon that ran out comes back to
+// life when time is added to it; one that never started is left alone.
+// Returns false when there is no subathon to change.
+function moderatorAddTime(ctx, timer, deltaMs) {
+    var sub = readSubathon(ctx).state;
+    if (!sub.active && !sub.ended) {
+        return false;
+    }
+    var now = runTimer(ctx, timer, "get");
+    var seconds = Math.round(deltaMs / 1000);
+    if (seconds > 0) {
+        seconds = Math.min(seconds, Math.max(0, maxSecondsLeft(ctx) - now.remaining));
+    } else {
+        seconds = Math.max(seconds, -now.remaining);
+    }
+    if (seconds !== 0) {
+        runTimer(ctx, timer, "add", { seconds: seconds });
+    }
+    if (!sub.active && deltaMs > 0) {
+        resumeTimer(ctx, timer);
+    }
+    return true;
+}
+
+// Time support earns. Added only while a subathon is on and the timer still
+// has time: once it runs out the subathon is over, and support after the end
+// adds nothing. A paused subathon still collects time.
 function addEarnedTime(ctx, seconds) {
     if (!(seconds > 0)) {
         return;
     }
-    addTime(ctx, Math.round(seconds * 1000), false);
-}
-
-function paused(t, now, by) {
-    t.remainingMs = remainingMs(t, now);
-    t.status = "paused";
-    t.pausedBy = by;
-    return t;
-}
-
-function resumed(t, now) {
-    t.status = "running";
-    t.endsAt = now + t.remainingMs;
-    t.pausedBy = "";
-    return t;
-}
-
-function remainingMs(t, now) {
-    if (t.status === "running") {
-        return Math.max(0, Number(t.endsAt) - now);
+    var timer = linkedTimer(ctx);
+    if (!timer || !readSubathon(ctx).state.active) {
+        return;
     }
-    if (t.status === "paused") {
-        return Math.max(0, Number(t.remainingMs) || 0);
+    var now = runTimer(ctx, timer, "get");
+    if (now.remaining <= 0) {
+        return;
     }
-    return 0;
+    var add = Math.min(Math.round(seconds), Math.max(0, maxSecondsLeft(ctx) - now.remaining));
+    if (add > 0) {
+        runTimer(ctx, timer, "add", { seconds: add });
+    }
 }
 
-function timerStatusLine(t, now) {
-    if (t.status === "idle") {
+function timerStatusLine(ctx, timer) {
+    var sub = readSubathon(ctx).state;
+    if (!sub.active && !sub.ended) {
         return "There's no subathon running right now.";
     }
-    var left = remainingMs(t, now);
-    if (left <= 0) {
+    var now = runTimer(ctx, timer, "get");
+    if (now.remaining <= 0) {
         return "The subathon timer has run out!";
     }
-    return formatDuration(left) + " left on the subathon timer" + (t.status === "paused" ? " (paused)." : ".");
+    return formatDuration(now.remaining * 1000) + " left on the subathon timer" + (now.running ? "." : " (paused).");
 }
 
-function timerResult(t) {
-    return { remainingMs: remainingMs(t, Date.now()), status: t.status };
-}
-
-function startLengthMs(ctx) {
-    return setting(ctx, "timerStartMinutes", DEFAULT_START_MINUTES) * 60000;
-}
-
-function maxRemainingMs(ctx) {
+// The most time the timer may hold, in seconds; unlimited when the setting is 0.
+function maxSecondsLeft(ctx) {
     var hours = setting(ctx, "timerMaxHours", 0);
-    return hours > 0 ? hours * 3600000 : Number.MAX_SAFE_INTEGER;
+    return hours > 0 ? hours * 3600 : Number.MAX_SAFE_INTEGER;
 }
 
 function tierMultiplier(tier) {
     return TIER_MULTIPLIER[str(tier)] || 1;
 }
+
 
 // "4h", "90m", "1h30m", "45s", or a bare number of minutes.
 function parseDuration(text) {
@@ -528,6 +606,7 @@ function formatDuration(ms) {
 function pad(n) {
     return n < 10 ? "0" + n : String(n);
 }
+
 
 // ---------------------------------------------------------------------------
 // Plumbing
