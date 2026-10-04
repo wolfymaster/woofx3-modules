@@ -46,6 +46,9 @@
   var slidesEl = document.getElementById("slides");
   var current = -1;
   var timer = null;
+  // Bumped to abandon the slide on screen: its fade and hold timers check it
+  // before touching anything.
+  var generation = 0;
 
   applySettings();
 
@@ -62,6 +65,22 @@
 
   schedule(0);
 
+  // Redrawn as the streamer edits it in the scene editor, rather than
+  // reloaded: the list on screen is rebuilt at once with the new settings.
+  // A host without live settings reloads the widget instead.
+  if (host.onSettings) {
+    host.onSettings(function (next) {
+      settings = next || {};
+      applySettings();
+      generation++;
+      if (current >= 0) {
+        current--;
+      }
+      slidesEl.replaceChildren();
+      schedule(0);
+    });
+  }
+
   // -------------------------------------------------------------------------
   // Setup
   // -------------------------------------------------------------------------
@@ -69,12 +88,8 @@
   function applySettings() {
     var root = document.documentElement.style;
     root.setProperty("--fade-ms", FADE_MS + "ms");
-    if (text(settings.accent)) {
-      root.setProperty("--accent", text(settings.accent));
-    }
-    if (text(settings.textColor)) {
-      root.setProperty("--text", text(settings.textColor));
-    }
+    setOrClear(root, "--accent", text(settings.accent));
+    setOrClear(root, "--text", text(settings.textColor));
     document.body.classList.toggle("panel", toggle(settings.showPanel, true));
 
     var headline = document.getElementById("headline");
@@ -82,9 +97,8 @@
     headline.hidden = headline.textContent === "";
 
     var scale = Number(settings.scale);
-    if (Number.isFinite(scale) && scale > 0 && scale !== 100) {
-      document.getElementById("stage").style.zoom = String(scale / 100);
-    }
+    document.getElementById("stage").style.zoom =
+      Number.isFinite(scale) && scale > 0 && scale !== 100 ? String(scale / 100) : "";
   }
 
   // -------------------------------------------------------------------------
@@ -116,6 +130,7 @@
   }
 
   function play(section) {
+    var playing = generation;
     var slide = buildSlide(section);
     slidesEl.replaceChildren(slide);
 
@@ -148,8 +163,14 @@
     }
 
     setTimeout(function () {
+      if (playing !== generation) {
+        return;
+      }
       slide.classList.add("out");
       setTimeout(function () {
+        if (playing !== generation) {
+          return;
+        }
         if (slide.parentNode) {
           slide.parentNode.removeChild(slide);
         }
@@ -267,6 +288,15 @@
 
   function count(n) {
     return Math.round(n).toLocaleString("en-US");
+  }
+
+  // An emptied colour falls back to the stylesheet's.
+  function setOrClear(style, name, value) {
+    if (value) {
+      style.setProperty(name, value);
+    } else {
+      style.removeProperty(name);
+    }
   }
 
   // Toggles may arrive as booleans or as the strings "true"/"false".
