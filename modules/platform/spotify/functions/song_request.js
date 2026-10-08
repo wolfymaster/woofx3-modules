@@ -84,10 +84,9 @@ function song_request(ctx) {
     }
 
     // Add to Spotify playback queue.
+    // Without a device_id, Spotify queues on the device that is playing now.
     var params = (ctx.event && ctx.event.parameters) || {};
-    var deviceId = (params.deviceId != null && params.deviceId !== "")
-        ? params.deviceId
-        : ctx.env.get("SPOTIFY_DEVICE_ID");
+    var deviceId = (params.deviceId != null && params.deviceId !== "") ? params.deviceId : null;
     var queueUrl = "https://api.spotify.com/v1/me/player/queue?uri=" + encodeURIComponent(song.uri);
     if (deviceId) { queueUrl += "&device_id=" + encodeURIComponent(deviceId); }
 
