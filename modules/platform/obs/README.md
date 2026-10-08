@@ -13,6 +13,9 @@ your chat.
   appear or disappear.
 - **Mute or unmute audio.** Turn your microphone, game sound or music on and
   off.
+- **Show a web page.** Put any website on screen, like a friend's channel or
+  your latest video. If the browser source isn't there yet, it's added for
+  you.
 
 When you set these up, just pick your scenes, sources and audio from a list.
 No typing names by hand!
@@ -24,6 +27,7 @@ No typing names by hand!
 - When an ad break starts, switch to your break scene and mute your mic. When
   it ends, switch back.
 - When you go live, start on your "Starting Soon" scene.
+- When a giveaway ends, show the winner's channel on screen.
 
 ## Getting started
 
