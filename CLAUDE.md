@@ -239,6 +239,7 @@ cards stay distinguishable — pick one not already taken:
 | `woofx3_dadjoke` | speech bubble with a mustache inside | `#ffc82e` → `#9a5200` | `#4a2a0e` |
 | `woofx3_hype_board` | trophy with a star on the cup | `#3cd8e0` → `#0b4f6c` | `#ff5fa2` |
 | `woofx3_stream_credits` | star over three centred lines of names | `#ff8a5c` → `#8c2410` | `#ffe14d` |
+| `woofx3_spam_battle` | two speech bubbles facing off with a lightning bolt between | `#b6f03c` → `#2f5e06` | `#ff3d81` |
 
 Before uploading, check a contact sheet: each banner full size, its card crop,
 and the icon at 256px and 64px. The glyph must still read at 64px.
