@@ -20,66 +20,25 @@ function song_request(ctx) {
         return ctx.response(false, "Usage: !sr <song name or Spotify URL>");
     }
 
-    // Auth: prefer the cached authToken (set by the Authorize Spotify button
-    // or a prior reauth in this same module) so most invocations make zero
-    // token-exchange calls. `clientId`/`authToken`/`refreshToken` come
-    // exclusively from that OAuth-with-PKCE flow — refreshing needs only
-    // clientId + refreshToken, never a client secret.
-    var accessToken = ctx.module.settings.authToken;
-    var reauthed = false;
-
-    function reauth() {
-        var refreshToken = ctx.module.settings.refreshToken;
-        var clientId = ctx.module.settings.clientId;
-        if (!refreshToken || !clientId) {
-            return null;
-        }
-        var tokenResp = ctx.http.request(
-            "https://accounts.spotify.com/api/token",
-            "POST",
-            {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken) +
-                    "&client_id=" + encodeURIComponent(clientId)
-            }
-        );
-        if (!tokenResp || tokenResp.status !== 200 || !tokenResp.body || !tokenResp.body.access_token) {
-            return null;
-        }
-        ctx.module.setSetting("authToken", tokenResp.body.access_token);
-        if (tokenResp.body.refresh_token) {
-            ctx.module.setSetting("refreshToken", tokenResp.body.refresh_token);
-        }
-        return tokenResp.body.access_token;
+    if (!ctx.oauth) {
+        return ctx.response(false, "Failed to Authenticate to Spotify");
     }
 
-    if (!accessToken) {
-        accessToken = reauth();
-        reauthed = true;
-        if (!accessToken) {
-            return ctx.response(false, "Failed to Authenticate to Spotify");
-        }
-    }
-
-    // Wraps ctx.http.request with a Bearer header and a single automatic
-    // reauth-and-retry if the call comes back 401. Centralized here so every
-    // Spotify API call below (track lookup, search, queue) gets the same
-    // cache-then-reauth-once behavior without duplicating it per call site.
-    function authedRequest(url, method, opts) {
+    // The engine attaches the streamer's token and refreshes it, and throws
+    // until Spotify is connected from the module's settings; a null response
+    // stands for that, so every call site reports it the same way.
+    function spotifyRequest(url, method, opts) {
         opts = opts || {};
-        opts.headers = opts.headers || {};
-        opts.headers["Authorization"] = "Bearer " + accessToken;
-        var resp = ctx.http.request(url, method, opts);
-        if (resp && resp.status === 401 && !reauthed) {
-            reauthed = true;
-            var newToken = reauth();
-            if (newToken) {
-                accessToken = newToken;
-                opts.headers["Authorization"] = "Bearer " + accessToken;
-                resp = ctx.http.request(url, method, opts);
-            }
+        try {
+            return ctx.oauth.request({
+                integration: "spotify",
+                url: url,
+                method: method,
+                query: opts.query
+            });
+        } catch (e) {
+            return null;
         }
-        return resp;
     }
 
     // Determine if query is a Spotify track URL or a search term.
@@ -88,8 +47,8 @@ function song_request(ctx) {
 
     if (urlMatch) {
         var trackId = urlMatch[1];
-        var trackResp = authedRequest("https://api.spotify.com/v1/tracks/" + trackId, "GET", {});
-        if (trackResp && trackResp.status === 401) {
+        var trackResp = spotifyRequest("https://api.spotify.com/v1/tracks/" + trackId, "GET", {});
+        if (!trackResp || trackResp.status === 401) {
             return ctx.response(false, "Failed to Authenticate to Spotify");
         }
         if (!trackResp || trackResp.status !== 200 || !trackResp.body) {
@@ -101,12 +60,12 @@ function song_request(ctx) {
             uri: trackResp.body.uri
         };
     } else {
-        var searchResp = authedRequest(
+        var searchResp = spotifyRequest(
             "https://api.spotify.com/v1/search",
             "GET",
             { query: { q: query, type: "track", limit: "1" } }
         );
-        if (searchResp && searchResp.status === 401) {
+        if (!searchResp || searchResp.status === 401) {
             return ctx.response(false, "Failed to Authenticate to Spotify");
         }
         var tracks = searchResp && searchResp.body && searchResp.body.tracks && searchResp.body.tracks.items;
@@ -129,8 +88,8 @@ function song_request(ctx) {
     var queueUrl = "https://api.spotify.com/v1/me/player/queue?uri=" + encodeURIComponent(song.uri);
     if (deviceId) { queueUrl += "&device_id=" + encodeURIComponent(deviceId); }
 
-    var queueResp = authedRequest(queueUrl, "POST", {});
-    if (queueResp && queueResp.status === 401) {
+    var queueResp = spotifyRequest(queueUrl, "POST", {});
+    if (!queueResp || queueResp.status === 401) {
         return ctx.response(false, "Failed to Authenticate to Spotify");
     }
 

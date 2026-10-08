@@ -2,64 +2,20 @@
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function poll_current_track(ctx) {
-    // Auth: prefer the cached authToken so most ticks make zero token-exchange
-    // calls. clientId/authToken/refreshToken come exclusively from the
-    // Authorize Spotify button's OAuth-with-PKCE flow — refreshing needs only
-    // clientId + refreshToken, never a client secret.
-    var accessToken = ctx.module.settings.authToken;
-    var reauthed = false;
-
-    function reauth() {
-        var refreshToken = ctx.module.settings.refreshToken;
-        var clientId = ctx.module.settings.clientId;
-        if (!refreshToken || !clientId) {
-            return null;
-        }
-        var tokenResp = ctx.http.request(
-            "https://accounts.spotify.com/api/token",
-            "POST",
-            {
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(refreshToken) +
-                    "&client_id=" + encodeURIComponent(clientId)
-            }
-        );
-        if (!tokenResp || tokenResp.status !== 200 || !tokenResp.body || !tokenResp.body.access_token) {
-            return null;
-        }
-        ctx.module.setSetting("authToken", tokenResp.body.access_token);
-        if (tokenResp.body.refresh_token) {
-            ctx.module.setSetting("refreshToken", tokenResp.body.refresh_token);
-        }
-        return tokenResp.body.access_token;
+    if (!ctx.oauth) {
+        return { error: "this engine cannot connect Spotify" };
     }
 
-    if (!accessToken) {
-        accessToken = reauth();
-        reauthed = true;
-        if (!accessToken) {
-            return { error: "Failed to Authenticate to Spotify" };
-        }
-    }
-
-    var playerResp = ctx.http.request(
-        "https://api.spotify.com/v1/me/player/currently-playing",
-        "GET",
-        { headers: { "Authorization": "Bearer " + accessToken } }
-    );
-
-    if (playerResp && playerResp.status === 401 && !reauthed) {
-        reauthed = true;
-        var newToken = reauth();
-        if (!newToken) {
-            return { error: "Failed to Authenticate to Spotify" };
-        }
-        accessToken = newToken;
-        playerResp = ctx.http.request(
-            "https://api.spotify.com/v1/me/player/currently-playing",
-            "GET",
-            { headers: { "Authorization": "Bearer " + accessToken } }
-        );
+    var playerResp;
+    try {
+        // The engine attaches the streamer's token and refreshes it; it throws
+        // until Spotify is connected from the module's settings.
+        playerResp = ctx.oauth.request({
+            integration: "spotify",
+            url: "https://api.spotify.com/v1/me/player/currently-playing"
+        });
+    } catch (e) {
+        return { error: "Failed to Authenticate to Spotify" };
     }
     if (playerResp && playerResp.status === 401) {
         return { error: "Failed to Authenticate to Spotify" };
