@@ -2,9 +2,9 @@
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function get_devices(ctx) {
-    // This feeds a dropdown, not a chat response, so any failure (not
-    // connected yet, Spotify unreachable) falls back to the single
-    // "Current Device" option rather than reporting an error.
+    // This feeds a dropdown, so any failure (not connected yet, Spotify
+    // unreachable) falls back to the single "Current Device" option; the
+    // engine's reason goes to the module's log.
     var fallback = [{ value: "", label: "Current Device" }];
     if (!ctx.oauth) {
         return fallback;
@@ -17,6 +17,7 @@ function get_devices(ctx) {
             url: "https://api.spotify.com/v1/me/player/devices"
         });
     } catch (e) {
+        ctx.log.warn({ label: "spotify request failed", value: String(e && e.message ? e.message : e) });
         return fallback;
     }
 
