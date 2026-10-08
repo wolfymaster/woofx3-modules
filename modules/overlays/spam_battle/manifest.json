@@ -1,0 +1,219 @@
+{
+  "id": "woofx3_spam_battle",
+  "name": "Spam Battle",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "overlay",
+  "description": "A timed chat battle: chat spams the name of their favourite streamer, the overlay races the top names against each other with their share of the vote, and when the timer runs out it crowns the winner and loads their Twitch channel in a browser source on the live OBS scene.",
+  "taxonomy": [
+    "overlay.battle"
+  ],
+  "permissions": [
+    "obs.control"
+  ],
+  "settings": [
+    {
+      "id": "timer",
+      "label": "Battle timer",
+      "description": "The timer that runs each battle. One is made for you; pick another to use a timer you already have. How long a battle lasts when you start it without saying how long is set on the timer itself.",
+      "type": "resource_ref",
+      "resourceKind": "timer",
+      "create": {
+        "instanceId": "spam_battle",
+        "displayName": "Spam Battle",
+        "settings": { "duration": 120, "lifetime": "forever" }
+      }
+    },
+    {
+      "id": "callout",
+      "label": "Call to chat",
+      "description": "Said in chat and shown on the overlay when a battle starts.",
+      "type": "text",
+      "defaultValue": "Spam your favorite streamer in chat!"
+    },
+    {
+      "id": "prize",
+      "label": "Prize",
+      "description": "Said in chat and shown on the overlay. Leave empty for none.",
+      "type": "text",
+      "defaultValue": "5 subs to the winner!"
+    },
+    {
+      "id": "streamersOnly",
+      "label": "Only count partners and affiliates",
+      "description": "On: a name counts only if it is a Twitch partner or affiliate, so everyday chat words can't sneak onto the board. Off: any Twitch channel counts.",
+      "type": "toggle",
+      "defaultValue": "true"
+    },
+    {
+      "id": "ignoredNames",
+      "label": "Names that can't be voted for",
+      "description": "Channels to leave off the board, like your own channel or your bots. Separate names with commas. Messages from these accounts are ignored too.",
+      "type": "text",
+      "defaultValue": "nightbot, streamelements, streamlabs, moobot, fossabot, sery_bot, wizebot, soundalerts"
+    },
+    {
+      "id": "showInObs",
+      "label": "Show the winner's channel in OBS",
+      "description": "After the winner is crowned, load their Twitch channel in a browser source on your live scene. Needs the OBS module.",
+      "type": "toggle",
+      "defaultValue": "true"
+    },
+    {
+      "id": "obsSourceName",
+      "label": "Browser source name",
+      "description": "The browser source to use. It's added to your live scene the first time, then reused.",
+      "type": "text",
+      "defaultValue": "Spam Battle Winner"
+    },
+    {
+      "id": "obsDelaySeconds",
+      "label": "Seconds to celebrate before OBS",
+      "description": "How long the winner celebration plays before their channel loads.",
+      "type": "number",
+      "defaultValue": "8"
+    }
+  ],
+  "functions": [
+    { "id": "handle_chat_message", "name": "Handle chat message", "runtime": "js", "path": "functions/battle.js", "entryPoint": "handle_chat_message" },
+    { "id": "start_battle", "name": "Start battle", "runtime": "js", "path": "functions/battle.js", "entryPoint": "start_battle" },
+    { "id": "end_battle", "name": "End battle", "runtime": "js", "path": "functions/battle.js", "entryPoint": "end_battle" },
+    { "id": "cancel_battle", "name": "Cancel battle", "runtime": "js", "path": "functions/battle.js", "entryPoint": "cancel_battle" },
+    { "id": "sync_timer", "name": "Follow the battle timer", "runtime": "js", "path": "functions/battle.js", "entryPoint": "sync_timer" },
+    { "id": "show_winner_in_obs", "name": "Show winner in OBS", "runtime": "js", "path": "functions/battle.js", "entryPoint": "show_winner_in_obs" }
+  ],
+  "actions": [
+    {
+      "id": "handle_chat",
+      "name": "Count Spam Battle votes",
+      "description": "Counts the streamer a chat message names while a battle is on, and lets moderators run battles with !spambattle. The module's own workflow runs this on every chat message.",
+      "type": "function",
+      "function": "handle_chat_message",
+      "returns": {
+        "fields": [
+          { "path": "command", "type": "string" },
+          { "path": "counted", "type": "string", "description": "The channel this message voted for, or empty." }
+        ]
+      },
+      "taxonomy": [ "overlay.battle" ]
+    },
+    {
+      "id": "start_battle",
+      "name": "Start a Spam Battle",
+      "description": "Starts a new battle, replacing one already running, and tells chat what to do.",
+      "type": "function",
+      "function": "start_battle",
+      "schema": [
+        { "id": "seconds", "label": "Seconds", "type": "number", "min": 5, "description": "Leave empty to use the timer's own length." }
+      ],
+      "returns": { "fields": [ { "path": "remaining", "type": "number", "description": "Seconds on the clock." } ] },
+      "taxonomy": [ "overlay.battle" ]
+    },
+    {
+      "id": "end_battle",
+      "name": "End the Spam Battle now",
+      "description": "Stops the clock and crowns whoever is ahead.",
+      "type": "function",
+      "function": "end_battle",
+      "returns": { "fields": [ { "path": "winnerLogin", "type": "string", "description": "Empty when nobody got a vote." } ] },
+      "taxonomy": [ "overlay.battle" ]
+    },
+    {
+      "id": "cancel_battle",
+      "name": "Cancel the Spam Battle",
+      "description": "Stops the battle without a winner and clears it from the overlay.",
+      "type": "function",
+      "function": "cancel_battle",
+      "returns": { "fields": [ { "path": "ok", "type": "boolean" } ] },
+      "taxonomy": [ "overlay.battle" ]
+    },
+    {
+      "id": "show_winner_in_obs",
+      "name": "Show the Spam Battle winner in OBS",
+      "description": "Loads the last winner's Twitch channel in the browser source named in the settings, on the live scene. Runs by itself after a battle when the setting is on.",
+      "type": "function",
+      "function": "show_winner_in_obs",
+      "returns": { "fields": [ { "path": "url", "type": "string", "description": "The page loaded, or empty when there is no winner." } ] },
+      "taxonomy": [ "overlay.battle" ]
+    },
+    {
+      "id": "sync_timer",
+      "name": "Follow the Spam Battle timer",
+      "description": "Starts a battle when its timer is started from anywhere, and crowns the winner when it runs out. The module's own workflows run this on every timer change.",
+      "type": "function",
+      "function": "sync_timer",
+      "returns": { "fields": [ { "path": "followed", "type": "boolean", "description": "Whether the change was to the battle timer." } ] },
+      "taxonomy": [ "overlay.battle" ]
+    }
+  ],
+  "triggers": [
+    {
+      "id": "battle_started",
+      "name": "Spam Battle started",
+      "description": "Fires when a Spam Battle opens for votes.",
+      "type": "eventbus",
+      "event": "spam_battle.started",
+      "sentence": "a Spam Battle starts",
+      "taxonomy": [ "overlay.battle" ],
+      "emits": {
+        "fields": [
+          { "path": "seconds", "type": "number", "description": "How long the battle runs.", "example": 120 },
+          { "path": "prize", "type": "string", "description": "Empty when none is set." }
+        ]
+      }
+    },
+    {
+      "id": "battle_ended",
+      "name": "Spam Battle ended",
+      "description": "Fires when a Spam Battle's time is up, or a moderator ends it, with the winner.",
+      "type": "eventbus",
+      "event": "spam_battle.ended",
+      "sentence": "a Spam Battle ends",
+      "taxonomy": [ "overlay.battle" ],
+      "emits": {
+        "fields": [
+          { "path": "hasWinner", "type": "boolean", "description": "False when nobody got a vote." },
+          { "path": "winnerLogin", "type": "string", "description": "The winning channel's Twitch login.", "example": "wolfymaster" },
+          { "path": "winnerName", "type": "string", "description": "The winning channel's display name.", "example": "WolfyMaster" },
+          { "path": "winnerUrl", "type": "string", "description": "The winning channel's Twitch page.", "example": "https://www.twitch.tv/wolfymaster" },
+          { "path": "votes", "type": "number", "description": "Votes the winner got." },
+          { "path": "percent", "type": "number", "description": "The winner's share of all votes, 0 to 100." },
+          { "path": "totalVotes", "type": "number" },
+          { "path": "prize", "type": "string", "description": "Empty when none is set." }
+        ]
+      }
+    }
+  ],
+  "deadlines": [
+    {
+      "id": "show_winner",
+      "function": "show_winner_in_obs",
+      "maxPending": 1,
+      "description": "Loads the winner's channel in OBS once the celebration has played."
+    }
+  ],
+  "workflows": [
+    { "id": "count-votes", "name": "Spam Battle: count votes", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] },
+    { "id": "timer-started", "name": "Spam Battle: timer started", "trigger": "timer.started", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
+    { "id": "timer-ended", "name": "Spam Battle: time's up", "trigger": "timer.ended", "steps": [ { "id": "follow", "action": "sync_timer" } ] }
+  ],
+  "widgets": [
+    {
+      "id": "battle",
+      "name": "Spam Battle",
+      "description": "The top names racing head to head with their share of the vote and the clock, then a big winner reveal. Hidden while no battle is on.",
+      "entry": "widgets/battle/index.html",
+      "assets": "widgets/battle",
+      "surfaces": [ "scene" ],
+      "taxonomy": [ "overlay.battle" ],
+      "settingsSchema": [
+        { "id": "title", "label": "Title", "type": "text", "defaultValue": "Spam Battle" },
+        { "id": "contenders", "label": "Names on the board", "type": "range", "min": 2, "max": 6, "defaultValue": 4 },
+        { "id": "winnerSeconds", "label": "Seconds to show the winner", "type": "number", "min": 0, "defaultValue": 20, "description": "0 keeps the winner up until the next battle." },
+        { "id": "accent", "label": "Accent colour", "type": "color", "defaultValue": "#ff3d81" },
+        { "id": "accentAlt", "label": "Second colour", "type": "color", "defaultValue": "#2de2ff" },
+        { "id": "scale", "label": "Size", "type": "range", "min": 50, "max": 200, "unit": "%", "defaultValue": 100 }
+      ]
+    }
+  ]
+}

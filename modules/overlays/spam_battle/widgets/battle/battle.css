@@ -1,0 +1,725 @@
+/* Spam Battle — arena while a battle is live, winner reveal once it's done,
+   nothing at all while idle. Body classes the script sets:
+     phase-idle | phase-live | phase-done
+     final-seconds   the last 10 seconds of the clock
+     has-winner      the reveal has someone to crown
+     solo            only one name has votes, so there's no head-to-head yet */
+
+@font-face {
+  font-family: "SpamBattle";
+  src: url("LilitaOne-Regular.ttf") format("truetype");
+}
+
+:root {
+  --accent: #ff3d81;
+  --accent-alt: #2de2ff;
+  --gold: #ffd84d;
+  --ink: #ffffff;
+  --panel: rgba(12, 8, 28, 0.86);
+  --row: rgba(255, 255, 255, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  color: var(--ink);
+  font-family: "SpamBattle", "Arial Black", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#stage {
+  position: relative;
+  width: 720px;
+  padding: 24px;
+}
+
+/* -------------------------------------------------------------------------
+   Phases
+   ------------------------------------------------------------------------- */
+
+#arena,
+#reveal {
+  transition: opacity 400ms ease, transform 500ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+body.phase-idle #arena,
+body.phase-idle #reveal,
+body.phase-done #arena,
+body.phase-live #reveal {
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+}
+
+body.phase-done #arena,
+body.phase-idle #arena {
+  position: absolute;
+  inset: 24px 24px auto;
+}
+
+body.phase-live #reveal,
+body.phase-idle #reveal {
+  position: absolute;
+  inset: 24px 24px auto;
+}
+
+body.phase-live #arena {
+  animation: slam-in 600ms cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+@keyframes slam-in {
+  0% { transform: scale(1.6) rotate(-3deg); opacity: 0; }
+  60% { transform: scale(0.96) rotate(1deg); opacity: 1; }
+  100% { transform: none; }
+}
+
+/* -------------------------------------------------------------------------
+   Arena
+   ------------------------------------------------------------------------- */
+
+#arena {
+  position: relative;
+  padding: 20px 22px 16px;
+  border-radius: 22px;
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--accent) 35%, transparent), transparent 60%),
+    radial-gradient(120% 80% at 100% 100%, color-mix(in srgb, var(--accent-alt) 30%, transparent), transparent 60%),
+    var(--panel);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 70%, transparent),
+    0 0 40px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 18px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+/* A sheen that sweeps across the panel, for life when chat is quiet. */
+#arena::before {
+  content: "";
+  position: absolute;
+  inset: -50% auto -50% -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transform: skewX(-20deg);
+  animation: sheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sheen {
+  0%, 55% { left: -60%; }
+  100% { left: 130%; }
+}
+
+.head {
+  position: relative;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+#title {
+  margin: 0;
+  font-size: 46px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--accent), var(--gold), var(--accent-alt), var(--accent));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.45));
+  animation: title-flow 3s linear infinite, title-throb 1.2s ease-in-out infinite;
+}
+
+@keyframes title-flow {
+  to { background-position: 300% 0; }
+}
+
+@keyframes title-throb {
+  50% { transform: scale(1.04) rotate(-1deg); }
+}
+
+.callout {
+  margin: 8px 0 0;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.92);
+  animation: callout-blink 1s steps(2, jump-none) infinite;
+}
+
+@keyframes callout-blink {
+  50% { color: var(--gold); }
+}
+
+.prize {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 20px;
+  color: #1b1030;
+  background: linear-gradient(90deg, var(--gold), #fff3b0, var(--gold));
+  background-size: 200% 100%;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--gold) 60%, transparent);
+  animation: prize-shine 2s linear infinite, prize-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes prize-shine {
+  to { background-position: 200% 0; }
+}
+
+@keyframes prize-bob {
+  50% { transform: translateY(-3px) rotate(-1deg); }
+}
+
+/* Clock */
+
+.clock {
+  position: relative;
+  flex: none;
+  width: 92px;
+  height: 92px;
+}
+
+.clock svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.clock-track {
+  fill: rgba(0, 0, 0, 0.35);
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 8;
+}
+
+.clock-fill {
+  fill: none;
+  stroke: var(--accent-alt);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 100 100;
+  transition: stroke-dashoffset 1s linear, stroke 300ms;
+  filter: drop-shadow(0 0 6px var(--accent-alt));
+}
+
+.clock-value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+}
+
+.clock-value.tick {
+  animation: tick 400ms ease-out;
+}
+
+@keyframes tick {
+  0% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+body.final-seconds .clock-fill {
+  stroke: #ff4141;
+  filter: drop-shadow(0 0 8px #ff4141);
+}
+
+body.final-seconds .clock {
+  animation: shake 300ms ease-in-out infinite;
+}
+
+body.final-seconds #arena {
+  animation: alarm 1s ease-in-out infinite;
+}
+
+@keyframes alarm {
+  50% {
+    box-shadow:
+      0 0 0 4px #ff4141,
+      0 0 60px rgba(255, 65, 65, 0.7),
+      0 18px 40px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes shake {
+  25% { transform: translate(-2px, 1px) rotate(-3deg); }
+  75% { transform: translate(2px, -1px) rotate(3deg); }
+}
+
+/* Versus */
+
+.versus {
+  display: grid;
+  grid-template-columns: 150px 1fr 150px;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 10px;
+}
+
+.fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  text-align: center;
+}
+
+.fighter-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 22px;
+}
+
+.fighter-pct {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.fighter.left .fighter-pct { color: var(--accent); }
+.fighter.right .fighter-pct { color: var(--accent-alt); }
+
+.fighter.hit .avatar {
+  animation: hit 280ms ease-out;
+}
+
+@keyframes hit {
+  0% { transform: scale(1.18) rotate(-6deg); }
+  100% { transform: scale(1); }
+}
+
+.fighter.empty {
+  opacity: 0.35;
+}
+
+.tug {
+  position: relative;
+  height: 64px;
+  display: grid;
+  align-items: center;
+}
+
+.tug-bar {
+  position: relative;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--accent-alt);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent-alt) 60%, transparent), inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.tug-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 18px var(--accent);
+  transition: width 500ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+/* Moving stripes on both sides, so the bar feels like it's straining. */
+.tug-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.18) 0 10px, transparent 10px 20px);
+  animation: stripes 600ms linear infinite;
+}
+
+@keyframes stripes {
+  to { background-position: 28px 0; }
+}
+
+.vs-badge {
+  position: absolute;
+  left: var(--split, 50%);
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 24px;
+  color: #1b1030;
+  background: radial-gradient(circle at 35% 30%, #fff8c8, var(--gold) 60%, #e0a800);
+  box-shadow: 0 0 0 4px #1b1030, 0 0 24px var(--gold);
+  transition: left 500ms cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: vs-pulse 900ms ease-in-out infinite;
+}
+
+@keyframes vs-pulse {
+  50% { transform: scale(1.12) rotate(8deg); }
+}
+
+body.solo .versus .tug {
+  opacity: 0.5;
+}
+
+/* Avatars */
+
+.avatar {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.9), 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+.fighter.left .avatar { box-shadow: 0 0 0 4px var(--accent), 0 0 22px var(--accent); }
+.fighter.right .avatar { box-shadow: 0 0 0 4px var(--accent-alt), 0 0 22px var(--accent-alt); }
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar img:not([src]),
+.avatar img[src=""] {
+  display: none;
+}
+
+.avatar .initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  z-index: -1;
+}
+
+/* Ranks */
+
+.ranks {
+  position: relative;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 40px 1fr 64px;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  margin-top: 8px;
+  padding: 0 12px 0 8px;
+  border-radius: 14px;
+  background: var(--row);
+  overflow: hidden;
+  animation: row-in 450ms cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+@keyframes row-in {
+  from { transform: translateX(-40px) scale(0.9); opacity: 0; }
+}
+
+.row-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--row-color) 70%, transparent), color-mix(in srgb, var(--row-color) 25%, transparent));
+  transition: width 500ms cubic-bezier(0.3, 1.3, 0.5, 1);
+}
+
+.row > *:not(.row-fill) {
+  position: relative;
+}
+
+.row-rank {
+  font-size: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.row:first-child .row-rank {
+  color: var(--gold);
+  text-shadow: 0 0 10px var(--gold);
+}
+
+.row .avatar {
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+
+.row .avatar .initial {
+  font-size: 20px;
+}
+
+.row-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 22px;
+}
+
+.row-pct {
+  font-size: 24px;
+  text-align: right;
+}
+
+.row.hit {
+  animation: row-hit 260ms ease-out;
+}
+
+@keyframes row-hit {
+  0% { transform: scale(1.04); filter: brightness(1.6); }
+  100% { transform: scale(1); filter: none; }
+}
+
+/* A "+1" floating up off a row that just got votes. */
+.pop {
+  position: absolute;
+  right: 80px;
+  top: 6px;
+  font-size: 22px;
+  color: var(--gold);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: pop 900ms ease-out forwards;
+}
+
+@keyframes pop {
+  0% { transform: translateY(8px) scale(0.6); opacity: 0; }
+  20% { transform: translateY(0) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-34px) scale(1); opacity: 0; }
+}
+
+.foot {
+  margin-top: 12px;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+
+.foot b {
+  font-weight: 400;
+  color: var(--gold);
+}
+
+#waiting {
+  animation: callout-blink 1.4s steps(2, jump-none) infinite;
+}
+
+.leader-flash {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  padding: 8px 22px;
+  border-radius: 12px;
+  font-size: 40px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #1b1030;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px #1b1030, 0 0 40px var(--gold);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0) rotate(-8deg);
+  pointer-events: none;
+}
+
+.leader-flash.show {
+  animation: leader 1400ms cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+}
+
+@keyframes leader {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(2.4) rotate(-8deg); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-4deg); }
+  80% { opacity: 1; transform: translate(-50%, -50%) scale(1.05) rotate(-4deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.6) rotate(-4deg); }
+}
+
+/* -------------------------------------------------------------------------
+   Winner reveal
+   ------------------------------------------------------------------------- */
+
+#reveal {
+  position: relative;
+  height: 560px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 28px;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--accent) 55%, #1b1030), #120a24 70%);
+  box-shadow: 0 0 0 4px var(--gold), 0 0 60px color-mix(in srgb, var(--gold) 60%, transparent);
+}
+
+.rays {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 1400px;
+  height: 1400px;
+  margin: -700px 0 0 -700px;
+  background: repeating-conic-gradient(rgba(255, 216, 77, 0.22) 0deg 10deg, transparent 10deg 20deg);
+  -webkit-mask-image: radial-gradient(circle, #000 10%, transparent 55%);
+  mask-image: radial-gradient(circle, #000 10%, transparent 55%);
+  animation: spin 14s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.reveal-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 24px;
+}
+
+body:not(.has-winner) .reveal-card,
+body.has-winner .no-winner {
+  display: none;
+}
+
+.no-winner {
+  position: relative;
+  font-size: 44px;
+}
+
+.crown {
+  width: 110px;
+  margin-bottom: -18px;
+  z-index: 1;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.4)) drop-shadow(0 0 16px var(--gold));
+}
+
+.crown path {
+  fill: var(--gold);
+  stroke: #1b1030;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.avatar.big {
+  width: 220px;
+  height: 220px;
+  box-shadow: 0 0 0 8px var(--gold), 0 0 0 14px #1b1030, 0 0 70px var(--gold);
+}
+
+.avatar.big .initial {
+  font-size: 110px;
+}
+
+.winner-label {
+  margin-top: 18px;
+  padding: 4px 18px;
+  border-radius: 999px;
+  font-size: 24px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #1b1030;
+  background: var(--gold);
+}
+
+/* Padded so the glow isn't clipped by the ellipsis' overflow. */
+.winner-name {
+  max-width: 700px;
+  margin-top: -24px;
+  padding: 30px 30px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 76px;
+  line-height: 1.1;
+  text-shadow: 0 5px 0 rgba(0, 0, 0, 0.45), 0 0 30px var(--accent);
+}
+
+.winner-pct {
+  font-size: 30px;
+  color: var(--accent-alt);
+}
+
+.winner-prize {
+  margin-top: 8px;
+  font-size: 24px;
+  color: var(--gold);
+}
+
+.winner-prize:empty {
+  display: none;
+}
+
+/* The reveal plays in stages each time it opens. */
+body.phase-done .crown { animation: drop 700ms 500ms cubic-bezier(0.2, 1.6, 0.4, 1) both, bob 2s 1.2s ease-in-out infinite; }
+body.phase-done .avatar.big { animation: zoom 700ms 150ms cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+body.phase-done .winner-label { animation: pop-in 400ms 800ms cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+body.phase-done .winner-name { animation: pop-in 500ms 1000ms cubic-bezier(0.2, 1.6, 0.4, 1) both, glow 1.6s 1.5s ease-in-out infinite; }
+body.phase-done .winner-pct { animation: pop-in 400ms 1300ms ease-out both; }
+body.phase-done .winner-prize { animation: pop-in 400ms 1500ms ease-out both; }
+body.phase-done .no-winner { animation: pop-in 500ms ease-out both; }
+
+@keyframes zoom {
+  0% { transform: scale(0) rotate(-200deg); }
+  100% { transform: none; }
+}
+
+@keyframes drop {
+  0% { transform: translateY(-260px) rotate(-20deg); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+@keyframes bob {
+  50% { transform: translateY(-6px) rotate(3deg); }
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+@keyframes glow {
+  50% { text-shadow: 0 5px 0 rgba(0, 0, 0, 0.45), 0 0 50px var(--gold); }
+}
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

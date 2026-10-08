@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spam Battle</title>
+  <link rel="stylesheet" href="battle.css" />
+</head>
+<body class="phase-idle">
+  <main id="stage">
+    <section id="arena">
+      <header class="head">
+        <div class="title-row">
+          <h1 id="title">Spam Battle</h1>
+          <div class="clock" id="clock">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <circle class="clock-track" cx="50" cy="50" r="44" />
+              <circle class="clock-fill" id="clockFill" cx="50" cy="50" r="44" pathLength="100" />
+            </svg>
+            <span class="clock-value" id="clockValue">0:00</span>
+          </div>
+        </div>
+        <p class="callout" id="callout"></p>
+        <p class="prize" id="prize" hidden></p>
+      </header>
+
+      <!-- The top two, head to head: their share of the votes between them. -->
+      <div class="versus" id="versus">
+        <div class="fighter left" id="fighterLeft">
+          <div class="avatar"><img alt="" /><span class="initial"></span></div>
+          <div class="fighter-name"></div>
+          <div class="fighter-pct">0%</div>
+        </div>
+        <div class="tug">
+          <div class="tug-bar"><div class="tug-fill" id="tugFill"></div></div>
+          <div class="vs-badge" id="vsBadge">VS</div>
+        </div>
+        <div class="fighter right" id="fighterRight">
+          <div class="avatar"><img alt="" /><span class="initial"></span></div>
+          <div class="fighter-name"></div>
+          <div class="fighter-pct">0%</div>
+        </div>
+      </div>
+
+      <!-- battle.js keeps one .row per contender on the board in here. -->
+      <ol class="ranks" id="ranks"></ol>
+
+      <footer class="foot">
+        <span id="waiting">Waiting for the first vote…</span>
+        <span id="totalWrap" hidden><b id="total">0</b> votes</span>
+      </footer>
+
+      <div class="leader-flash" id="leaderFlash" aria-hidden="true">New leader!</div>
+    </section>
+
+    <section id="reveal" aria-live="polite">
+      <div class="rays" aria-hidden="true"></div>
+      <div class="reveal-card">
+        <div class="crown" aria-hidden="true">
+          <svg viewBox="0 0 64 40"><path d="M4 36 L8 10 L22 22 L32 4 L42 22 L56 10 L60 36 Z" /></svg>
+        </div>
+        <div class="avatar big" id="winnerAvatar"><img alt="" /><span class="initial"></span></div>
+        <div class="winner-label">Winner</div>
+        <div class="winner-name" id="winnerName"></div>
+        <div class="winner-pct" id="winnerPct"></div>
+        <div class="winner-prize" id="winnerPrize"></div>
+      </div>
+      <div class="no-winner" id="noWinner">Nobody spammed a name!</div>
+    </section>
+
+    <canvas id="confetti" aria-hidden="true"></canvas>
+  </main>
+  <script src="battle.js"></script>
+</body>
+</html>
