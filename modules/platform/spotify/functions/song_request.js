@@ -25,8 +25,10 @@ function song_request(ctx) {
     }
 
     // The engine attaches the streamer's token and refreshes it, and throws
-    // until Spotify is connected from the module's settings; a null response
-    // stands for that, so every call site reports it the same way.
+    // when it cannot (not connected yet, a refresh Spotify refused, a module
+    // update that needs a reconnect). Its reason goes to the module's log for
+    // the streamer, not to chat; a null response then stands for it, so every
+    // call site replies the same way.
     function spotifyRequest(url, method, opts) {
         opts = opts || {};
         try {
@@ -37,6 +39,7 @@ function song_request(ctx) {
                 query: opts.query
             });
         } catch (e) {
+            ctx.log.warn({ label: "spotify request failed", value: String(e && e.message ? e.message : e) });
             return null;
         }
     }

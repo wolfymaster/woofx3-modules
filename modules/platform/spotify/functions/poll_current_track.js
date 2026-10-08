@@ -8,14 +8,16 @@ function poll_current_track(ctx) {
 
     var playerResp;
     try {
-        // The engine attaches the streamer's token and refreshes it; it throws
-        // until Spotify is connected from the module's settings.
+        // The engine attaches the streamer's token and refreshes it, and throws
+        // with its reason when it cannot.
         playerResp = ctx.oauth.request({
             integration: "spotify",
             url: "https://api.spotify.com/v1/me/player/currently-playing"
         });
     } catch (e) {
-        return { error: "Failed to Authenticate to Spotify" };
+        var reason = String(e && e.message ? e.message : e);
+        ctx.log.warn({ label: "spotify request failed", value: reason });
+        return { error: reason };
     }
     if (playerResp && playerResp.status === 401) {
         return { error: "Failed to Authenticate to Spotify" };
