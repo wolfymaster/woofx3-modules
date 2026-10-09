@@ -74,11 +74,27 @@
   });
   var linkedTimer = host.linkedResources ? host.linkedResources.timer : "";
   if (linkedTimer) {
+    // An engine that serves the timer whole, at `resource:`, sends its stored
+    // value and settings, and this works out the time left. An older one
+    // serves its own reading at `state:` instead. The two never mix: the
+    // older reading always carries `durationMs`, which a stored value never
+    // does, and once the timer has arrived whole the older key is ignored.
+    var whole = false;
+    host.storage.subscribe("resource:" + linkedTimer, function (raw) {
+      var instance = parse(raw);
+      if (!instance || typeof instance.readAt !== "number") {
+        return;
+      }
+      whole = true;
+      sync(timerReading(instance.value, instance.settings || {}, instance.readAt));
+    });
     host.storage.subscribe("state:" + linkedTimer, function (raw) {
       var r = parse(raw);
-      reading = r && typeof r.running === "boolean" && typeof r.remainingMs === "number" ? r : null;
-      syncedAt = performance.now();
-      renderTimer();
+      if (whole || !r || typeof r.running !== "boolean" || typeof r.remainingMs !== "number" ||
+          typeof r.durationMs !== "number") {
+        return;
+      }
+      sync(r);
     });
   } else {
     renderTimer();
@@ -367,6 +383,38 @@
 
   function text(value) {
     return typeof value === "string" ? value.trim() : "";
+  }
+
+  function sync(next) {
+    reading = next;
+    syncedAt = performance.now();
+    renderTimer();
+  }
+
+  // A woofx3 timer's `{ running, remainingMs, durationMs }` at `now`, from
+  // what it stores, `{ running: true, endsAt }` or `{ running: false,
+  // remainingMs }`, or from nothing, which is stopped at its full duration.
+  // Reads as the woofx3 module's own timer does.
+  function timerReading(stored, timerSettings, now) {
+    var durationMs = clampMs(numberOr(timerSettings.duration, 300) * 1000);
+    if (stored === null || typeof stored !== "object" || Array.isArray(stored)) {
+      return { running: false, remainingMs: durationMs, durationMs: durationMs };
+    }
+    if (stored.running === true) {
+      return { running: true, remainingMs: clampMs(numberOr(stored.endsAt, 0) - now), durationMs: durationMs };
+    }
+    return { running: false, remainingMs: clampMs(numberOr(stored.remainingMs, 0)), durationMs: durationMs };
+  }
+
+  // Capped at the latest moment a Date can hold, so a corrupt value can't
+  // read as an impossible time.
+  function clampMs(ms) {
+    return Math.min(8.64e15, Math.max(0, Math.round(ms)));
+  }
+
+  function numberOr(value, fallback) {
+    var n = Number(value);
+    return value === null || value === undefined || value === "" || !isFinite(n) ? fallback : n;
   }
 
   function parse(raw) {
