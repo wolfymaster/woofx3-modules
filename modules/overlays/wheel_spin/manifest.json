@@ -2,7 +2,7 @@
   "id": "woofx3_wheel_spin",
   "name": "Wheel Spin",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "overlay",
   "description": "A prize wheel for your scene. Keep as many entries as you like in its settings or add them from workflows, spin it from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
   "taxonomy": [
