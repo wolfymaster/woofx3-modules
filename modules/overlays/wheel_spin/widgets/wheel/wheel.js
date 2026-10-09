@@ -1,11 +1,12 @@
 // Wheel Spin widget.
 //
-// Reads one key from this module's storage, written by the module's functions
-// (functions/wheel.js) as a JSON string:
+// Shows the wheel chosen in the `wheel` setting, whose value the module's
+// functions (functions/wheel.js) keep at `state:<canonicalId>` in this
+// module's storage:
 //
-//   wheel  {"items":[string],
-//           "spin": {"id","labels":[string],"winnerIndex","landAt","turns",
-//                    "durationMs","endsAt","item"} | null}
+//   {"items":[string],
+//    "spin": {"id","labels":[string],"winnerIndex","landAt","turns",
+//             "durationMs","endsAt","item"} | null}
 //
 // The winner is picked by the function; this page only spins to it. A spin is
 // drawn from `spin.labels`, the wheel as it was when the spin started, and the
@@ -86,7 +87,14 @@
     window.addEventListener("resize", fit);
   }
 
-  host.storage.subscribe("wheel", function (raw) {
+  // With no wheel chosen the empty wheel stays up, rather than a blank space
+  // the streamer can't find on the scene.
+  var wheelId = text(settings.wheel);
+  if (wheelId === "") {
+    return;
+  }
+
+  host.storage.subscribe("state:" + wheelId, function (raw) {
     var wheel = parse(raw) || {};
     items = Array.isArray(wheel.items) ? wheel.items.map(text) : [];
     var spin = wheel.spin && typeof wheel.spin === "object" ? wheel.spin : null;

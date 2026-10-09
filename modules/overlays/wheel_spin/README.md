@@ -7,6 +7,9 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 
 ## What it can do
 
+- **Make as many wheels as you want.** Keep a giveaway wheel, a game picker
+  and a dare wheel side by side. Each one has its own entries and its own
+  settings, and each widget shows the wheel you pick for it.
 - **Hold as many entries as you want.** Two choices or two thousand, they all
   fit on the wheel.
 - **Spin with style.** The wheel whips around fast, then slows down with the
@@ -23,7 +26,8 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 ## Getting started
 
 1. Install the Twitch module first, so Wheel Spin can talk in chat.
-2. Add the Wheel Spin widget to a scene.
+2. Add the Wheel Spin widget to a scene, and pick which wheel it shows. If
+   you don't have a wheel yet, make one right there and give it a name.
 3. Set up what fills the wheel. For example, add a viewer's name when they
    redeem a channel point reward.
 4. Set up what spins it, like a button, a stream deck key or a chat command.
@@ -39,13 +43,19 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 - **Spinning the wheel** picks a winner. You can choose how long it spins
   each time, or use your usual length.
 - **When the wheel lands**, you can make more things happen, like a sound, a
-  light show or a shoutout for the winner.
+  light show or a shoutout for the winner. Pick one wheel, or let any wheel
+  set it off.
 
 ## Make it yours
+
+Each wheel has its own settings:
 
 - Choose whether winners stay on the wheel or come off it.
 - Pick how many seconds the wheel spins.
 - Turn the winner message in chat on or off.
+
+Each widget has its own look:
+
 - Add a title above the wheel.
 - Pick your four slice colors and the pointer color.
 - Choose how long the winner stays on screen.
@@ -53,7 +63,9 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 
 ## Good to know
 
-- Your wheel is saved, so it's still full next time you go live.
+- Your wheels are saved, so they're still full next time you go live.
+- Wheels from before this version don't carry over. Make a new wheel and
+  fill it again.
 - Spinning while the wheel is already turning does nothing, so a double press
   can't change the winner.
 - When a wheel has hundreds of entries, the names get too small to read, so
