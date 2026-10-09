@@ -1,0 +1,192 @@
+/* Wheel Spin. --accent is set from the widget settings by wheel.js.
+
+   The wheel itself is drawn on #wheel; the hub, pointer and winner card sit
+   over it. body.idle-hidden fades everything out when the "Only show while
+   spinning" setting is on and nothing is happening. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+
+:root {
+  --accent: #ffffff;
+}
+
+body {
+  color: #ffffff;
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 2vmin;
+  gap: 1.5vmin;
+  transition: opacity 600ms ease, transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.idle-hidden #stage {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+#title {
+  flex: none;
+  margin: 0;
+  font-size: 6vmin;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-shadow: 0 0.4vmin 1.6vmin rgba(0, 0, 0, 0.6);
+}
+
+/* Fills what the title leaves; wheel.js sizes #wheelWrap to the largest
+   square that fits in it. */
+#wheelBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+}
+
+#wheelWrap {
+  position: relative;
+  flex: none;
+}
+
+#wheel {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 1.5vmin 5vmin rgba(0, 0, 0, 0.45);
+}
+
+.hub {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14%;
+  height: 14%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, #ffffff 0%, #e6e8ef 55%, #b9bdca 100%);
+  box-shadow:
+    0 0 0 0.5vmin rgba(0, 0, 0, 0.18),
+    0 0.6vmin 2vmin rgba(0, 0, 0, 0.4);
+}
+
+/* Sits on the right edge pointing in, like the wheel it's inspired by. */
+.pointer {
+  position: absolute;
+  top: 50%;
+  right: -4%;
+  width: 12%;
+  height: auto;
+  transform: translateY(-50%);
+  transform-origin: 85% 50%;
+  fill: var(--accent);
+  stroke: rgba(0, 0, 0, 0.35);
+  stroke-width: 2;
+  filter: drop-shadow(0 0.4vmin 0.8vmin rgba(0, 0, 0, 0.5));
+}
+
+.pointer.tick {
+  animation: pointer-tick 140ms ease-out;
+}
+
+@keyframes pointer-tick {
+  30% {
+    transform: translateY(-50%) rotate(-14deg);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+/* ---- Winner ----------------------------------------------------------- */
+
+#winner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+body.show-winner #winner {
+  opacity: 1;
+}
+
+.winner-card {
+  max-width: 88%;
+  padding: 2.2vmin 4.4vmin 2.8vmin;
+  border-radius: 2.6vmin;
+  background: rgba(12, 14, 22, 0.88);
+  box-shadow:
+    0 0 0 0.5vmin var(--accent),
+    0 2vmin 6vmin rgba(0, 0, 0, 0.55);
+  text-align: center;
+  transform: scale(0.4);
+}
+
+body.show-winner .winner-card {
+  animation: winner-pop 650ms cubic-bezier(0.18, 1.5, 0.4, 1) forwards;
+}
+
+@keyframes winner-pop {
+  from {
+    transform: scale(0.4) rotate(-6deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.winner-label {
+  font-size: 3vmin;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.winner-name {
+  margin-top: 0.6vmin;
+  font-size: 7.5vmin;
+  font-weight: 900;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

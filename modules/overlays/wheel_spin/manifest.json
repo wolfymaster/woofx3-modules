@@ -1,0 +1,154 @@
+{
+  "id": "woofx3_wheel_spin",
+  "name": "Wheel Spin",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "overlay",
+  "description": "A prize wheel for your scene. Add as many entries as you like, spin it from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
+  "taxonomy": [
+    "overlay.wheel"
+  ],
+  "settings": [
+    {
+      "id": "removeWhenPicked",
+      "label": "Take the winner off the wheel",
+      "description": "On: whatever the wheel lands on comes off it, so it can't win twice. Off: it stays on for the next spin.",
+      "type": "toggle",
+      "defaultValue": "false"
+    },
+    {
+      "id": "spinSeconds",
+      "label": "Seconds to spin",
+      "description": "How long the wheel spins before it lands, unless a spin says otherwise.",
+      "type": "number",
+      "defaultValue": "8"
+    },
+    {
+      "id": "announce",
+      "label": "Say the winner in chat",
+      "description": "Your bot tells chat what the wheel landed on.",
+      "type": "toggle",
+      "defaultValue": "true"
+    }
+  ],
+  "functions": [
+    { "id": "add_item", "name": "Add item", "runtime": "js", "path": "functions/wheel.js", "entryPoint": "add_item" },
+    { "id": "remove_item", "name": "Remove item", "runtime": "js", "path": "functions/wheel.js", "entryPoint": "remove_item" },
+    { "id": "clear_wheel", "name": "Clear wheel", "runtime": "js", "path": "functions/wheel.js", "entryPoint": "clear_wheel" },
+    { "id": "spin_wheel", "name": "Spin wheel", "runtime": "js", "path": "functions/wheel.js", "entryPoint": "spin_wheel" },
+    { "id": "land_wheel", "name": "Land wheel", "runtime": "js", "path": "functions/wheel.js", "entryPoint": "land_wheel" }
+  ],
+  "actions": [
+    {
+      "id": "add_item",
+      "name": "Add to the Wheel",
+      "description": "Puts an entry on the wheel. Put each entry on its own line to add several at once. The same entry can go on more than once, for a bigger chance to win.",
+      "type": "function",
+      "function": "add_item",
+      "schema": [
+        { "id": "item", "label": "Entry", "type": "text", "required": true, "placeholder": "${trigger.data.userName}" }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "added", "type": "number", "description": "Entries put on the wheel." },
+          { "path": "count", "type": "number", "description": "Entries on the wheel now." }
+        ]
+      },
+      "taxonomy": [ "overlay.wheel" ]
+    },
+    {
+      "id": "remove_item",
+      "name": "Remove from the Wheel",
+      "description": "Takes an entry off the wheel. Capital letters don't matter.",
+      "type": "function",
+      "function": "remove_item",
+      "schema": [
+        { "id": "item", "label": "Entry", "type": "text", "required": true },
+        { "id": "all", "label": "Remove every copy", "type": "toggle", "defaultValue": false, "description": "Off takes off one copy of an entry that's on the wheel more than once." }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "removed", "type": "number", "description": "Entries taken off; 0 when it wasn't on the wheel." },
+          { "path": "count", "type": "number", "description": "Entries on the wheel now." }
+        ]
+      },
+      "taxonomy": [ "overlay.wheel" ]
+    },
+    {
+      "id": "clear_wheel",
+      "name": "Clear the Wheel",
+      "description": "Takes every entry off the wheel.",
+      "type": "function",
+      "function": "clear_wheel",
+      "returns": { "fields": [ { "path": "removed", "type": "number", "description": "Entries taken off." } ] },
+      "taxonomy": [ "overlay.wheel" ]
+    },
+    {
+      "id": "spin_wheel",
+      "name": "Spin the Wheel",
+      "description": "Spins the wheel and picks a winner. The Wheel landed trigger fires when it stops. Does nothing while the wheel is still spinning or has nothing on it.",
+      "type": "function",
+      "function": "spin_wheel",
+      "schema": [
+        { "id": "seconds", "label": "Seconds", "type": "number", "min": 1, "max": 60, "description": "Leave empty to use the module's setting." }
+      ],
+      "returns": {
+        "fields": [
+          { "path": "spun", "type": "boolean", "description": "False when the wheel was busy or empty." },
+          { "path": "item", "type": "string", "description": "What the wheel will land on. It's picked now, but shown only when the wheel stops." },
+          { "path": "seconds", "type": "number", "description": "How long until it stops." },
+          { "path": "count", "type": "number", "description": "Entries on the wheel after this spin." }
+        ]
+      },
+      "taxonomy": [ "overlay.wheel" ]
+    }
+  ],
+  "triggers": [
+    {
+      "id": "wheel_landed",
+      "name": "Wheel landed",
+      "description": "Fires when the wheel stops spinning, with what it landed on.",
+      "type": "eventbus",
+      "event": "wheel_spin.landed",
+      "sentence": "the wheel lands",
+      "taxonomy": [ "overlay.wheel" ],
+      "emits": {
+        "fields": [
+          { "path": "item", "type": "string", "description": "What the wheel landed on.", "example": "Pizza night" },
+          { "path": "removed", "type": "boolean", "description": "Whether it was taken off the wheel." },
+          { "path": "count", "type": "number", "description": "Entries left on the wheel." }
+        ]
+      }
+    }
+  ],
+  "deadlines": [
+    {
+      "id": "land",
+      "function": "land_wheel",
+      "maxPending": 1,
+      "description": "Announces the winner once the wheel has stopped on screen."
+    }
+  ],
+  "widgets": [
+    {
+      "id": "wheel",
+      "name": "Wheel Spin",
+      "description": "The wheel with every entry on it. It spins when the wheel is spun, then shows the winner big in the middle.",
+      "entry": "widgets/wheel/index.html",
+      "assets": "widgets/wheel",
+      "surfaces": [ "scene" ],
+      "taxonomy": [ "overlay.wheel" ],
+      "settingsSchema": [
+        { "id": "title", "label": "Title", "type": "text", "placeholder": "Spin the wheel!", "description": "Shown above the wheel. Leave empty for none." },
+        { "id": "hideWhenIdle", "label": "Only show while spinning", "type": "toggle", "defaultValue": false, "description": "Hide the wheel until it spins, and again after the winner is shown." },
+        { "id": "winnerSeconds", "label": "Seconds to show the winner", "type": "number", "min": 0, "defaultValue": 8, "description": "0 keeps the winner up until the next spin." },
+        { "id": "color1", "label": "Slice colour 1", "type": "color", "defaultValue": "#3369e8" },
+        { "id": "color2", "label": "Slice colour 2", "type": "color", "defaultValue": "#d50f25" },
+        { "id": "color3", "label": "Slice colour 3", "type": "color", "defaultValue": "#eeb211" },
+        { "id": "color4", "label": "Slice colour 4", "type": "color", "defaultValue": "#009925" },
+        { "id": "accent", "label": "Pointer colour", "type": "color", "defaultValue": "#ffffff" },
+        { "id": "scale", "label": "Size", "type": "range", "min": 50, "max": 200, "unit": "%", "defaultValue": 100 }
+      ]
+    }
+  ]
+}
