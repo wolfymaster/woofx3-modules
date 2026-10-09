@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
