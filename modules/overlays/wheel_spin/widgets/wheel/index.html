@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wheel Spin</title>
+  <link rel="stylesheet" href="wheel.css" />
+</head>
+<body>
+  <main id="stage">
+    <h1 id="title" hidden></h1>
+    <div id="wheelBox">
+      <div id="wheelWrap">
+        <canvas id="wheel" aria-hidden="true"></canvas>
+        <div class="hub" aria-hidden="true"></div>
+        <svg class="pointer" id="pointer" viewBox="0 0 60 48" aria-hidden="true">
+          <path d="M2 24 L56 4 Q60 3 59 8 L59 40 Q60 45 56 44 Z" />
+        </svg>
+        <div id="winner" aria-live="polite">
+          <div class="winner-card">
+            <div class="winner-label">Winner</div>
+            <div class="winner-name" id="winnerName"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas id="confetti" aria-hidden="true"></canvas>
+  </main>
+  <script src="wheel.js"></script>
+</body>
+</html>
