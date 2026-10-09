@@ -2,7 +2,7 @@
   "id": "woofx3_hype_board",
   "name": "Hype Board",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "category": "overlay",
   "description": "An on-stream board for bits, subs and tips: who cheered, gifted and tipped the most, running totals, a goal with milestones, and a subathon timer that grows with every sub, cheer and tip. Ships three themes, and the board's own settings choose which parts show.",
   "taxonomy": [
