@@ -1,15 +1,18 @@
 // Wheel Spin widget.
 //
-// Reads one key from this module's storage, written by the module's functions
+// Reads the entries from the module's `items` list setting, at
+// `setting:items`: rows of {"label"}, sent again whenever the streamer or an
+// action changes them. A row with an empty label is no entry.
+//
+// Reads the spin from the module's storage, written by the module's functions
 // (functions/wheel.js) as a JSON string:
 //
-//   wheel  {"items":[string],
-//           "spin": {"id","labels":[string],"winnerIndex","landAt","turns",
-//                    "durationMs","endsAt","item"} | null}
+//   spin  {"id","labels":[string],"winnerIndex","landAt","turns",
+//          "durationMs","endsAt","item"}
 //
 // The winner is picked by the function; this page only spins to it. A spin is
 // drawn from `spin.labels`, the wheel as it was when the spin started, and the
-// live `items` take over once the winner has been shown, so a winner taken off
+// live entries take over once the winner has been shown, so a winner taken off
 // the wheel disappears only after everyone has seen it land.
 //
 // Geometry: slice i covers wheel angles [i, i+1) * slice, measured clockwise
@@ -86,26 +89,30 @@
     window.addEventListener("resize", fit);
   }
 
-  host.storage.subscribe("wheel", function (raw) {
-    var wheel = parse(raw) || {};
-    items = Array.isArray(wheel.items) ? wheel.items.map(text) : [];
-    var spin = wheel.spin && typeof wheel.spin === "object" ? wheel.spin : null;
-    var first = firstValue;
-    firstValue = false;
-
-    if (spin && text(spin.id) !== "" && text(spin.id) !== seenSpin) {
-      seenSpin = text(spin.id);
-      if (first && Date.now() > Number(spin.endsAt) + STALE_SPIN_MS) {
-        restAfter(spin);
-      } else {
-        startSpin(spin);
-      }
-      return;
-    }
+  host.storage.subscribe("setting:items", function (raw) {
+    var rows = parse(raw);
+    items = (Array.isArray(rows) ? rows : [])
+      .map(function (row) { return row && typeof row === "object" ? text(row.label) : ""; })
+      .filter(function (label) { return label !== ""; });
     if (!holding) {
       setLabels(items);
     }
     updateIdle();
+  });
+
+  host.storage.subscribe("spin", function (raw) {
+    var spin = parse(raw);
+    var first = firstValue;
+    firstValue = false;
+    if (!spin || typeof spin !== "object" || text(spin.id) === "" || text(spin.id) === seenSpin) {
+      return;
+    }
+    seenSpin = text(spin.id);
+    if (first && Date.now() > Number(spin.endsAt) + STALE_SPIN_MS) {
+      restAfter(spin);
+    } else {
+      startSpin(spin);
+    }
   });
 
   // -------------------------------------------------------------------------

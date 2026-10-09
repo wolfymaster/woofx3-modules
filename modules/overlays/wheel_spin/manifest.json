@@ -4,11 +4,20 @@
   "author": "WolfyMaster LLC",
   "version": "0.1.0",
   "category": "overlay",
-  "description": "A prize wheel for your scene. Add as many entries as you like, spin it from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
+  "description": "A prize wheel for your scene. Keep as many entries as you like in its settings or add them from workflows, spin it from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
   "taxonomy": [
     "overlay.wheel"
   ],
   "settings": [
+    {
+      "id": "items",
+      "label": "Entries on the wheel",
+      "description": "Everything on the wheel. Add the same entry twice to give it a better chance. Adding to or removing from the wheel changes this list too.",
+      "type": "list",
+      "itemFields": [
+        { "id": "label", "label": "Entry", "type": "text", "required": true, "placeholder": "Pizza night" }
+      ]
+    },
     {
       "id": "removeWhenPicked",
       "label": "Take the winner off the wheel",

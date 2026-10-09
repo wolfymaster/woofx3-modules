@@ -6,35 +6,42 @@
 // hears the result, and the `wheel_spin.landed` trigger fires, when the
 // `land` deadline comes due at the moment the wheel stops on screen.
 //
-// Storage layout. One key, a JSON *string* this file serialises itself,
-// because compareAndSet compares the stored bytes: handing back the exact
-// string that was read is what makes the comparison reliable.
+// The entries are the module's `items` list setting, so the streamer can add
+// and remove them in the module's settings as well as through the actions
+// here. Each row is {"label"}; a row with an empty label is no entry. The
+// widget reads the same setting, at `setting:items`.
 //
-//   wheel  {"items":[string],
-//           "spin": {"id","phase":"spinning"|"landed","labels":[string],
-//                    "winnerIndex","landAt","turns","durationMs",
-//                    "startedAt","endsAt","item","removed"} | null}
+// Every change to the entries goes through ctx.module.compareAndSetSetting,
+// so an action and the streamer, or two actions, changing the wheel at the
+// same moment can't lose each other's change. `ctx.module.settings` is read
+// once per run and never refreshed, so a retry works from the `current` the
+// failed write answered with, not from the settings again.
 //
-// `spin.labels` is the wheel as it was when the spin started: the widget
-// draws the spin from it, so a winner taken off the wheel stays on screen
-// until it has been shown, and entries added mid-spin don't reshuffle the
-// slices under the pointer. `landAt` is where in the winning slice the
-// pointer stops (0..1), so it doesn't always land dead centre.
+// The spin lives in storage, as a JSON *string* this file serialises itself,
+// because storage's compareAndSet compares the stored bytes:
 //
-// Items and the current spin share a key so that picking a winner, taking
-// it off the wheel and starting the spin are one compare-and-set: two spins
-// at once can't both start, nor both take the same entry.
+//   spin  {"id","phase":"spinning"|"landed","labels":[string],
+//          "winnerIndex","landAt","turns","durationMs",
+//          "startedAt","endsAt","item","removed"}
+//
+// `labels` is the wheel as it was when the spin started: the widget draws the
+// spin from it, so a winner taken off the wheel stays on screen until it has
+// been shown, and entries added mid-spin don't reshuffle the slices under the
+// pointer. `landAt` is where in the winning slice the pointer stops (0..1), so
+// it doesn't always land dead centre.
+//
+// A spin is claimed in storage before its winner comes off the wheel: two
+// spins at once can't both start, and the one that loses has taken nothing.
 //
 // There's no cap on how many entries the wheel holds; only each entry's
 // length is limited, so a pasted paragraph can't become one slice.
-//
-// The wheel is kept across streams, so nothing here is clearOnSessionEnd.
 
 var CAS_ATTEMPTS = 12;
 var MAX_LABEL_LENGTH = 100;
 var DEFAULT_SPIN_SECONDS = 8;
 var MIN_SPIN_SECONDS = 1;
 var MAX_SPIN_SECONDS = 60;
+var ITEMS_SETTING = "items";
 var EVENT_LANDED = "wheel_spin.landed";
 
 // ---------------------------------------------------------------------------
@@ -48,13 +55,12 @@ function add_item(ctx) {
         .map(cleanLabel)
         .filter(function (l) { return l !== ""; });
     if (labels.length === 0) {
-        return { added: 0, count: readWheel(ctx).wheel.items.length };
+        return { added: 0, count: entries(readRows(ctx)).length };
     }
-    var wheel = updateWheel(ctx, function (w) {
-        w.items = w.items.concat(labels);
-        return w;
+    var rows = updateRows(ctx, function (current) {
+        return current.concat(labels.map(function (label) { return { label: label }; }));
     });
-    return { added: labels.length, count: wheel.items.length };
+    return { added: labels.length, count: entries(rows).length };
 }
 
 /** Removes one copy of an entry, or every copy, matching without case. */
@@ -63,32 +69,28 @@ function remove_item(ctx) {
     var target = cleanLabel(params.item).toLowerCase();
     var all = params.all === true || params.all === "true";
     var removed = 0;
-    var wheel = updateWheel(ctx, function (w) {
+    var rows = updateRows(ctx, function (current) {
         removed = 0;
         if (target === "") {
             return null;
         }
-        w.items = w.items.filter(function (label) {
-            if ((all || removed === 0) && label.toLowerCase() === target) {
+        var next = current.filter(function (row) {
+            if ((all || removed === 0) && labelOf(row).toLowerCase() === target) {
                 removed++;
                 return false;
             }
             return true;
         });
-        return removed > 0 ? w : null;
+        return removed > 0 ? next : null;
     });
-    return { removed: removed, count: wheel.items.length };
+    return { removed: removed, count: entries(rows).length };
 }
 
 function clear_wheel(ctx) {
     var removed = 0;
-    updateWheel(ctx, function (w) {
-        removed = w.items.length;
-        if (removed === 0) {
-            return null;
-        }
-        w.items = [];
-        return w;
+    updateRows(ctx, function (current) {
+        removed = entries(current).length;
+        return current.length > 0 ? [] : null;
     });
     return { removed: removed };
 }
@@ -101,48 +103,32 @@ function clear_wheel(ctx) {
 function spin_wheel(ctx) {
     var durationMs = spinSeconds(ctx) * 1000;
     var removeWinner = toggle(ctx, "removeWhenPicked", false);
-    var refusal = "";
+    var labels = entries(readRows(ctx));
     var spin = null;
 
-    var wheel = updateWheel(ctx, function (w) {
-        refusal = "";
-        spin = null;
-        if (w.spin && w.spin.phase === "spinning" && Date.now() < Number(w.spin.endsAt)) {
-            refusal = "busy";
-            return null;
+    for (var attempt = 0; attempt < CAS_ATTEMPTS && !spin; attempt++) {
+        var read = readSpin(ctx);
+        if (read.spin && read.spin.phase === "spinning" && Date.now() < Number(read.spin.endsAt)) {
+            return { spun: false, item: "", seconds: 0, count: labels.length, skipped: "busy" };
         }
-        if (w.items.length === 0) {
-            refusal = "empty";
-            return null;
+        if (labels.length === 0) {
+            return { spun: false, item: "", seconds: 0, count: 0, skipped: "empty" };
         }
-        var now = Date.now();
-        var index = Math.floor(Math.random() * w.items.length);
-        spin = {
-            id: String(now) + Math.floor(Math.random() * 1e6),
-            phase: "spinning",
-            labels: w.items.slice(),
-            winnerIndex: index,
-            landAt: 0.15 + Math.random() * 0.7,
-            // Roughly one turn a second, so a long spin doesn't crawl.
-            turns: Math.max(3, Math.round(durationMs / 1000)) + Math.floor(Math.random() * 3),
-            durationMs: durationMs,
-            startedAt: now,
-            endsAt: now + durationMs,
-            item: w.items[index],
-            removed: removeWinner
-        };
-        if (removeWinner) {
-            w.items.splice(index, 1);
+        var next = newSpin(labels, durationMs, removeWinner);
+        if (ctx.storage.compareAndSet("spin", read.raw, JSON.stringify(next)).swapped) {
+            spin = next;
         }
-        w.spin = spin;
-        return w;
-    });
+    }
+    if (!spin) {
+        throw new Error("the wheel kept changing underneath this spin; try again.");
+    }
 
-    if (refusal) {
-        return { spun: false, item: "", seconds: 0, count: wheel.items.length, skipped: refusal };
+    var count = labels.length;
+    if (removeWinner) {
+        count = entries(takeOff(ctx, spin.item, spin.winnerIndex)).length;
     }
     ctx.schedule.at("land", "spin", spin.endsAt, { spinId: spin.id });
-    return { spun: true, item: spin.item, seconds: durationMs / 1000, count: wheel.items.length };
+    return { spun: true, item: spin.item, seconds: durationMs / 1000, count: count };
 }
 
 // ---------------------------------------------------------------------------
@@ -156,17 +142,18 @@ function spin_wheel(ctx) {
 function land_wheel(ctx) {
     var spinId = str(eventParams(ctx).spinId);
     var landed = null;
-    var wheel = updateWheel(ctx, function (w) {
-        landed = null;
-        if (!w.spin || w.spin.id !== spinId || w.spin.phase !== "spinning") {
-            return null;
+    for (var attempt = 0; attempt < CAS_ATTEMPTS && !landed; attempt++) {
+        var read = readSpin(ctx);
+        if (!read.spin || read.spin.id !== spinId || read.spin.phase !== "spinning") {
+            return { landed: false };
         }
-        w.spin.phase = "landed";
-        landed = w.spin;
-        return w;
-    });
+        read.spin.phase = "landed";
+        if (ctx.storage.compareAndSet("spin", read.raw, JSON.stringify(read.spin)).swapped) {
+            landed = read.spin;
+        }
+    }
     if (!landed) {
-        return { landed: false };
+        throw new Error("the spin kept changing underneath this update; try again.");
     }
 
     // A chat that can't be reached mustn't stop the trigger firing: that's
@@ -180,44 +167,110 @@ function land_wheel(ctx) {
     }
     return ctx.result({ landed: true, item: landed.item }, [{
         type: EVENT_LANDED,
-        data: { item: landed.item, removed: landed.removed === true, count: wheel.items.length }
+        data: { item: landed.item, removed: landed.removed === true, count: entries(readRows(ctx)).length }
     }]);
 }
 
 // ---------------------------------------------------------------------------
-// The wheel
+// The entries (the `items` list setting)
 // ---------------------------------------------------------------------------
 
-function readWheel(ctx) {
-    var raw = ctx.storage.get("wheel");
-    var wheel = parseJson(raw);
-    if (!wheel || typeof wheel !== "object") {
-        wheel = {};
-    }
-    wheel.items = Array.isArray(wheel.items) ? wheel.items.map(str) : [];
-    wheel.spin = wheel.spin && typeof wheel.spin === "object" ? wheel.spin : null;
-    return { raw: raw === undefined ? null : raw, wheel: wheel };
+function readRows(ctx) {
+    return asRows(moduleSettings(ctx)[ITEMS_SETTING]);
 }
 
-// Read-modify-write the wheel. `change(wheel)` returns the new wheel, or null
-// to leave it. Returns the wheel as it stands afterwards. `change` may run
-// more than once, so it resets anything it reports out before deciding.
-function updateWheel(ctx, change) {
+// Read-modify-write the entries. `change(rows)` returns the new rows, or null
+// to leave them, and may run more than once, so it resets anything it reports
+// out before deciding. Returns the rows as they stand afterwards.
+function updateRows(ctx, change) {
+    var current = readRows(ctx);
     for (var attempt = 0; attempt < CAS_ATTEMPTS; attempt++) {
-        var read = readWheel(ctx);
-        var next = change(read.wheel);
+        var next = change(current.slice());
         if (!next) {
-            return read.wheel;
+            return current;
         }
-        if (ctx.storage.compareAndSet("wheel", read.raw, JSON.stringify(next)).swapped) {
+        var outcome = ctx.module.compareAndSetSetting(ITEMS_SETTING, current, next);
+        if (outcome.swapped) {
             return next;
         }
+        current = asRows(outcome.current);
     }
     throw new Error("the wheel kept changing underneath this update; try again.");
 }
 
+// Takes one copy of the winner off the wheel: the row it was picked from when
+// the wheel hasn't changed since, else the first row with its label. Gone
+// already (the streamer removed it mid-spin) is fine.
+function takeOff(ctx, label, index) {
+    return updateRows(ctx, function (current) {
+        var at = -1;
+        var seen = -1;
+        for (var i = 0; i < current.length; i++) {
+            if (labelOf(current[i]) === "") {
+                continue;
+            }
+            seen++;
+            if (labelOf(current[i]) === label && (at === -1 || seen === index)) {
+                at = i;
+            }
+        }
+        if (at === -1) {
+            return null;
+        }
+        current.splice(at, 1);
+        return current;
+    });
+}
+
+// The labels on the wheel, in order: rows with an empty label are skipped.
+function entries(rows) {
+    return rows.map(labelOf).filter(function (l) { return l !== ""; });
+}
+
+function asRows(value) {
+    return Array.isArray(value)
+        ? value.filter(function (row) { return row && typeof row === "object" && !Array.isArray(row); })
+        : [];
+}
+
+function labelOf(row) {
+    return cleanLabel(row && row.label);
+}
+
 function cleanLabel(value) {
     return str(value).replace(/\s+/g, " ").trim().slice(0, MAX_LABEL_LENGTH).trim();
+}
+
+// ---------------------------------------------------------------------------
+// The spin
+// ---------------------------------------------------------------------------
+
+function readSpin(ctx) {
+    var raw = ctx.storage.get("spin");
+    var spin = parseJson(raw);
+    return {
+        raw: raw === undefined ? null : raw,
+        spin: spin && typeof spin === "object" ? spin : null
+    };
+}
+
+function newSpin(labels, durationMs, removeWinner) {
+    var now = Date.now();
+    var index = Math.floor(Math.random() * labels.length);
+    return {
+        id: String(now) + Math.floor(Math.random() * 1e6),
+        phase: "spinning",
+        labels: labels,
+        winnerIndex: index,
+        landAt: 0.15 + Math.random() * 0.7,
+        // Roughly one turn a second, so a long spin doesn't crawl.
+        turns: Math.max(3, Math.round(durationMs / 1000)) + Math.floor(Math.random() * 3),
+        durationMs: durationMs,
+        startedAt: now,
+        endsAt: now + durationMs,
+        item: labels[index],
+        removed: removeWinner
+    };
 }
 
 // ---------------------------------------------------------------------------

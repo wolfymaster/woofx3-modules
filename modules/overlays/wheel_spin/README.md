@@ -9,6 +9,9 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 
 - **Hold as many entries as you want.** Two choices or two thousand, they all
   fit on the wheel.
+- **Fill it from your settings.** Type your entries right into the Wheel Spin
+  settings, one per row. Add a row, remove a row, hit save, and the wheel on
+  your stream changes right away.
 - **Spin with style.** The wheel whips around fast, then slows down with the
   pointer clicking past each slice, just like a real one.
 - **Show the winner big.** When the wheel stops, the winner pops up in the
@@ -24,14 +27,16 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 
 1. Install the Twitch module first, so Wheel Spin can talk in chat.
 2. Add the Wheel Spin widget to a scene.
-3. Set up what fills the wheel. For example, add a viewer's name when they
-   redeem a channel point reward.
+3. Fill the wheel. Type your entries into the Wheel Spin settings, or set
+   things up to add them for you, like a viewer's name when they redeem a
+   channel point reward.
 4. Set up what spins it, like a button, a stream deck key or a chat command.
 5. Spin away!
 
 ## Ways to use it
 
-- **Adding to the wheel** puts something new on it. Add a whole list at once
+- **Adding to the wheel** puts something new on it, and you'll see it show up
+  in your settings too. Add a whole list at once
   by putting each entry on its own line.
 - **Removing from the wheel** takes something off. Capital letters don't
   matter, so "pizza" takes off "Pizza".
