@@ -26,15 +26,19 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 ## Getting started
 
 1. Install the Twitch module first, so Wheel Spin can talk in chat.
-2. Add the Wheel Spin widget to a scene, and pick which wheel it shows. If
-   you don't have a wheel yet, make one right there and give it a name.
-3. Set up what fills the wheel. For example, add a viewer's name when they
-   redeem a channel point reward.
-4. Set up what spins it, like a button, a stream deck key or a chat command.
-5. Spin away!
+2. Make a wheel on the Wheels page. Give it a name and type in your
+   entries, one per row.
+3. Add the Wheel Spin widget to a scene, and pick which wheel it shows.
+4. Want chat to fill it too? Set that up as well. For example, add a
+   viewer's name when they redeem a channel point reward.
+5. Set up what spins it, like a button, a stream deck key or a chat command.
+6. Spin away!
 
 ## Ways to use it
 
+- **Typing your own entries** is the quickest way to fill a wheel. Open the
+  wheel on the Wheels page, edit it, and add or remove rows any time, even
+  live. The wheel on stream changes right away.
 - **Adding to the wheel** puts something new on it. Add a whole list at once
   by putting each entry on its own line.
 - **Removing from the wheel** takes something off. Capital letters don't
@@ -50,6 +54,7 @@ to pick giveaway winners, choose the next game, or let chat shake things up.
 
 Each wheel has its own settings:
 
+- Type in the entries on the wheel.
 - Choose whether winners stay on the wheel or come off it.
 - Pick how many seconds the wheel spins.
 - Turn the winner message in chat on or off.
@@ -64,8 +69,8 @@ Each widget has its own look:
 ## Good to know
 
 - Your wheels are saved, so they're still full next time you go live.
-- Wheels from before this version don't carry over. Make a new wheel and
-  fill it again.
+- Anything chat or your buttons add to the wheel shows up in its list of
+  entries too, so you can always see and fix what's on it.
 - Spinning while the wheel is already turning does nothing, so a double press
   can't change the winner.
 - When a wheel has hundreds of entries, the names get too small to read, so

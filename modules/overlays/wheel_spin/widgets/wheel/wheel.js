@@ -1,16 +1,17 @@
 // Wheel Spin widget.
 //
-// Shows the wheel chosen in the `wheel` setting, whose value the module's
-// functions (functions/wheel.js) keep at `state:<canonicalId>` in this
-// module's storage:
+// Shows the wheel chosen in the `wheel` setting. It reads the wheel whole at
+// `resource:<canonicalId>`, `{ value, settings, readAt }`, sent again
+// whenever either changes. Its entries are its `items` setting, `{label}`
+// rows; its value, which the module's functions (functions/wheel.js) keep,
+// says what is happening to it:
 //
-//   {"items":[string],
-//    "spin": {"id","labels":[string],"winnerIndex","landAt","turns",
+//   {"spin": {"id","labels":[string],"winnerIndex","landAt","turns",
 //             "durationMs","endsAt","item"} | null}
 //
 // The winner is picked by the function; this page only spins to it. A spin is
 // drawn from `spin.labels`, the wheel as it was when the spin started, and the
-// live `items` take over once the winner has been shown, so a winner taken off
+// live entries take over once the winner has been shown, so a winner taken off
 // the wheel disappears only after everyone has seen it land.
 //
 // Geometry: slice i covers wheel angles [i, i+1) * slice, measured clockwise
@@ -94,16 +95,20 @@
     return;
   }
 
-  host.storage.subscribe("state:" + wheelId, function (raw) {
-    var wheel = parse(raw) || {};
-    items = Array.isArray(wheel.items) ? wheel.items.map(text) : [];
-    var spin = wheel.spin && typeof wheel.spin === "object" ? wheel.spin : null;
+  host.storage.subscribe("resource:" + wheelId, function (instance) {
+    if (!instance || typeof instance !== "object" || typeof instance.readAt !== "number") {
+      return;
+    }
+    var value = parse(instance.value) || {};
+    items = entriesOf(instance.settings || {}, value);
+    var spin = value.spin && typeof value.spin === "object" ? value.spin : null;
     var first = firstValue;
     firstValue = false;
 
     if (spin && text(spin.id) !== "" && text(spin.id) !== seenSpin) {
       seenSpin = text(spin.id);
-      if (first && Date.now() > Number(spin.endsAt) + STALE_SPIN_MS) {
+      // Measured on the host's clock, which wrote `endsAt`, not this page's.
+      if (first && instance.readAt > Number(spin.endsAt) + STALE_SPIN_MS) {
         restAfter(spin);
       } else {
         startSpin(spin);
@@ -115,6 +120,21 @@
     }
     updateIdle();
   });
+
+  // The wheel's entries, from its `items` rows. A 0.3 wheel nothing has
+  // touched since still keeps them in its value, until its next action moves
+  // them over.
+  function entriesOf(wheelSettings, value) {
+    var rows = parse(wheelSettings.items);
+    if (!Array.isArray(rows)) {
+      return Array.isArray(value.items) ? value.items.map(text).filter(Boolean) : [];
+    }
+    return rows
+      .map(function (row) {
+        return text(row && typeof row === "object" ? row.label : row);
+      })
+      .filter(Boolean);
+  }
 
   // -------------------------------------------------------------------------
   // Setup

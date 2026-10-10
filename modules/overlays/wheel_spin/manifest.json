@@ -2,7 +2,7 @@
   "id": "woofx3_wheel_spin",
   "name": "Wheel Spin",
   "author": "WolfyMaster LLC",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "category": "overlay",
   "description": "Prize wheels for your scene. Make as many wheels as you like, fill each with entries, spin one from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
   "taxonomy": [
@@ -12,10 +12,17 @@
     {
       "kind": "wheel",
       "name": "Wheel",
-      "description": "A prize wheel of entries that actions add to, take from and spin, and overlays show: giveaway wheels, game pickers.",
+      "description": "A prize wheel of entries you type in, or that actions add to and take from, spun by actions and shown by overlays: giveaway wheels, game pickers.",
       "icon": "FerrisWheel",
-      "display": { "summary": "items" },
+      "display": { "summary": "spin.item" },
       "schema": [
+        {
+          "id": "items",
+          "label": "Entries",
+          "description": "Everything on the wheel. Add the same entry more than once for a bigger chance to win. Actions and chat can add to this list too.",
+          "type": "list",
+          "itemFields": [ { "id": "label", "label": "Entry", "type": "text", "required": true } ]
+        },
         {
           "id": "removeWhenPicked",
           "label": "Take the winner off the wheel",
