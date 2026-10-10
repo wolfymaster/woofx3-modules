@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
@@ -34,6 +34,13 @@
       "emits": {
         "fields": [
           {
+            "path": "userId",
+            "type": "string",
+            "description": "The follower's Twitch user id.",
+            "identity": "viewer",
+            "displayName": "userName"
+          },
+          {
             "path": "userName",
             "type": "string",
             "description": "Who followed."
@@ -56,7 +63,9 @@
         "fields": [
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -131,7 +140,9 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "Who now holds the sub: the recipient of a gifted sub."
+            "description": "Who now holds the sub: the recipient of a gifted sub.",
+            "identity": "viewer",
+            "displayName": "userName"
           },
           {
             "path": "userName",
@@ -215,7 +226,9 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "Who now holds the sub: the recipient of a gifted sub."
+            "description": "Who now holds the sub: the recipient of a gifted sub.",
+            "identity": "viewer",
+            "displayName": "userName"
           },
           {
             "path": "userName",
@@ -338,7 +351,10 @@
         "fields": [
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "isAnonymous",
+            "displayName": "gifterName"
           },
           {
             "path": "gifterName",
@@ -422,7 +438,10 @@
         "fields": [
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "isAnonymous",
+            "displayName": "gifterName"
           },
           {
             "path": "gifterName",
@@ -547,7 +566,10 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "Absent when the cheer is anonymous."
+            "description": "Absent when the cheer is anonymous.",
+            "identity": "viewer",
+            "anonymousWhen": "isAnonymous",
+            "displayName": "userName"
           },
           {
             "path": "userName",
@@ -651,7 +673,9 @@
         "fields": [
           {
             "path": "userId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "displayName": "userName"
           },
           {
             "path": "userName",
@@ -742,7 +766,9 @@
         "fields": [
           {
             "path": "fromBroadcasterUserId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "displayName": "fromBroadcasterUserName"
           },
           {
             "path": "fromBroadcasterUserName",
@@ -796,7 +822,9 @@
         "fields": [
           {
             "path": "fromBroadcasterUserId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "displayName": "fromBroadcasterUserName"
           },
           {
             "path": "fromBroadcasterUserName",
@@ -940,7 +968,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1096,7 +1127,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1230,7 +1264,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1288,7 +1325,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1350,7 +1390,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1426,7 +1469,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1564,7 +1610,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1622,7 +1671,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1871,7 +1923,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -1945,7 +2000,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
@@ -2023,7 +2081,10 @@
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
           },
           {
             "path": "chatterName",
