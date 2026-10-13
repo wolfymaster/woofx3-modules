@@ -2,7 +2,7 @@
   "id": "woofx3_kofi",
   "name": "Ko-fi",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "category": "platform",
   "description": "Receives Ko-fi webhooks and fires triggers when someone tips, starts or renews a membership, buys from your shop, or orders a commission.",
   "taxonomy": [
