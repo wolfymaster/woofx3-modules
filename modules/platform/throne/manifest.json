@@ -2,7 +2,7 @@
   "id": "woofx3_throne",
   "name": "Throne Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "category": "platform",
   "description": "Receives Throne webhooks and fires triggers when someone buys a gift, makes a contribution, or completes a crowdfunded gift on your Throne wishlist.",
   "functions": [
@@ -30,6 +30,8 @@
       "event": "throne.gift.purchased",
       "taxonomy": ["platform.throne", "alert.gift"],
       "emits": {
+        "summary": "{gifterUsername} sent {itemName}",
+        "details": ["{priceDisplay}", "“{message}”"],
         "fields": [
           { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
           { "path": "creatorUsername", "type": "string", "description": "Your Throne username." },
@@ -52,6 +54,8 @@
       "event": "throne.contribution.purchased",
       "taxonomy": ["platform.throne", "alert.contribution"],
       "emits": {
+        "summary": "{gifterUsername} contributed {amountDisplay} to {itemName}",
+        "details": ["“{message}”"],
         "fields": [
           { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
           { "path": "creatorUsername", "type": "string", "description": "Your Throne username." },
@@ -73,6 +77,8 @@
       "event": "throne.gift.crowdfunded",
       "taxonomy": ["platform.throne", "alert.gift"],
       "emits": {
+        "summary": "{itemName} was fully crowdfunded",
+        "details": ["{priceDisplay}"],
         "fields": [
           { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
           { "path": "creatorUsername", "type": "string", "description": "Your Throne username." },

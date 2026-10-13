@@ -2,7 +2,7 @@
   "id": "woofx3_fourthwall",
   "name": "Fourthwall",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "platform",
   "description": "Receives Fourthwall webhooks and fires triggers when someone donates, orders merch, buys gifts for your community, or joins a membership.",
   "taxonomy": [
@@ -46,6 +46,10 @@
         "alert.donation"
       ],
       "emits": {
+        "summary": "{username} donated {amountDisplay}",
+        "details": [
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "eventId",
@@ -100,6 +104,11 @@
         "alert.purchase"
       ],
       "emits": {
+        "summary": "{username} ordered {itemNames}",
+        "details": [
+          "{amountDisplay}",
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "eventId",
@@ -166,6 +175,11 @@
         "alert.gift"
       ],
       "emits": {
+        "summary": "{username} gifted {quantity} × {itemName}",
+        "details": [
+          "{amountDisplay}",
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "eventId",
@@ -232,6 +246,10 @@
         "alert.subscription"
       ],
       "emits": {
+        "summary": "{username} became a member",
+        "details": [
+          "{amountDisplay} / {interval}"
+        ],
         "fields": [
           {
             "path": "eventId",
