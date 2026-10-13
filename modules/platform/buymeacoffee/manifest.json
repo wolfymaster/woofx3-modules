@@ -2,7 +2,7 @@
   "id": "woofx3_buymeacoffee",
   "name": "Buy Me a Coffee",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "category": "platform",
   "description": "Receives Buy Me a Coffee webhooks and fires triggers when someone buys you a coffee, joins a membership, or cancels one.",
   "taxonomy": [
