@@ -2,7 +2,7 @@
   "id": "woofx3_buymeacoffee",
   "name": "Buy Me a Coffee",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "platform",
   "description": "Receives Buy Me a Coffee webhooks and fires triggers when someone buys you a coffee, joins a membership, or cancels one.",
   "taxonomy": [
@@ -46,6 +46,11 @@
         "alert.donation"
       ],
       "emits": {
+        "summary": "{supporterName} supported with {amountDisplay}",
+        "details": [
+          "Coffees: {coffeeCount}",
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "eventId",
@@ -107,6 +112,11 @@
         "alert.subscription"
       ],
       "emits": {
+        "summary": "{supporterName} joined {levelName}",
+        "details": [
+          "{amountDisplay} / {interval}",
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "eventId",
@@ -173,6 +183,7 @@
         "platform.buymeacoffee"
       ],
       "emits": {
+        "summary": "{supporterName} cancelled {levelName}",
         "fields": [
           {
             "path": "eventId",

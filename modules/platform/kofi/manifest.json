@@ -2,7 +2,7 @@
   "id": "woofx3_kofi",
   "name": "Ko-fi",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "platform",
   "description": "Receives Ko-fi webhooks and fires triggers when someone tips, starts or renews a membership, buys from your shop, or orders a commission.",
   "taxonomy": [
@@ -46,6 +46,10 @@
         "alert.donation"
       ],
       "emits": {
+        "summary": "{fromName} donated {amountDisplay}",
+        "details": [
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "messageId",
@@ -106,6 +110,10 @@
         "alert.subscription"
       ],
       "emits": {
+        "summary": "{fromName} paid {amountDisplay} for {tierName}",
+        "details": [
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "messageId",
@@ -176,6 +184,11 @@
         "alert.purchase"
       ],
       "emits": {
+        "summary": "{fromName} placed a {amountDisplay} shop order",
+        "details": [
+          "Items: {itemCount}",
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "messageId",
@@ -242,6 +255,10 @@
         "alert.purchase"
       ],
       "emits": {
+        "summary": "{fromName} paid {amountDisplay} for a commission",
+        "details": [
+          "“{message}”"
+        ],
         "fields": [
           {
             "path": "messageId",
