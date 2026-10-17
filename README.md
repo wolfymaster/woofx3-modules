@@ -174,6 +174,10 @@ existing build stays downloadable until the new ZIP is parsed and swapped
 atomically. A failed deploy leaves the previous version live, and re-running is
 safe.
 
+Every module is published as the marketplace user `wolfymaster`
+(`--author-slug`), and with `--free`, which prices a new listing free without
+ever replacing a price set in the marketplace.
+
 Retirement is the exception — `marketplace-cli remove` deletes the row and the
 R2 objects. It runs only for modules whose directory is gone from the tree, only
 after every publish in the run has succeeded, and uses `--if-exists` so a

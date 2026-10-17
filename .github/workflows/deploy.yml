@@ -32,6 +32,11 @@ jobs:
       # job needs it: the precheck validates with a dry run that makes no API
       # calls, so pull requests from forks keep working without secrets.
       API_TOKEN: ${{ secrets.MARKETPLACE_API_TOKEN }}
+      # The marketplace username every module in this repo is published under.
+      # Attribution is the publisher's to state, not the manifest's: its
+      # "author" is only the name the card shows. Only a new listing reads
+      # it; an existing one keeps its attribution.
+      AUTHOR_SLUG: wolfymaster
     steps:
       - uses: actions/checkout@v4
         with:
@@ -123,7 +128,10 @@ jobs:
             id="$(./ci/scripts/manifest.py get "$mod/manifest.json" id)"
             version="$(./ci/scripts/manifest.py get "$mod/manifest.json" version)"
             echo "::group::$id $version ($mod)"
-            if ./marketplace-cli publish "$mod"; then
+            # --free prices a listing free only while it has no pricing, so a
+            # price set in the marketplace is never undone by a deploy. Without
+            # it a new module is published unpriced, which nobody can install.
+            if ./marketplace-cli publish --author-slug "$AUTHOR_SLUG" --free "$mod"; then
               echo "$id $version" >> published.txt
             else
               echo "::error title=Publish failed::$id ($mod) — the previous version is still live"
