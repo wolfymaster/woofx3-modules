@@ -156,12 +156,13 @@ Three properties of the deploy step are deliberate and worth keeping:
   make many modules look deleted at once. The `workflow_dispatch` path skips
   removals entirely — it names modules to publish and has no base to diff.
 
-## Prefer publish over update-package
+## Publish, never delete-and-reupload
 
-Do **not** switch the deploy step's publish to `update-package` — that
-subcommand issues a `DELETE` before re-uploading, so a mid-flight failure removes
-the module from the marketplace entirely. Retirement is the only place a `DELETE`
-belongs, and it happens because the module is gone from the tree on purpose.
+Updating a module is always `publish`. The marketplace CLI no longer has a
+delete-and-reupload command (`update-package` was removed): a mid-flight
+failure left the module missing, and deleting a listing anyone holds retires
+its id for good. Retirement is the only place a `DELETE` belongs, and it
+happens because the module is gone from the tree on purpose.
 
 ## Conventions
 
