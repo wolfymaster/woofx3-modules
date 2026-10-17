@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>spotlight</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    #stage {
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+    }
+
+    #card {
+      box-sizing: border-box;
+      width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+      padding: 1em 1.25em;
+      border-left: 0.25em solid var(--accent);
+      border-radius: 0.5em;
+      background: var(--card);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 250ms ease, transform 250ms ease;
+    }
+
+    #card.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    #header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1em;
+      margin-bottom: 0.6em;
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #title {
+      opacity: 0.7;
+    }
+
+    #name {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .answer + .answer {
+      margin-top: 0.6em;
+    }
+
+    .label {
+      font-size: 0.7em;
+      opacity: 0.7;
+    }
+
+    .value {
+      line-height: 1.3;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="stage">
+    <div id="card">
+      <div id="header">
+        <span id="title"></span>
+        <span id="name"></span>
+      </div>
+      <div id="answers"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const host = window.widgetHost;
+      if (!host) {
+        return;
+      }
+      const settings = host.settings;
+      const card = document.getElementById("card");
+      card.style.color = str(settings.color, "#ffffff");
+      card.style.fontFamily = str(settings.fontFamily, "Roboto, system-ui, sans-serif");
+      card.style.fontSize = num(settings.fontSize, 28) + "px";
+      card.style.setProperty("--accent", str(settings.accentColor, "#ec6758"));
+      card.style.setProperty("--card", str(settings.backgroundColor, "#1b1b24"));
+
+      const queue = str(settings.queue, "");
+      if (queue === "") {
+        return;
+      }
+      const showName = settings.showName !== false;
+
+      // The module keeps what this queue's Spotlights show at
+      // `shown:<queue canonical id>`: `{ submission, shownAt }`, with a null
+      // submission once it is hidden. Nothing stored means nothing shown yet.
+      host.storage.subscribe("shown:" + queue, (stored) => {
+        const submission = stored !== null && typeof stored === "object" ? stored.submission : null;
+        if (submission === null || typeof submission !== "object") {
+          card.classList.remove("visible");
+          return;
+        }
+        render(submission, showName);
+        card.classList.add("visible");
+      });
+    })();
+
+    // Everything here was written by a viewer, so it goes in as text, never
+    // as markup.
+    function render(submission, showName) {
+      document.getElementById("title").textContent = str(submission.formTitle, "");
+      const viewer = submission.viewer;
+      document.getElementById("name").textContent =
+        showName && viewer && typeof viewer.displayName === "string" ? viewer.displayName : "";
+
+      const answers = document.getElementById("answers");
+      answers.replaceChildren();
+      const list = Array.isArray(submission.answers) ? submission.answers : [];
+      list.forEach((answer) => {
+        const row = document.createElement("div");
+        row.className = "answer";
+        if (list.length > 1) {
+          const label = document.createElement("div");
+          label.className = "label";
+          label.textContent = String(answer.label || "");
+          row.appendChild(label);
+        }
+        const value = document.createElement("div");
+        value.className = "value";
+        value.textContent = String(answer.value || "");
+        row.appendChild(value);
+        answers.appendChild(row);
+      });
+    }
+
+    function str(value, fallback) {
+      return typeof value === "string" && value.trim() !== "" ? value : fallback;
+    }
+
+    function num(value, fallback) {
+      return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+    }
+  </script>
+</body>
+
+</html>
