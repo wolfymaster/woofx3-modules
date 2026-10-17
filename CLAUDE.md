@@ -115,6 +115,18 @@ presigned upload URL for the existing object. The live build stays downloadable
 until `/complete` parses the new ZIP and swaps the metadata atomically, so a
 failed publish leaves the previous version serving and re-running is safe.
 
+Every module here is published as the marketplace user **`wolfymaster`**
+(`--author-slug`, set once as `AUTHOR_SLUG` in `deploy.yml`). That is what
+puts it on wolfymaster's author page. The manifest's `author` is only the name
+the card shows and does not decide attribution. Only creating a listing reads
+the flag; a republish keeps the listing's attribution.
+
+The deploy also passes `--free`, which prices a listing free **only while it
+has no pricing**. The marketplace refuses installs of an unpriced listing, so
+without it a new module would publish and be uninstallable; and because an
+existing price is never touched, pricing a module paid in the marketplace is
+not undone by the next deploy.
+
 ## Retiring a module
 
 Deleting a module's directory retires it: the deploy job runs
