@@ -9,8 +9,8 @@ your chat.
 
 - **Switch scenes.** Jump to any scene, like your "Be Right Back" screen or a
   big celebration scene.
-- **Show or hide things on screen.** Make a webcam, image, video or overlay
-  appear or disappear.
+- **Show, hide or toggle things on screen.** Make a webcam, image, video or
+  overlay appear or disappear, or flip it to whichever it isn't right now.
 - **Mute or unmute audio.** Turn your microphone, game sound or music on and
   off.
 - **Show a web page.** Put any website on screen, like a friend's channel or
@@ -28,6 +28,7 @@ No typing names by hand!
   it ends, switch back.
 - When you go live, start on your "Starting Soon" scene.
 - When a giveaway ends, show the winner's channel on screen.
+- Make a chat command that toggles your webcam on and off.
 
 ## Getting started
 
@@ -49,3 +50,6 @@ running.
 
 Your stream picks scenes and sources by their names in OBS. If you rename a
 scene or source, update anything that uses it so it keeps working.
+
+Toggling a source needs an up-to-date WoofX3. On an older one, Toggle shows
+the source instead.

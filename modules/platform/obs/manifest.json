@@ -2,9 +2,9 @@
   "id": "woofx3_obs",
   "name": "OBS",
   "author": "WolfyMaster LLC",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "category": "platform",
-  "description": "Workflow actions that control OBS: switch the program scene, show or hide a source, mute or unmute an audio input, and load a web page in a browser source. The engine holds the OBS WebSocket connection; this module reaches it through ctx.obs.",
+  "description": "Workflow actions that control OBS: switch the program scene, show, hide or toggle a source, mute or unmute an audio input, and load a web page in a browser source. The engine holds the OBS WebSocket connection; this module reaches it through ctx.obs.",
   "taxonomy": [
     "platform.obs"
   ],
@@ -143,8 +143,8 @@
     },
     {
       "id": "obs.set_source_visibility",
-      "name": "Show or hide OBS source",
-      "description": "Show or hide a source in an OBS scene. The step fails, with the reason, when OBS is not connected or the source is not in that scene.",
+      "name": "Set OBS source visibility",
+      "description": "Show, hide or toggle a source in an OBS scene. The step fails, with the reason, when OBS is not connected or the source is not in that scene.",
       "type": "function",
       "function": "setSourceVisibility",
       "schema": [
@@ -168,11 +168,25 @@
           }
         },
         {
-          "id": "visible",
-          "label": "Visible",
-          "type": "toggle",
-          "defaultValue": true,
-          "description": "On shows the source; off hides it."
+          "id": "visibility",
+          "label": "Visibility",
+          "type": "select",
+          "defaultValue": "visible",
+          "options": [
+            {
+              "value": "visible",
+              "label": "Visible"
+            },
+            {
+              "value": "hidden",
+              "label": "Hidden"
+            },
+            {
+              "value": "toggle",
+              "label": "Toggle"
+            }
+          ],
+          "description": "Visible shows the source, Hidden hides it, and Toggle flips whichever it is when the step runs."
         },
         {
           "id": "sceneName",
