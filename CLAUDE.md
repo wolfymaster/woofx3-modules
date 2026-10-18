@@ -115,6 +115,18 @@ presigned upload URL for the existing object. The live build stays downloadable
 until `/complete` parses the new ZIP and swaps the metadata atomically, so a
 failed publish leaves the previous version serving and re-running is safe.
 
+Every module here is published as the marketplace user **`wolfymaster`**
+(`--author-slug`, set once as `AUTHOR_SLUG` in `deploy.yml`). That is what
+puts it on wolfymaster's author page. The manifest's `author` is only the name
+the card shows and does not decide attribution. Only creating a listing reads
+the flag; a republish keeps the listing's attribution.
+
+The deploy also passes `--free`, which prices a listing free **only while it
+has no pricing**. The marketplace refuses installs of an unpriced listing, so
+without it a new module would publish and be uninstallable; and because an
+existing price is never touched, pricing a module paid in the marketplace is
+not undone by the next deploy.
+
 ## Retiring a module
 
 Deleting a module's directory retires it: the deploy job runs
@@ -144,12 +156,13 @@ Three properties of the deploy step are deliberate and worth keeping:
   make many modules look deleted at once. The `workflow_dispatch` path skips
   removals entirely — it names modules to publish and has no base to diff.
 
-## Prefer publish over update-package
+## Publish, never delete-and-reupload
 
-Do **not** switch the deploy step's publish to `update-package` — that
-subcommand issues a `DELETE` before re-uploading, so a mid-flight failure removes
-the module from the marketplace entirely. Retirement is the only place a `DELETE`
-belongs, and it happens because the module is gone from the tree on purpose.
+Updating a module is always `publish`. The marketplace CLI no longer has a
+delete-and-reupload command (`update-package` was removed): a mid-flight
+failure left the module missing, and deleting a listing anyone holds retires
+its id for good. Retirement is the only place a `DELETE` belongs, and it
+happens because the module is gone from the tree on purpose.
 
 ## Conventions
 
