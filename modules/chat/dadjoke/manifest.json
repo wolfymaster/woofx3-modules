@@ -2,7 +2,7 @@
   "id": "woofx3_dadjoke",
   "name": "Dad Jokes",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "Adds !dadjoke, which says a random dad joke in chat from a built-in list of 500. Jokes told recently are skipped so chat doesn't hear repeats.",
   "taxonomy": [

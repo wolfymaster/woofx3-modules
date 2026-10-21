@@ -2,7 +2,7 @@
   "id": "woofx3_giveaways",
   "name": "Giveaways",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "Chat giveaways. Moderators run them with !giveaway start, draw, end and cancel; viewers enter by typing the entry keyword (!join by default). Subscribers can get extra luck. Mod commands arrive through chat messages because those carry the chatter's badges.",
   "taxonomy": [

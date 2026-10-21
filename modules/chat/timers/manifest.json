@@ -2,7 +2,7 @@
   "id": "woofx3_timed_messages",
   "name": "Timed Messages",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "Posts a rotating set of chat messages on a timer while you are live, and only when chat has been active since the last one, so an empty chat is never spammed.",
   "taxonomy": [

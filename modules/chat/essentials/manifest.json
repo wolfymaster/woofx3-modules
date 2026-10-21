@@ -2,7 +2,7 @@
   "id": "woofx3_chat_essentials",
   "name": "Chat Essentials",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "The everyday chat commands: !uptime, !lurk, !unlurk, !8ball, !roll, !coinflip, !quote, plus !addquote and !delquote for mods.",
   "taxonomy": [
