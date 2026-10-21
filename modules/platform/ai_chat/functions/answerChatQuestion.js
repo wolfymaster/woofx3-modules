@@ -1,15 +1,15 @@
 /// <reference types="@woofx3/module-sdk/function-ctx" />
 
-// Runs from the !ask command. The reply goes out through ctx.chat: in the
-// command-action path a returned ctx.response never reaches chat.
+// Runs from the !ask command. The answer is announced rather than returned
+// to a chat step, since a viewer on cooldown gets no answer at all.
 function answerChatQuestion(ctx) {
   var data = (ctx.event && ctx.event.data) || {};
   var chatter = String(data.chatter || "").trim();
   var question = String(data.text || "").trim();
 
   if (!question) {
-    ctx.chat.sendMessage((chatter ? "@" + chatter + " " : "") + "Ask me anything! Try: !ask what's your favorite game?");
-    return { ok: false, reason: "no question" };
+    var usage = (chatter ? "@" + chatter + " " : "") + "Ask me anything! Try: !ask what's your favorite game?";
+    return answer(ctx, false, usage, { ok: false, reason: "no question" });
   }
 
   var cfg = readConfig(ctx);
@@ -19,8 +19,35 @@ function answerChatQuestion(ctx) {
     return { ok: false, reason: "cooldown" };
   }
 
-  var reply = answerInChat(ctx, cfg, chatter, question);
-  return { ok: true, reply: reply };
+  var answered = answerForChat(ctx, cfg, chatter, question);
+  return answer(ctx, true, answered.line, { ok: true, reply: answered.reply });
+}
+
+var EVENT_ANSWERED = "ai_chat.answered";
+
+// Chat is spoken by the module's "say answers in chat" workflow, which posts
+// the message of each answered event, so the streamer can reword it or switch
+// it off. Runs with nothing to say (a cooldown, a message that is not a
+// mention) publish nothing: a Send chat message step straight after this
+// function would fail on every one of them.
+function answer(ctx, success, line, fields) {
+  return ctx.result(outcome(ctx, success, line, fields), [{ type: EVENT_ANSWERED, data: { message: line } }]);
+}
+
+// ctx.success / ctx.failure where the engine has them; older engines only have
+// ctx.response, which takes the same fields assigned onto its result.
+function outcome(ctx, success, message, fields) {
+  if (success && typeof ctx.success === "function") {
+    return ctx.success(message, fields);
+  }
+  if (!success && typeof ctx.failure === "function") {
+    return ctx.failure(message, fields);
+  }
+  var reply = ctx.response(success, message);
+  Object.keys(fields || {}).forEach(function (key) {
+    reply[key] = fields[key];
+  });
+  return reply;
 }
 
 // ---- Shared with the module's other functions; keep the copies identical. ----
@@ -167,10 +194,9 @@ function takeCooldown(ctx, cfg, chatter) {
   return true;
 }
 
-// Posts the answer tagged to the viewer, fitted inside chat's limit.
-function answerInChat(ctx, cfg, chatter, question) {
+// The answer tagged to the viewer, fitted inside chat's limit.
+function answerForChat(ctx, cfg, chatter, question) {
   var tag = chatter ? "@" + chatter + " " : "";
   var reply = askModel(ctx, cfg, question, Math.min(cfg.maxChars, CHAT_LIMIT - tag.length));
-  ctx.chat.sendMessage(tag + reply);
-  return reply;
+  return { reply: reply, line: tag + reply };
 }
