@@ -100,7 +100,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "live",
@@ -142,7 +142,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "user",
@@ -179,7 +179,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "user",
@@ -215,7 +215,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "answer",
@@ -252,7 +252,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "total",
@@ -284,7 +284,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "side",
@@ -322,7 +322,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "number",
@@ -382,7 +382,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "number",
@@ -402,6 +402,13 @@
         {
           "id": "run",
           "action": "uptime"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     },
@@ -414,6 +421,13 @@
         {
           "id": "run",
           "action": "lurk"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     },
@@ -426,6 +440,13 @@
         {
           "id": "run",
           "action": "unlurk"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     },
@@ -438,6 +459,13 @@
         {
           "id": "run",
           "action": "eight_ball"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     },
@@ -450,6 +478,13 @@
         {
           "id": "run",
           "action": "roll"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     },
@@ -462,6 +497,13 @@
         {
           "id": "run",
           "action": "coinflip"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     },
@@ -474,6 +516,13 @@
         {
           "id": "run",
           "action": "quote"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     }
@@ -509,6 +558,21 @@
         {
           "id": "manage",
           "action": "manage_quotes"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "dependsOn": [
+            "manage"
+          ],
+          "condition": {
+            "field": "${manage.handled}",
+            "operator": "eq",
+            "value": true
+          },
+          "parameters": {
+            "message": "${manage.message}"
+          }
         }
       ]
     }
