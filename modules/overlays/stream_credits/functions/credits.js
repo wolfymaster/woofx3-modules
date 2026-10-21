@@ -21,6 +21,7 @@ var CAS_ATTEMPTS = 8;
 // channel's credits would never finish and the stored value keeps growing.
 var MAX_CHATTERS = 1000;
 var STORE_OPTIONS = { clearOnSessionEnd: true };
+var EVENT_ANNOUNCED = "stream_credits.announced";
 
 // ---------------------------------------------------------------------------
 // Event entry points (run by the module's own workflows)
@@ -82,8 +83,7 @@ function handle_chat_message(ctx) {
     if (message.split(/\s+/)[0].toLowerCase() === "!resetcredits") {
         if (membership.isModerator === true || membership.isBroadcaster === true) {
             resetCredits(ctx);
-            say(ctx, "The stream credits are wiped clean. Fresh start!");
-            return { command: "resetcredits", added: false };
+            return announce(ctx, "The stream credits are wiped clean. Fresh start!", { command: "resetcredits", added: false });
         }
     }
 
@@ -190,11 +190,30 @@ function eventData(ctx) {
     return (ctx.event && ctx.event.data) || {};
 }
 
-function say(ctx, text) {
-    if (!ctx.chat || typeof ctx.chat.sendMessage !== "function") {
-        throw new Error("ctx.chat.sendMessage is not available on this engine.");
+// Chat is spoken by the module's "say announcements in chat" workflow, which
+// posts the message of each announced event, so the streamer can reword it or
+// switch it off. Only runs with something to say publish one: a Send chat
+// message step straight after the handler would fail on every silent chat
+// message.
+function announce(ctx, text, fields) {
+    return ctx.result(succeed(ctx, text, fields), [announcement(text)]);
+}
+
+function announcement(text) {
+    return { type: EVENT_ANNOUNCED, data: { message: text } };
+}
+
+// ctx.success where the engine has it; older engines only have ctx.response,
+// which takes the same fields assigned onto its result.
+function succeed(ctx, message, fields) {
+    if (typeof ctx.success === "function") {
+        return ctx.success(message, fields);
     }
-    ctx.chat.sendMessage(text);
+    var reply = ctx.response(true, message);
+    Object.keys(fields || {}).forEach(function (key) {
+        reply[key] = fields[key];
+    });
+    return reply;
 }
 
 function wholeNumber(value) {
