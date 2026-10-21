@@ -4,10 +4,15 @@
 // rotation when all three gates pass: the stream is live (if the streamer
 // asked for that), a full interval has passed since the last post, and chat
 // has been active since then.
+//
+// A background task has no step after it, so the message goes out as a
+// timers.message_due event; the module's workflow on that event posts it with a
+// Send chat message step.
 var MESSAGE_SETTINGS = ["message1", "message2", "message3", "message4", "message5"];
 var DEFAULT_INTERVAL_MINUTES = 15;
 var DEFAULT_MIN_CHAT_LINES = 5;
 var MAX_ATTEMPTS = 5;
+var EVENT_MESSAGE_DUE = "timers.message_due";
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function post_timed_message(ctx) {
@@ -54,14 +59,17 @@ function post_timed_message(ctx) {
     var index = ctx.storage.get("nextIndex");
     index = typeof index === "number" && index >= 0 ? index % messages.length : 0;
     var message = messages[index];
-    ctx.chat.sendMessage(message);
     ctx.storage.set("nextIndex", (index + 1) % messages.length);
 
     // Take off only the lines this post consumed, so messages counted while
     // it ran still count toward the next one.
     consumeChatLines(ctx, chatLines);
 
-    return { posted: true, message: message, index: index };
+    var fields = { posted: true, index: index };
+    var value = typeof ctx.success === "function"
+        ? ctx.success(message, fields)
+        : Object.assign(ctx.response(true, message), fields);
+    return ctx.result(value, [{ type: EVENT_MESSAGE_DUE, data: { message: message, index: index } }]);
 }
 
 function consumeChatLines(ctx, seen) {
