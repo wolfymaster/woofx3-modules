@@ -5,8 +5,9 @@
 // (a giveaway wheel, a game picker) and point each widget and workflow at the
 // one it means. The winner is picked here, when the spin starts, so every
 // widget showing that wheel lands on the same slice; the widget only animates
-// to it. Chat hears the result, and the `wheel_spin.landed` trigger fires,
-// when the `land` deadline comes due at the moment the wheel stops on screen.
+// to it. The `wheel_spin.landed` trigger fires, and the result is announced
+// for the module's workflow to say in chat, when the `land` deadline comes due
+// at the moment the wheel stops on screen.
 //
 // Where a wheel lives. Its entries are the wheel's own `items` setting, a
 // `list` of `{label}` rows, so the streamer types them in when making or
@@ -48,6 +49,7 @@ var MIN_SPIN_SECONDS = 1;
 var MAX_SPIN_SECONDS = 60;
 var ITEMS_SETTING = "items";
 var EVENT_LANDED = "wheel_spin.landed";
+var EVENT_ANNOUNCED = "wheel_spin.announced";
 var DEADLINE_LAND = "land";
 
 // ---------------------------------------------------------------------------
@@ -173,7 +175,7 @@ function spin_wheel(ctx) {
 // ---------------------------------------------------------------------------
 
 /**
- * Marks the spin landed, tells chat and fires the trigger. A deadline can
+ * Marks the spin landed, announces it and fires the trigger. A deadline can
  * fire late or twice, so it only acts on the spin it was armed for, once.
  */
 function land_wheel(ctx) {
@@ -199,19 +201,17 @@ function land_wheel(ctx) {
         return { landed: false };
     }
 
-    // A chat that can't be reached mustn't stop the trigger firing: that's
-    // what the streamer's own workflows wait on.
-    if (toggle(wheel.settings.announce, true)) {
-        try {
-            say(ctx, "The wheel landed on " + landed.item + "!");
-        } catch (err) {
-            ctx.log.warn("wheel spin: couldn't announce the winner of " + target + " in chat: " + str(err && err.message ? err.message : err));
-        }
-    }
-    return ctx.result({ target: target, landed: true, item: landed.item }, [{
+    var events = [{
         type: EVENT_LANDED,
         data: { target: target, item: landed.item, removed: landed.removed === true, count: wheel.items.length }
-    }]);
+    }];
+    // Chat is spoken by the module's "say announcements in chat" workflow, so
+    // the streamer can reword or switch off the line; the wheel's own setting
+    // still decides whether there is one.
+    if (toggle(wheel.settings.announce, true)) {
+        events.push({ type: EVENT_ANNOUNCED, data: { target: target, message: "The wheel landed on " + landed.item + "!" } });
+    }
+    return ctx.result({ target: target, landed: true, item: landed.item }, events);
 }
 
 // ---------------------------------------------------------------------------
@@ -381,13 +381,6 @@ function toggle(value, fallback) {
         return fallback;
     }
     return value === true || value === "true";
-}
-
-function say(ctx, text) {
-    if (!ctx.chat || typeof ctx.chat.sendMessage !== "function") {
-        throw new Error("ctx.chat.sendMessage is not available on this engine.");
-    }
-    ctx.chat.sendMessage(text);
 }
 
 function str(value) {
