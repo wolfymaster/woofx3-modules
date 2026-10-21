@@ -36,7 +36,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What to say in chat. A Send chat message step posts it."
           },
           {
             "path": "joke",
@@ -56,6 +56,13 @@
         {
           "id": "run",
           "action": "dadjoke"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${run.message}"
+          }
         }
       ]
     }
