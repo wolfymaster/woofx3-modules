@@ -9,9 +9,8 @@ function song_request(ctx) {
     // "{songTitle}", so variables.songTitle is the query when configured).
     // ctx.event.parameters is reserved for workflow-step-authored config
     // (e.g. deviceId below) and is never used for command-derived data.
-    // Every exit point returns its message instead of speaking: the !sr
-    // command's "Send chat message" step posts it, so the streamer can reword
-    // or drop the reply.
+    // Every exit point returns its message; the !sr command's "Send chat
+    // message" step posts it, so the streamer can reword or drop the reply.
     var data = (ctx.event && ctx.event.data) ? ctx.event.data : {};
 
     var variables = data.variables || {};
@@ -21,7 +20,7 @@ function song_request(ctx) {
     }
 
     if (!ctx.oauth) {
-        return outcome(ctx, false, "Failed to Authenticate to Spotify");
+        return outcome(ctx, false, "Song requests are not set up right now.");
     }
 
     // The engine attaches the streamer's token and refreshes it, and throws
@@ -52,7 +51,7 @@ function song_request(ctx) {
         var trackId = urlMatch[1];
         var trackResp = spotifyRequest("https://api.spotify.com/v1/tracks/" + trackId, "GET", {});
         if (!trackResp || trackResp.status === 401) {
-            return outcome(ctx, false, "Failed to Authenticate to Spotify");
+            return outcome(ctx, false, "Song requests are not set up right now.");
         }
         if (!trackResp || trackResp.status !== 200 || !trackResp.body) {
             return outcome(ctx, false, "Could not find that track on Spotify.");
@@ -69,7 +68,7 @@ function song_request(ctx) {
             { query: { q: query, type: "track", limit: "1" } }
         );
         if (!searchResp || searchResp.status === 401) {
-            return outcome(ctx, false, "Failed to Authenticate to Spotify");
+            return outcome(ctx, false, "Song requests are not set up right now.");
         }
         var tracks = searchResp && searchResp.body && searchResp.body.tracks && searchResp.body.tracks.items;
         if (!tracks || tracks.length === 0) {
@@ -92,7 +91,7 @@ function song_request(ctx) {
 
     var queueResp = spotifyRequest(queueUrl, "POST", {});
     if (!queueResp || queueResp.status === 401) {
-        return outcome(ctx, false, "Failed to Authenticate to Spotify");
+        return outcome(ctx, false, "Song requests are not set up right now.");
     }
 
     // 200 or 204 both indicate success.

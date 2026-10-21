@@ -36,3 +36,5 @@ when everyone gets a say in the soundtrack.
 ## Good to know
 
 Adding songs to a Spotify queue needs a **Spotify Premium** account.
+
+If you already had the **!sr** command before updating and chat does not see a reply, remove the command and add it again to pick up the new reply.
