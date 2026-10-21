@@ -36,7 +36,9 @@ var MAX_EVENTS = 16;
 
 /**
  * Runs on every chat message (the bundled workflow binds it to user.message):
- * awards chat points, then answers any points command in the message.
+ * awards chat points, then answers any points command in the message. The
+ * answer comes back as `message` (with `said` true) for a Send chat message
+ * step to post; nothing is written to chat from here.
  * Commands are handled here rather than as manifest commands because the
  * command event carries only the chatter's name, and !addpoints must know
  * whether the chatter is a moderator, which only the chat message says.
@@ -58,11 +60,12 @@ function handle_chat_message(ctx) {
     rememberName(run, chatterId, chatterName);
     var earned = awardChatPoints(run, chatterId, chatterName, membership);
 
-    var outcome = { handled: true, earned: earned, command: "" };
+    var outcome = { handled: true, earned: earned, command: "", said: false };
     if (message.charAt(0) === "!") {
         outcome.command = runCommand(run, chatterId, chatterName, membership, message);
     }
-    return finish(run, outcome);
+    outcome.said = run.said !== null;
+    return finish(run, withReply(run, outcome));
 }
 
 /**
@@ -458,7 +461,7 @@ function updateLeaderboard(run, key, name, points) {
 // ---------------------------------------------------------------------------
 
 function newRun(ctx) {
-    return { ctx: ctx, events: [] };
+    return { ctx: ctx, events: [], said: null };
 }
 
 function queueEvent(run, name, points, delta, reason) {
@@ -480,11 +483,25 @@ function finish(run, value) {
     return value;
 }
 
+// A points command answers with at most one line, held until the run returns.
 function say(run, text) {
-    if (!run.ctx.chat || typeof run.ctx.chat.sendMessage !== "function") {
-        throw new Error("ctx.chat.sendMessage is not available on this engine.");
+    if (run.said !== null) {
+        throw new Error("a points command may say only one thing per run.");
     }
-    run.ctx.chat.sendMessage(text);
+    run.said = text;
+}
+
+// Attaches what the run said, if anything, as the response message. Engines
+// without ctx.success only have ctx.response, so fall back to it and add the
+// fields by hand.
+function withReply(run, fields) {
+    if (run.said === null) {
+        return fields;
+    }
+    if (typeof run.ctx.success === "function") {
+        return run.ctx.success(run.said, fields);
+    }
+    return Object.assign(run.ctx.response(true, run.said), fields);
 }
 
 function currencyName(run) {

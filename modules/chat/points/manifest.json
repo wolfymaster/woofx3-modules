@@ -79,13 +79,15 @@
     {
       "id": "points.handle_chat",
       "name": "Earn points and answer points commands",
-      "description": "Awards chat points to the sender of a chat message and answers any points command in it. The module's own \"Points from chat\" workflow runs this on every chat message; there is no need to add it anywhere else.",
+      "description": "Awards chat points to the sender of a chat message and works out the answer to any points command in it. The module's own \"Points from chat\" workflow runs this on every chat message and posts the answer; there is no need to add it anywhere else.",
       "type": "function",
       "function": "handle_chat_message",
       "returns": {
         "fields": [
           { "path": "earned", "type": "number", "description": "Points this message earned. 0 while the chatter is on cooldown." },
-          { "path": "command", "type": "string", "description": "The points command the message ran, such as \"gamble\". Empty when it ran none." }
+          { "path": "command", "type": "string", "description": "The points command the message ran, such as \"gamble\". Empty when it ran none." },
+          { "path": "said", "type": "boolean", "description": "Whether there is an answer to post in chat." },
+          { "path": "message", "type": "string", "description": "The answer to the points command. Only set when said is true." }
         ]
       },
       "taxonomy": [
@@ -191,6 +193,21 @@
         {
           "id": "points",
           "action": "points.handle_chat"
+        },
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "dependsOn": [
+            "points"
+          ],
+          "condition": {
+            "field": "${points.said}",
+            "operator": "eq",
+            "value": true
+          },
+          "parameters": {
+            "message": "${points.message}"
+          }
         }
       ],
       "taxonomy": [
