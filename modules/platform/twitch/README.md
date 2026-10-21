@@ -47,10 +47,6 @@ you can cheer for your friends' viewers right alongside your own.
 Your stream can take care of these Twitch jobs for you, right when they're
 needed.
 
-- **Send a chat message.** Thank a new follower or welcome a raid, all on its
-  own. This now comes with your stream itself as the "Send chat message" step,
-  so it is no longer listed as a Twitch action. If one of your workflows still
-  uses the old Twitch version, switch that step to "Send chat message".
 - **Give a shoutout.** Share another streamer's channel with your viewers, just
   like the shoutout button. Twitch only allows one shoutout every two minutes,
   so every shoutout waits its turn in your shoutout queue. If three raids land
@@ -67,6 +63,12 @@ needed.
   one, and the rest stay the same.
 - **Time out a chatter.** Give a rule breaker a break from chat, for as long as
   you choose.
+
+## Sending chat messages
+
+Chat messages are sent with the "Send chat message" step that comes with your
+stream, not with Twitch. If one of your workflows still uses the old Twitch
+chat step, switch it to "Send chat message".
 
 ## Ideas to try
 
