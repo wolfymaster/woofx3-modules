@@ -2,7 +2,7 @@
   "id": "woofx3_hype_board",
   "name": "Hype Board",
   "author": "WolfyMaster LLC",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "category": "overlay",
   "description": "An on-stream board for bits, subs and tips: who cheered, gifted and tipped the most, running totals, a goal with milestones, and a subathon timer that grows with every sub, cheer and tip. Ships three themes, and the board's own settings choose which parts show.",
   "taxonomy": [
@@ -215,6 +215,22 @@
       "taxonomy": [ "overlay.support" ]
     }
   ],
+  "triggers": [
+    {
+      "id": "announced",
+      "name": "Hype Board announced",
+      "description": "Fires when Hype Board has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "hype_board.announced",
+      "sentence": "Hype Board has something to say",
+      "taxonomy": [ "overlay.support" ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
+    }
+  ],
   "workflows": [
     { "id": "count-cheers", "name": "Hype Board: count cheers", "trigger": "channel.cheer", "steps": [ { "id": "count", "action": "record_cheer" } ] },
     { "id": "count-subs", "name": "Hype Board: count new subs", "trigger": "channel.subscribe", "steps": [ { "id": "count", "action": "record_sub" } ] },
@@ -230,7 +246,14 @@
     { "id": "chat-commands", "name": "Hype Board: chat commands", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] },
     { "id": "timer-started", "name": "Hype Board: subathon timer started", "trigger": "timer.started", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
     { "id": "timer-paused", "name": "Hype Board: subathon timer paused", "trigger": "timer.paused", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
-    { "id": "timer-ended", "name": "Hype Board: subathon timer ran out", "trigger": "timer.ended", "steps": [ { "id": "follow", "action": "sync_timer" } ] }
+    { "id": "timer-ended", "name": "Hype Board: subathon timer ran out", "trigger": "timer.ended", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
+    {
+      "id": "say-announcements",
+      "name": "Hype Board: say announcements in chat",
+      "trigger": "announced",
+      "steps": [ { "id": "say", "action": "woofx3:action:chat.reply", "parameters": { "message": "${trigger.data.message}" } } ],
+      "taxonomy": [ "overlay.support" ]
+    }
   ],
   "widgets": [
     {

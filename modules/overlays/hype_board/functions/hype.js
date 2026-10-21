@@ -41,6 +41,7 @@ var TIER_MULTIPLIER = { "1000": 1, "2000": 2, "3000": 5 };
 var DEFAULT_SECONDS_PER_SUB = 60;
 var DEFAULT_SECONDS_PER_100_BITS = 12;
 var DEFAULT_SECONDS_PER_TIP = 12;
+var EVENT_ANNOUNCED = "hype_board.announced";
 
 // ---------------------------------------------------------------------------
 // Event entry points (run by the module's own workflows)
@@ -186,68 +187,63 @@ function handle_chat_message(ctx) {
             return { command: "" };
         }
         resetBoard(ctx);
-        say(ctx, "The Hype Board is back to zero. Let's go!");
-        return { command: "resetboard" };
+        return announce(ctx, "The Hype Board is back to zero. Let's go!", { command: "resetboard" });
     }
 
     var timer = linkedTimer(ctx);
     if (!timer) {
-        say(ctx, "The Hype Board has no subathon timer picked yet.");
-        return { command: "subathon" };
+        return announce(ctx, "The Hype Board has no subathon timer picked yet.", { command: "subathon" });
     }
 
     if (sub === "" || !isMod) {
-        say(ctx, timerStatusLine(ctx, timer));
-        return { command: "subathon" };
+        return announce(ctx, timerStatusLine(ctx, timer), { command: "subathon" });
     }
 
     switch (sub) {
         case "start": {
             var length = words[2] ? parseDuration(words[2]) : null;
             if (words[2] && (length === null || length <= 0)) {
-                say(ctx, "Try !subathon start 4h, 90m or 1h30m.");
-                return { command: "subathon start" };
+                return announce(ctx, "Try !subathon start 4h, 90m or 1h30m.", { command: "subathon start" });
             }
             var started = startSubathon(ctx, timer, length);
-            say(ctx, "The subathon is on! " + formatDuration(started.remaining * 1000) + " on the clock.");
-            return { command: "subathon start" };
+            return announce(ctx, "The subathon is on! " + formatDuration(started.remaining * 1000) + " on the clock.", { command: "subathon start" });
         }
-        case "pause":
+        case "pause": {
+            var pausedLine;
             if (readSubathon(ctx).state.active && runTimer(ctx, timer, "get").running) {
                 var held = pauseTimer(ctx, timer, "mod");
-                say(ctx, "Subathon timer paused at " + formatDuration(held.remaining * 1000) + ".");
+                pausedLine = "Subathon timer paused at " + formatDuration(held.remaining * 1000) + ".";
             } else {
-                say(ctx, timerStatusLine(ctx, timer));
+                pausedLine = timerStatusLine(ctx, timer);
             }
-            return { command: "subathon pause" };
+            return announce(ctx, pausedLine, { command: "subathon pause" });
+        }
         case "resume":
             if (readSubathon(ctx).state.active && runTimer(ctx, timer, "get").remaining > 0) {
                 resumeTimer(ctx, timer);
             }
-            say(ctx, timerStatusLine(ctx, timer));
-            return { command: "subathon resume" };
+            return announce(ctx, timerStatusLine(ctx, timer), { command: "subathon resume" });
         case "add":
         case "remove": {
             var amount = words[2] ? parseDuration(words[2]) : null;
             if (amount === null || amount <= 0) {
-                say(ctx, "Try !subathon " + sub + " 10m.");
-                return { command: "subathon " + sub };
+                return announce(ctx, "Try !subathon " + sub + " 10m.", { command: "subathon " + sub });
             }
             if (!moderatorAddTime(ctx, timer, sub === "add" ? amount : -amount)) {
-                say(ctx, "There's no subathon running. Start one with !subathon start.");
-                return { command: "subathon " + sub };
+                return announce(ctx, "There's no subathon running. Start one with !subathon start.", { command: "subathon " + sub });
             }
-            say(ctx, (sub === "add" ? "Added " : "Took away ") + formatDuration(amount) + ". " + timerStatusLine(ctx, timer));
-            return { command: "subathon " + sub };
+            return announce(
+                ctx,
+                (sub === "add" ? "Added " : "Took away ") + formatDuration(amount) + ". " + timerStatusLine(ctx, timer),
+                { command: "subathon " + sub }
+            );
         }
         case "end":
         case "stop":
             endSubathon(ctx, timer);
-            say(ctx, "The subathon timer is done. Thank you all!");
-            return { command: "subathon end" };
+            return announce(ctx, "The subathon timer is done. Thank you all!", { command: "subathon end" });
         default:
-            say(ctx, "Subathon commands: start, pause, resume, add, remove, end.");
-            return { command: "subathon" };
+            return announce(ctx, "Subathon commands: start, pause, resume, add, remove, end.", { command: "subathon" });
     }
 }
 
@@ -650,11 +646,30 @@ function currencySymbol(ctx) {
     return typeof s === "string" ? s : "$";
 }
 
-function say(ctx, text) {
-    if (!ctx.chat || typeof ctx.chat.sendMessage !== "function") {
-        throw new Error("ctx.chat.sendMessage is not available on this engine.");
+// Chat is spoken by the module's "say announcements in chat" workflow, which
+// posts the message of each announced event, so the streamer can reword it or
+// switch it off. Only runs with something to say publish one: a Send chat
+// message step straight after the handler would fail on every silent chat
+// message.
+function announce(ctx, text, fields) {
+    return ctx.result(succeed(ctx, text, fields), [announcement(text)]);
+}
+
+function announcement(text) {
+    return { type: EVENT_ANNOUNCED, data: { message: text } };
+}
+
+// ctx.success where the engine has it; older engines only have ctx.response,
+// which takes the same fields assigned onto its result.
+function succeed(ctx, message, fields) {
+    if (typeof ctx.success === "function") {
+        return ctx.success(message, fields);
     }
-    ctx.chat.sendMessage(text);
+    var reply = ctx.response(true, message);
+    Object.keys(fields || {}).forEach(function (key) {
+        reply[key] = fields[key];
+    });
+    return reply;
 }
 
 function wholeNumber(value) {
