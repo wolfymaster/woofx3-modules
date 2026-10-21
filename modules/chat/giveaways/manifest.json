@@ -72,7 +72,7 @@
     {
       "id": "handle_chat_message",
       "name": "Handle giveaway chat message",
-      "description": "Reads one chat message for giveaway entries and moderator giveaway commands. The module's own workflow runs this on every chat message.",
+      "description": "Reads one chat message for giveaway entries and moderator giveaway commands, and returns any reply as the message. The module's own workflow runs this on every chat message and posts the reply.",
       "type": "function",
       "function": "handle_chat_message",
       "returns": {
@@ -81,6 +81,16 @@
             "path": "handled",
             "type": "string",
             "description": "What the message did: none, entered, started, drawn, ended, cancelled or status."
+          },
+          {
+            "path": "said",
+            "type": "boolean",
+            "description": "Whether there is a reply to post in chat."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post. Only set when said is true."
           }
         ]
       },
@@ -91,7 +101,7 @@
     {
       "id": "start_giveaway",
       "name": "Start giveaway",
-      "description": "Open a giveaway for entries and announce it in chat. Does nothing when one is already open.",
+      "description": "Open a giveaway for entries. Returns the announcement as the message, for a Send chat message step to post. Does nothing when one is already open.",
       "type": "function",
       "function": "start_giveaway",
       "schema": [
@@ -120,6 +130,16 @@
           {
             "path": "keyword",
             "type": "string"
+          },
+          {
+            "path": "said",
+            "type": "boolean",
+            "description": "Whether there is a reply to post in chat."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post. Only set when said is true."
           }
         ]
       },
@@ -130,7 +150,7 @@
     {
       "id": "draw_winner",
       "name": "Draw giveaway winner",
-      "description": "Close entries and pick a random winner, announcing them in chat. Drawing again picks someone new.",
+      "description": "Close entries and pick a random winner. Returns the winner announcement as the message, for a Send chat message step to post. Drawing again picks someone new.",
       "type": "function",
       "function": "draw_winner",
       "returns": {
@@ -147,6 +167,16 @@
           {
             "path": "entryCount",
             "type": "number"
+          },
+          {
+            "path": "said",
+            "type": "boolean",
+            "description": "Whether there is a reply to post in chat."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post. Only set when said is true."
           }
         ]
       },
@@ -157,7 +187,7 @@
     {
       "id": "end_giveaway",
       "name": "End giveaway entries",
-      "description": "Stop taking entries without drawing. The entries are kept, so a winner can still be drawn.",
+      "description": "Stop taking entries without drawing, and return a confirmation as the message. The entries are kept, so a winner can still be drawn.",
       "type": "function",
       "function": "end_giveaway",
       "returns": {
@@ -165,6 +195,16 @@
           {
             "path": "entryCount",
             "type": "number"
+          },
+          {
+            "path": "said",
+            "type": "boolean",
+            "description": "Whether there is a reply to post in chat."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post. Only set when said is true."
           }
         ]
       },
@@ -276,6 +316,22 @@
           "id": "giveaway",
           "type": "action",
           "action": "handle_chat_message"
+        },
+        {
+          "id": "say",
+          "type": "action",
+          "action": "woofx3:action:chat.reply",
+          "dependsOn": [
+            "giveaway"
+          ],
+          "condition": {
+            "field": "${giveaway.said}",
+            "operator": "eq",
+            "value": true
+          },
+          "parameters": {
+            "message": "${giveaway.message}"
+          }
         }
       ]
     }

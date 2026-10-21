@@ -9,9 +9,9 @@
 // order is not something to bet a lost entry on. "" means no giveaway, since
 // storage has no delete.
 //
-// Every entry point is also a workflow action, and neither that path nor the
-// command path turns ctx.response into a chat reply, so replies go through
-// ctx.chat.sendMessage.
+// Every entry point is also a workflow action. Nothing here writes to chat: a
+// reply comes back as `message` with `said` true, and a Send chat message step
+// after the function posts it. `said` is false when there is nothing to say.
 
 var STATE_KEY = "giveaway";
 var MAX_ATTEMPTS = 8;
@@ -30,7 +30,7 @@ function handle_chat_message(ctx) {
     var data = (ctx.event && ctx.event.data) || {};
     var message = cleanMessage(data.message);
     if (!message) {
-        return { handled: "none" };
+        return silent({ handled: "none" });
     }
     var words = message.split(/\s+/);
     var first = words[0].toLowerCase();
@@ -38,7 +38,7 @@ function handle_chat_message(ctx) {
     if (first === "!giveaway") {
         var membership = data.membership || {};
         if (membership.isModerator !== true && membership.isBroadcaster !== true) {
-            return { handled: "none", reason: "not a moderator" };
+            return silent({ handled: "none", reason: "not a moderator" });
         }
         var sub = (words[1] || "").toLowerCase();
         var by = String(data.chatterName || "");
@@ -64,7 +64,7 @@ function handle_chat_message(ctx) {
 
     var state = parseState(ctx.storage.get(STATE_KEY));
     if (!state || !state.open || first !== state.keyword.toLowerCase()) {
-        return { handled: "none" };
+        return silent({ handled: "none" });
     }
     return enter(ctx, data);
 }
@@ -98,14 +98,16 @@ function startGiveaway(ctx, keyword, prize, startedBy) {
     });
 
     if (!outcome.wrote) {
-        ctx.chat.sendMessage("A giveaway is already open! Type " + outcome.result.keyword + " to enter.");
-        return { handled: "started", started: false, keyword: outcome.result.keyword };
+        return speak(
+            ctx,
+            "A giveaway is already open! Type " + outcome.result.keyword + " to enter.",
+            { handled: "started", started: false, keyword: outcome.result.keyword }
+        );
     }
 
-    ctx.chat.sendMessage(
-        "Giveaway time" + (prize ? " for " + prize : "") + "! Type " + keyword + " in chat to enter."
-    );
-    return ctx.result(
+    return speak(
+        ctx,
+        "Giveaway time" + (prize ? " for " + prize : "") + "! Type " + keyword + " in chat to enter.",
         { handled: "started", started: true, keyword: keyword },
         [{ type: EVENT_STARTED, data: { keyword: keyword, prize: prize, startedBy: startedBy } }]
     );
@@ -116,7 +118,7 @@ function enter(ctx, data) {
     var id = String(data.chatterId || "");
     var key = id || name.toLowerCase();
     if (!key) {
-        return { handled: "none", reason: "no chatter" };
+        return silent({ handled: "none", reason: "no chatter" });
     }
     var membership = data.membership || {};
     var weight = membership.isSubscriber === true ? subscriberLuck(ctx) : 1;
@@ -141,17 +143,15 @@ function enter(ctx, data) {
     // A repeat entry or a full giveaway gets no reply: answering every
     // "!join" spam would flood chat with the bot's own messages.
     if (!outcome.wrote) {
-        return { handled: "none", reason: outcome.result };
+        return silent({ handled: "none", reason: outcome.result });
     }
 
     var entryCount = outcome.result;
+    var events = [{ type: EVENT_ENTERED, data: { userName: name, userId: id, entryCount: entryCount } }];
     if (settingBool(ctx, "announceEntries")) {
-        ctx.chat.sendMessage("@" + name + " you're in! Good luck!");
+        return speak(ctx, "@" + name + " you're in! Good luck!", { handled: "entered", entryCount: entryCount }, events);
     }
-    return ctx.result(
-        { handled: "entered", entryCount: entryCount },
-        [{ type: EVENT_ENTERED, data: { userName: name, userId: id, entryCount: entryCount } }]
-    );
+    return ctx.result(silent({ handled: "entered", entryCount: entryCount }), events);
 }
 
 function drawWinner(ctx) {
@@ -192,21 +192,21 @@ function drawWinner(ctx) {
 
     if (!outcome.wrote) {
         var reason = outcome.result.reason;
-        ctx.chat.sendMessage(
+        return speak(
+            ctx,
             reason === "none" ? "There's no giveaway to draw from. Start one with !giveaway start."
                 : reason === "empty" ? "Nobody has entered the giveaway yet!"
-                    : "Everyone who entered has already won!"
+                    : "Everyone who entered has already won!",
+            { handled: "drawn", winnerName: "", winnerId: "", entryCount: 0 }
         );
-        return { handled: "drawn", winnerName: "", winnerId: "", entryCount: 0 };
     }
 
     var picked = outcome.result.entrant;
     var prize = outcome.result.prize;
     var entryCount = outcome.result.entryCount;
-    ctx.chat.sendMessage(
-        "Congratulations @" + picked[1] + ", you won" + (prize ? " " + prize : " the giveaway") + "!"
-    );
-    return ctx.result(
+    return speak(
+        ctx,
+        "Congratulations @" + picked[1] + ", you won" + (prize ? " " + prize : " the giveaway") + "!",
         { handled: "drawn", winnerName: picked[1], winnerId: picked[2], entryCount: entryCount },
         [{ type: EVENT_WINNER, data: { winnerName: picked[1], winnerId: picked[2], prize: prize, entryCount: entryCount } }]
     );
@@ -222,39 +222,54 @@ function endGiveaway(ctx) {
     });
     var count = outcome.result;
     if (count < 0) {
-        ctx.chat.sendMessage("There's no giveaway running.");
-        return { handled: "ended", entryCount: 0 };
+        return speak(ctx, "There's no giveaway running.", { handled: "ended", entryCount: 0 });
     }
-    ctx.chat.sendMessage(
+    return speak(
+        ctx,
         outcome.wrote
             ? "Entries are closed! " + plural(count, "viewer") + " entered."
-            : "Entries were already closed. " + plural(count, "viewer") + " entered."
+            : "Entries were already closed. " + plural(count, "viewer") + " entered.",
+        { handled: "ended", entryCount: count }
     );
-    return { handled: "ended", entryCount: count };
 }
 
 function cancelGiveaway(ctx) {
     var outcome = update(ctx, function (state) {
         return state ? { next: null, result: true } : { result: false };
     });
-    ctx.chat.sendMessage(outcome.wrote ? "The giveaway was cancelled." : "There's no giveaway running.");
-    return { handled: "cancelled", cancelled: outcome.wrote };
+    return speak(
+        ctx,
+        outcome.wrote ? "The giveaway was cancelled." : "There's no giveaway running.",
+        { handled: "cancelled", cancelled: outcome.wrote }
+    );
 }
 
 function reportStatus(ctx) {
     var state = parseState(ctx.storage.get(STATE_KEY));
+    var message;
     if (!state) {
-        ctx.chat.sendMessage("No giveaway right now. Mods can start one with !giveaway start.");
+        message = "No giveaway right now. Mods can start one with !giveaway start.";
     } else if (state.open) {
-        ctx.chat.sendMessage(
-            "Giveaway open! Type " + state.keyword + " to enter. " + plural(state.entrants.length, "viewer") + " so far."
-        );
+        message = "Giveaway open! Type " + state.keyword + " to enter. " + plural(state.entrants.length, "viewer") + " so far.";
     } else {
-        ctx.chat.sendMessage(
-            "Entries are closed with " + plural(state.entrants.length, "viewer") + ". Mods can draw with !giveaway draw."
-        );
+        message = "Entries are closed with " + plural(state.entrants.length, "viewer") + ". Mods can draw with !giveaway draw.";
     }
-    return { handled: "status" };
+    return speak(ctx, message, { handled: "status" });
+}
+
+// A reply for a Send chat message step to post. Engines without ctx.success
+// only have ctx.response, so fall back to it and add the fields by hand.
+function speak(ctx, message, fields, events) {
+    fields.said = true;
+    var value = typeof ctx.success === "function"
+        ? ctx.success(message, fields)
+        : Object.assign(ctx.response(true, message), fields);
+    return events ? ctx.result(value, events) : value;
+}
+
+function silent(fields) {
+    fields.said = false;
+    return fields;
 }
 
 // Read-modify-write under compareAndSet. `change` gets the current state (or
