@@ -86,8 +86,7 @@
         "fields": [
           { "path": "earned", "type": "number", "description": "Points this message earned. 0 while the chatter is on cooldown." },
           { "path": "command", "type": "string", "description": "The points command the message ran, such as \"gamble\". Empty when it ran none." },
-          { "path": "said", "type": "boolean", "description": "Whether there is an answer to post in chat." },
-          { "path": "message", "type": "string", "description": "The answer to the points command. Only set when said is true." }
+          { "path": "message", "type": "string", "description": "The answer to the points command. Only set when the message ran one; the module's own workflow posts it." }
         ]
       },
       "taxonomy": [
@@ -182,6 +181,22 @@
           { "path": "reason", "type": "string", "description": "What changed it: chat, gamble, give, gift from <name>, refund, carried over, added by mod, removed by mod, or a workflow's reason.", "example": "gamble" }
         ]
       }
+    },
+    {
+      "id": "announced",
+      "name": "Loyalty Points announced",
+      "description": "Fires when Loyalty Points has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "points.announced",
+      "sentence": "Loyalty Points has something to say",
+      "taxonomy": [
+        "chat.loyalty"
+      ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
     }
   ],
   "workflows": [
@@ -193,20 +208,22 @@
         {
           "id": "points",
           "action": "points.handle_chat"
-        },
+        }
+      ],
+      "taxonomy": [
+        "chat.loyalty"
+      ]
+    },
+    {
+      "id": "say-announcements",
+      "name": "Loyalty Points: say announcements in chat",
+      "trigger": "announced",
+      "steps": [
         {
           "id": "say",
           "action": "woofx3:action:chat.reply",
-          "dependsOn": [
-            "points"
-          ],
-          "condition": {
-            "field": "${points.said}",
-            "operator": "eq",
-            "value": true
-          },
           "parameters": {
-            "message": "${points.message}"
+            "message": "${trigger.data.message}"
           }
         }
       ],

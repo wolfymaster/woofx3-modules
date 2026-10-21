@@ -83,14 +83,9 @@
             "description": "What the message did: none, entered, started, drawn, ended, cancelled or status."
           },
           {
-            "path": "said",
-            "type": "boolean",
-            "description": "Whether there is a reply to post in chat."
-          },
-          {
             "path": "message",
             "type": "string",
-            "description": "The reply for a Send chat message step to post. Only set when said is true."
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -132,14 +127,9 @@
             "type": "string"
           },
           {
-            "path": "said",
-            "type": "boolean",
-            "description": "Whether there is a reply to post in chat."
-          },
-          {
             "path": "message",
             "type": "string",
-            "description": "The reply for a Send chat message step to post. Only set when said is true."
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -169,14 +159,9 @@
             "type": "number"
           },
           {
-            "path": "said",
-            "type": "boolean",
-            "description": "Whether there is a reply to post in chat."
-          },
-          {
             "path": "message",
             "type": "string",
-            "description": "The reply for a Send chat message step to post. Only set when said is true."
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -197,14 +182,9 @@
             "type": "number"
           },
           {
-            "path": "said",
-            "type": "boolean",
-            "description": "Whether there is a reply to post in chat."
-          },
-          {
             "path": "message",
             "type": "string",
-            "description": "The reply for a Send chat message step to post. Only set when said is true."
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -304,6 +284,22 @@
           }
         ]
       }
+    },
+    {
+      "id": "announced",
+      "name": "Giveaways announced",
+      "description": "Fires when Giveaways has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "giveaways.announced",
+      "sentence": "Giveaways has something to say",
+      "taxonomy": [
+        "chat.giveaways"
+      ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
     }
   ],
   "workflows": [
@@ -316,23 +312,24 @@
           "id": "giveaway",
           "type": "action",
           "action": "handle_chat_message"
-        },
+        }
+      ]
+    },
+    {
+      "id": "say-announcements",
+      "name": "Giveaways: say announcements in chat",
+      "trigger": "announced",
+      "steps": [
         {
           "id": "say",
-          "type": "action",
           "action": "woofx3:action:chat.reply",
-          "dependsOn": [
-            "giveaway"
-          ],
-          "condition": {
-            "field": "${giveaway.said}",
-            "operator": "eq",
-            "value": true
-          },
           "parameters": {
-            "message": "${giveaway.message}"
+            "message": "${trigger.data.message}"
           }
         }
+      ],
+      "taxonomy": [
+        "chat.giveaways"
       ]
     }
   ]

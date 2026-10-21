@@ -527,6 +527,21 @@
       ]
     }
   ],
+  "triggers": [
+    {
+      "id": "announced",
+      "name": "Chat Essentials announced",
+      "description": "Fires when Chat Essentials has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "essentials.announced",
+      "sentence": "Chat Essentials has something to say",
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
+    }
+  ],
   "workflows": [
     {
       "id": "track-stream-start",
@@ -558,20 +573,19 @@
         {
           "id": "manage",
           "action": "manage_quotes"
-        },
+        }
+      ]
+    },
+    {
+      "id": "say-announcements",
+      "name": "Chat Essentials: say announcements in chat",
+      "trigger": "announced",
+      "steps": [
         {
           "id": "say",
           "action": "woofx3:action:chat.reply",
-          "dependsOn": [
-            "manage"
-          ],
-          "condition": {
-            "field": "${manage.handled}",
-            "operator": "eq",
-            "value": true
-          },
           "parameters": {
-            "message": "${manage.message}"
+            "message": "${trigger.data.message}"
           }
         }
       ]
