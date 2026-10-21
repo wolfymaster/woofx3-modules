@@ -9,19 +9,19 @@ function song_request(ctx) {
     // "{songTitle}", so variables.songTitle is the query when configured).
     // ctx.event.parameters is reserved for workflow-step-authored config
     // (e.g. deviceId below) and is never used for command-derived data.
-    // Every exit point below uses ctx.response(success, message) instead of
-    // ctx.chat.sendMessage — one mechanism instead of two, and it works
-    // whether or not the chat extension happens to be bound.
+    // Every exit point returns its message instead of speaking: the !sr
+    // command's "Send chat message" step posts it, so the streamer can reword
+    // or drop the reply.
     var data = (ctx.event && ctx.event.data) ? ctx.event.data : {};
 
     var variables = data.variables || {};
     var query = (variables.songTitle || data.text || "").trim();
     if (!query) {
-        return ctx.response(false, "Usage: !sr <song name or Spotify URL>");
+        return outcome(ctx, false, "Usage: !sr <song name or Spotify URL>");
     }
 
     if (!ctx.oauth) {
-        return ctx.response(false, "Failed to Authenticate to Spotify");
+        return outcome(ctx, false, "Failed to Authenticate to Spotify");
     }
 
     // The engine attaches the streamer's token and refreshes it, and throws
@@ -52,10 +52,10 @@ function song_request(ctx) {
         var trackId = urlMatch[1];
         var trackResp = spotifyRequest("https://api.spotify.com/v1/tracks/" + trackId, "GET", {});
         if (!trackResp || trackResp.status === 401) {
-            return ctx.response(false, "Failed to Authenticate to Spotify");
+            return outcome(ctx, false, "Failed to Authenticate to Spotify");
         }
         if (!trackResp || trackResp.status !== 200 || !trackResp.body) {
-            return ctx.response(false, "Could not find that track on Spotify.");
+            return outcome(ctx, false, "Could not find that track on Spotify.");
         }
         song = {
             name: trackResp.body.name,
@@ -69,11 +69,11 @@ function song_request(ctx) {
             { query: { q: query, type: "track", limit: "1" } }
         );
         if (!searchResp || searchResp.status === 401) {
-            return ctx.response(false, "Failed to Authenticate to Spotify");
+            return outcome(ctx, false, "Failed to Authenticate to Spotify");
         }
         var tracks = searchResp && searchResp.body && searchResp.body.tracks && searchResp.body.tracks.items;
         if (!tracks || tracks.length === 0) {
-            return ctx.response(false, "No results found for: " + query);
+            return outcome(ctx, false, "No results found for: " + query);
         }
         var track = tracks[0];
         song = {
@@ -92,19 +92,35 @@ function song_request(ctx) {
 
     var queueResp = spotifyRequest(queueUrl, "POST", {});
     if (!queueResp || queueResp.status === 401) {
-        return ctx.response(false, "Failed to Authenticate to Spotify");
+        return outcome(ctx, false, "Failed to Authenticate to Spotify");
     }
 
     // 200 or 204 both indicate success.
     if (!queueResp || (queueResp.status !== 200 && queueResp.status !== 204)) {
-        return ctx.response(false, "Failed to queue " + song.name + ".");
+        return outcome(ctx, false, "Failed to queue " + song.name + ".");
     }
 
     // The returned object is the workflow step's output, so the song and artist
     // ride along on the reply for later steps to read as ${stepId.song} and
     // ${stepId.artist}. Must match the action's `returns` in manifest.json.
-    var reply = ctx.response(true, "Added to queue: " + song.name + " by " + song.artist);
-    reply.song = song.name;
-    reply.artist = song.artist;
+    return outcome(ctx, true, "Added to queue: " + song.name + " by " + song.artist, {
+        song: song.name,
+        artist: song.artist
+    });
+}
+
+// ctx.success / ctx.failure where the engine has them; older engines only have
+// ctx.response, which takes the same fields assigned onto its result.
+function outcome(ctx, success, message, fields) {
+    if (success && typeof ctx.success === "function") {
+        return ctx.success(message, fields);
+    }
+    if (!success && typeof ctx.failure === "function") {
+        return ctx.failure(message, fields);
+    }
+    var reply = ctx.response(success, message);
+    Object.keys(fields || {}).forEach(function (key) {
+        reply[key] = fields[key];
+    });
     return reply;
 }
