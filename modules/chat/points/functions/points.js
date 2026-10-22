@@ -29,6 +29,7 @@ var LEADERBOARD_SHOWN = 5;
 var CAS_ATTEMPTS = 6;
 // Events a single run may ask the engine to publish is capped at 16.
 var MAX_EVENTS = 16;
+var EVENT_ANNOUNCED = "points.announced";
 
 // ---------------------------------------------------------------------------
 // Entry points
@@ -36,7 +37,11 @@ var MAX_EVENTS = 16;
 
 /**
  * Runs on every chat message (the bundled workflow binds it to user.message):
- * awards chat points, then answers any points command in the message.
+ * awards chat points, then answers any points command in the message. The
+ * answer comes back as `message` and is announced with a points.announced
+ * event that the module's workflow posts with a Send chat message step;
+ * nothing is written to chat from here. Ordinary chat has nothing to say, so
+ * it publishes no event and posts nothing.
  * Commands are handled here rather than as manifest commands because the
  * command event carries only the chatter's name, and !addpoints must know
  * whether the chatter is a moderator, which only the chat message says.
@@ -62,7 +67,7 @@ function handle_chat_message(ctx) {
     if (message.charAt(0) === "!") {
         outcome.command = runCommand(run, chatterId, chatterName, membership, message);
     }
-    return finish(run, outcome);
+    return finish(run, withReply(run, outcome));
 }
 
 /**
@@ -458,7 +463,7 @@ function updateLeaderboard(run, key, name, points) {
 // ---------------------------------------------------------------------------
 
 function newRun(ctx) {
-    return { ctx: ctx, events: [] };
+    return { ctx: ctx, events: [], said: null };
 }
 
 function queueEvent(run, name, points, delta, reason) {
@@ -480,11 +485,27 @@ function finish(run, value) {
     return value;
 }
 
+// A points command answers with at most one line, held until the run returns.
 function say(run, text) {
-    if (!run.ctx.chat || typeof run.ctx.chat.sendMessage !== "function") {
-        throw new Error("ctx.chat.sendMessage is not available on this engine.");
+    if (run.said !== null) {
+        throw new Error("a points command may say only one thing per run.");
     }
-    run.ctx.chat.sendMessage(text);
+    run.said = text;
+}
+
+// Attaches what the run said, if anything, as the response message and queues
+// the event that gets it posted. Engines without ctx.success only have
+// ctx.response, so fall back to it and add the fields by hand. The announced
+// event bypasses MAX_EVENTS: dropping it would silence the answer.
+function withReply(run, fields) {
+    if (run.said === null) {
+        return fields;
+    }
+    run.events.push({ type: EVENT_ANNOUNCED, data: { message: run.said } });
+    if (typeof run.ctx.success === "function") {
+        return run.ctx.success(run.said, fields);
+    }
+    return Object.assign(run.ctx.response(true, run.said), fields);
 }
 
 function currencyName(run) {

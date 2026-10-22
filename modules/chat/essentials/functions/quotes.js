@@ -8,6 +8,7 @@
 var QUOTES_KEY = "quotes";
 var MAX_CAS_ATTEMPTS = 5;
 var MAX_QUOTE_LENGTH = 400;
+var EVENT_ANNOUNCED = "essentials.announced";
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function quote(ctx) {
@@ -56,14 +57,21 @@ function manageQuotes(ctx) {
     if (membership.isModerator !== true && membership.isBroadcaster !== true) {
         var denied = reply(ctx, false, "Sorry " + (data.chatterName || "friend") + ", only mods can change quotes.");
         denied.handled = true;
-        return denied;
+        return announce(ctx, denied);
     }
 
     var result = command === "addquote"
         ? addQuote(ctx, argument, data.chatterName || "")
         : deleteQuote(ctx, argument);
     result.handled = true;
-    return result;
+    return announce(ctx, result);
+}
+
+// Also publishes the reply as an essentials.announced event, which the
+// module's quote-commands workflow posts with a Send chat message step. Only
+// !addquote and !delquote get here, so ordinary chat posts nothing.
+function announce(ctx, result) {
+    return ctx.result(result, [{ type: EVENT_ANNOUNCED, data: { message: result.message } }]);
 }
 
 function addQuote(ctx, text, addedBy) {
@@ -168,12 +176,13 @@ function inputText(ctx, paramKey) {
     return typeof data.text === "string" ? data.text.trim() : "";
 }
 
-// A command's actions reach chat only through the chat extension: the
-// command path does not turn a returned ctx.response into a reply. The same
-// text rides on the result for a workflow to reuse as ${step.message}.
+// The function returns what should be said; a "Send chat message" step posts
+// ${step.message}. Engines without ctx.success/ctx.failure only have
+// ctx.response, so fall back to it and add the fields by hand.
 function reply(ctx, ok, message) {
-    if (ctx.chat && typeof ctx.chat.sendMessage === "function") {
-        ctx.chat.sendMessage(message);
+    var build = ok ? ctx.success : ctx.failure;
+    if (typeof build === "function") {
+        return build(message, { ok: ok });
     }
     var result = ctx.response(ok, message);
     result.ok = ok;

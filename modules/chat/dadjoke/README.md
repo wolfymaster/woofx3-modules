@@ -24,6 +24,9 @@ your chat won't hear the same one over and over. Puns, knock-knock jokes,
 - Every joke is family-friendly, so it's safe for any stream.
 - If another module already has its own !dadjoke, keep just one so chat
   doesn't get two answers.
+- The joke is sent by a **Send chat message** step. If you installed an earlier
+  version, add that step to your !dadjoke command (or delete the command and
+  install the module again) to bring the jokes back.
 
 ## Thanks
 

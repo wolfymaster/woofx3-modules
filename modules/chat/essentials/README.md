@@ -53,3 +53,7 @@ Leave any of these blank to use the built-in messages.
   stream.
 - If another module already uses one of these commands, like its own !lurk,
   keep just one so chat doesn't get two answers.
+- Replies are sent by a **Send chat message** step. If you installed an earlier
+  version, your existing commands keep their old steps and will go quiet. Add a
+  **Send chat message** step to each one (or delete the command and install the
+  module again) to bring the replies back.

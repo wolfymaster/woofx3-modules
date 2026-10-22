@@ -9,9 +9,12 @@
 // order is not something to bet a lost entry on. "" means no giveaway, since
 // storage has no delete.
 //
-// Every entry point is also a workflow action, and neither that path nor the
-// command path turns ctx.response into a chat reply, so replies go through
-// ctx.chat.sendMessage.
+// Every entry point is also a workflow action. Nothing here writes to chat: a
+// reply comes back as `message`. A chat-driven reply is also announced with a
+// giveaways.announced event that the module's workflow posts with a Send chat
+// message step, so ordinary chat (nothing to say) posts nothing and fails
+// nothing. The start_giveaway, draw_winner and end_giveaway actions only return
+// `message`; a workflow that calls them adds its own Send chat message step.
 
 var STATE_KEY = "giveaway";
 var MAX_ATTEMPTS = 8;
@@ -24,6 +27,7 @@ var MAX_SUBSCRIBER_LUCK = 10;
 var EVENT_STARTED = "giveaways.started";
 var EVENT_ENTERED = "giveaways.entered";
 var EVENT_WINNER = "giveaways.winner";
+var EVENT_ANNOUNCED = "giveaways.announced";
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function handle_chat_message(ctx) {
@@ -45,15 +49,15 @@ function handle_chat_message(ctx) {
         switch (sub) {
             case "start":
             case "open":
-                return startGiveaway(ctx, words[2] || "", "", by);
+                return startGiveaway(ctx, words[2] || "", "", by, true);
             case "draw":
             case "pick":
             case "roll":
-                return drawWinner(ctx);
+                return drawWinner(ctx, true);
             case "end":
             case "close":
             case "stop":
-                return endGiveaway(ctx);
+                return endGiveaway(ctx, true);
             case "cancel":
             case "clear":
                 return cancelGiveaway(ctx);
@@ -72,20 +76,20 @@ function handle_chat_message(ctx) {
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function start_giveaway(ctx) {
     var params = (ctx.event && ctx.event.parameters) || {};
-    return startGiveaway(ctx, String(params.keyword || ""), String(params.prize || ""), "");
+    return startGiveaway(ctx, String(params.keyword || ""), String(params.prize || ""), "", false);
 }
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function draw_winner(ctx) {
-    return drawWinner(ctx);
+    return drawWinner(ctx, false);
 }
 
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
 function end_giveaway(ctx) {
-    return endGiveaway(ctx);
+    return endGiveaway(ctx, false);
 }
 
-function startGiveaway(ctx, keyword, prize, startedBy) {
+function startGiveaway(ctx, keyword, prize, startedBy, announce) {
     keyword = keyword.trim() || settingString(ctx, "defaultKeyword", DEFAULT_KEYWORD);
     prize = prize.trim();
 
@@ -98,14 +102,16 @@ function startGiveaway(ctx, keyword, prize, startedBy) {
     });
 
     if (!outcome.wrote) {
-        ctx.chat.sendMessage("A giveaway is already open! Type " + outcome.result.keyword + " to enter.");
-        return { handled: "started", started: false, keyword: outcome.result.keyword };
+        return speak(
+            ctx, announce,
+            "A giveaway is already open! Type " + outcome.result.keyword + " to enter.",
+            { handled: "started", started: false, keyword: outcome.result.keyword }
+        );
     }
 
-    ctx.chat.sendMessage(
-        "Giveaway time" + (prize ? " for " + prize : "") + "! Type " + keyword + " in chat to enter."
-    );
-    return ctx.result(
+    return speak(
+        ctx, announce,
+        "Giveaway time" + (prize ? " for " + prize : "") + "! Type " + keyword + " in chat to enter.",
         { handled: "started", started: true, keyword: keyword },
         [{ type: EVENT_STARTED, data: { keyword: keyword, prize: prize, startedBy: startedBy } }]
     );
@@ -145,16 +151,14 @@ function enter(ctx, data) {
     }
 
     var entryCount = outcome.result;
+    var events = [{ type: EVENT_ENTERED, data: { userName: name, userId: id, entryCount: entryCount } }];
     if (settingBool(ctx, "announceEntries")) {
-        ctx.chat.sendMessage("@" + name + " you're in! Good luck!");
+        return speak(ctx, true, "@" + name + " you're in! Good luck!", { handled: "entered", entryCount: entryCount }, events);
     }
-    return ctx.result(
-        { handled: "entered", entryCount: entryCount },
-        [{ type: EVENT_ENTERED, data: { userName: name, userId: id, entryCount: entryCount } }]
-    );
+    return ctx.result({ handled: "entered", entryCount: entryCount }, events);
 }
 
-function drawWinner(ctx) {
+function drawWinner(ctx, announce) {
     var outcome = update(ctx, function (state) {
         if (!state) {
             return { result: { reason: "none" } };
@@ -192,27 +196,27 @@ function drawWinner(ctx) {
 
     if (!outcome.wrote) {
         var reason = outcome.result.reason;
-        ctx.chat.sendMessage(
+        return speak(
+            ctx, announce,
             reason === "none" ? "There's no giveaway to draw from. Start one with !giveaway start."
                 : reason === "empty" ? "Nobody has entered the giveaway yet!"
-                    : "Everyone who entered has already won!"
+                    : "Everyone who entered has already won!",
+            { handled: "drawn", winnerName: "", winnerId: "", entryCount: 0 }
         );
-        return { handled: "drawn", winnerName: "", winnerId: "", entryCount: 0 };
     }
 
     var picked = outcome.result.entrant;
     var prize = outcome.result.prize;
     var entryCount = outcome.result.entryCount;
-    ctx.chat.sendMessage(
-        "Congratulations @" + picked[1] + ", you won" + (prize ? " " + prize : " the giveaway") + "!"
-    );
-    return ctx.result(
+    return speak(
+        ctx, announce,
+        "Congratulations @" + picked[1] + ", you won" + (prize ? " " + prize : " the giveaway") + "!",
         { handled: "drawn", winnerName: picked[1], winnerId: picked[2], entryCount: entryCount },
         [{ type: EVENT_WINNER, data: { winnerName: picked[1], winnerId: picked[2], prize: prize, entryCount: entryCount } }]
     );
 }
 
-function endGiveaway(ctx) {
+function endGiveaway(ctx, announce) {
     var outcome = update(ctx, function (state) {
         if (!state || !state.open) {
             return { result: state ? state.entrants.length : -1 };
@@ -222,39 +226,54 @@ function endGiveaway(ctx) {
     });
     var count = outcome.result;
     if (count < 0) {
-        ctx.chat.sendMessage("There's no giveaway running.");
-        return { handled: "ended", entryCount: 0 };
+        return speak(ctx, announce, "There's no giveaway running.", { handled: "ended", entryCount: 0 });
     }
-    ctx.chat.sendMessage(
+    return speak(
+        ctx, announce,
         outcome.wrote
             ? "Entries are closed! " + plural(count, "viewer") + " entered."
-            : "Entries were already closed. " + plural(count, "viewer") + " entered."
+            : "Entries were already closed. " + plural(count, "viewer") + " entered.",
+        { handled: "ended", entryCount: count }
     );
-    return { handled: "ended", entryCount: count };
 }
 
 function cancelGiveaway(ctx) {
     var outcome = update(ctx, function (state) {
         return state ? { next: null, result: true } : { result: false };
     });
-    ctx.chat.sendMessage(outcome.wrote ? "The giveaway was cancelled." : "There's no giveaway running.");
-    return { handled: "cancelled", cancelled: outcome.wrote };
+    return speak(
+        ctx, true,
+        outcome.wrote ? "The giveaway was cancelled." : "There's no giveaway running.",
+        { handled: "cancelled", cancelled: outcome.wrote }
+    );
 }
 
 function reportStatus(ctx) {
     var state = parseState(ctx.storage.get(STATE_KEY));
+    var message;
     if (!state) {
-        ctx.chat.sendMessage("No giveaway right now. Mods can start one with !giveaway start.");
+        message = "No giveaway right now. Mods can start one with !giveaway start.";
     } else if (state.open) {
-        ctx.chat.sendMessage(
-            "Giveaway open! Type " + state.keyword + " to enter. " + plural(state.entrants.length, "viewer") + " so far."
-        );
+        message = "Giveaway open! Type " + state.keyword + " to enter. " + plural(state.entrants.length, "viewer") + " so far.";
     } else {
-        ctx.chat.sendMessage(
-            "Entries are closed with " + plural(state.entrants.length, "viewer") + ". Mods can draw with !giveaway draw."
-        );
+        message = "Entries are closed with " + plural(state.entrants.length, "viewer") + ". Mods can draw with !giveaway draw.";
     }
-    return { handled: "status" };
+    return speak(ctx, true, message, { handled: "status" });
+}
+
+// A reply for a Send chat message step to post. With `announce`, the reply
+// also rides on a giveaways.announced event, which is what the module's
+// workflow posts. Engines without ctx.success only have ctx.response, so fall
+// back to it and add the fields by hand.
+function speak(ctx, announce, message, fields, events) {
+    var value = typeof ctx.success === "function"
+        ? ctx.success(message, fields)
+        : Object.assign(ctx.response(true, message), fields);
+    var all = events ? events.slice() : [];
+    if (announce) {
+        all.push({ type: EVENT_ANNOUNCED, data: { message: message } });
+    }
+    return all.length > 0 ? ctx.result(value, all) : value;
 }
 
 // Read-modify-write under compareAndSet. `change` gets the current state (or
