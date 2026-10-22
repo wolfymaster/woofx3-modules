@@ -567,12 +567,13 @@ function readRecent(ctx) {
     }
 }
 
-// A command's actions reach chat only through the chat extension: the
-// command path does not turn a returned ctx.response into a reply. The same
-// text rides on the result for a workflow to reuse as ${step.message}.
+// The function returns what should be said; a "Send chat message" step posts
+// ${step.message}. Engines without ctx.success/ctx.failure only have
+// ctx.response, so fall back to it and add the fields by hand.
 function reply(ctx, ok, message) {
-    if (ctx.chat && typeof ctx.chat.sendMessage === "function") {
-        ctx.chat.sendMessage(message);
+    var build = ok ? ctx.success : ctx.failure;
+    if (typeof build === "function") {
+        return build(message, { ok: ok });
     }
     var result = ctx.response(ok, message);
     result.ok = ok;

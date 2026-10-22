@@ -2,7 +2,7 @@
   "id": "woofx3_giveaways",
   "name": "Giveaways",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "Chat giveaways. Moderators run them with !giveaway start, draw, end and cancel; viewers enter by typing the entry keyword (!join by default). Subscribers can get extra luck. Mod commands arrive through chat messages because those carry the chatter's badges.",
   "taxonomy": [
@@ -72,7 +72,7 @@
     {
       "id": "handle_chat_message",
       "name": "Handle giveaway chat message",
-      "description": "Reads one chat message for giveaway entries and moderator giveaway commands. The module's own workflow runs this on every chat message.",
+      "description": "Reads one chat message for giveaway entries and moderator giveaway commands, and returns any reply as the message. The module's own workflow runs this on every chat message and posts the reply.",
       "type": "function",
       "function": "handle_chat_message",
       "returns": {
@@ -81,6 +81,11 @@
             "path": "handled",
             "type": "string",
             "description": "What the message did: none, entered, started, drawn, ended, cancelled or status."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -91,7 +96,7 @@
     {
       "id": "start_giveaway",
       "name": "Start giveaway",
-      "description": "Open a giveaway for entries and announce it in chat. Does nothing when one is already open.",
+      "description": "Open a giveaway for entries. Returns the announcement as the message, for a Send chat message step to post. Does nothing when one is already open.",
       "type": "function",
       "function": "start_giveaway",
       "schema": [
@@ -120,6 +125,11 @@
           {
             "path": "keyword",
             "type": "string"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -130,7 +140,7 @@
     {
       "id": "draw_winner",
       "name": "Draw giveaway winner",
-      "description": "Close entries and pick a random winner, announcing them in chat. Drawing again picks someone new.",
+      "description": "Close entries and pick a random winner. Returns the winner announcement as the message, for a Send chat message step to post. Drawing again picks someone new.",
       "type": "function",
       "function": "draw_winner",
       "returns": {
@@ -147,6 +157,11 @@
           {
             "path": "entryCount",
             "type": "number"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -157,7 +172,7 @@
     {
       "id": "end_giveaway",
       "name": "End giveaway entries",
-      "description": "Stop taking entries without drawing. The entries are kept, so a winner can still be drawn.",
+      "description": "Stop taking entries without drawing, and return a confirmation as the message. The entries are kept, so a winner can still be drawn.",
       "type": "function",
       "function": "end_giveaway",
       "returns": {
@@ -165,6 +180,11 @@
           {
             "path": "entryCount",
             "type": "number"
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The reply for a Send chat message step to post."
           }
         ]
       },
@@ -264,6 +284,22 @@
           }
         ]
       }
+    },
+    {
+      "id": "announced",
+      "name": "Giveaways announced",
+      "description": "Fires when Giveaways has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "giveaways.announced",
+      "sentence": "Giveaways has something to say",
+      "taxonomy": [
+        "chat.giveaways"
+      ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
     }
   ],
   "workflows": [
@@ -277,6 +313,23 @@
           "type": "action",
           "action": "handle_chat_message"
         }
+      ]
+    },
+    {
+      "id": "say-announcements",
+      "name": "Giveaways: say announcements in chat",
+      "trigger": "announced",
+      "steps": [
+        {
+          "id": "say",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${trigger.data.message}"
+          }
+        }
+      ],
+      "taxonomy": [
+        "chat.giveaways"
       ]
     }
   ]

@@ -2,7 +2,7 @@
   "id": "woofx3_timed_messages",
   "name": "Timed Messages",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "Posts a rotating set of chat messages on a timer while you are live, and only when chat has been active since the last one, so an empty chat is never spammed.",
   "taxonomy": [
@@ -179,6 +179,24 @@
           }
         }
       ]
+    },
+    {
+      "id": "post-timed-message",
+      "name": "Timed messages: post the next message",
+      "trigger": "timers.message_due",
+      "steps": [
+        {
+          "id": "say",
+          "type": "action",
+          "action": "woofx3:action:chat.reply",
+          "parameters": {
+            "message": "${trigger.data.message}"
+          }
+        }
+      ],
+      "taxonomy": [
+        "chat.timers"
+      ]
     }
   ],
   "backgroundTasks": [
@@ -187,6 +205,33 @@
       "function": "post_timed_message",
       "schedule": "0 * * * * *",
       "description": "Checks once a minute whether the next timed message is due."
+    }
+  ],
+  "triggers": [
+    {
+      "id": "message_due",
+      "name": "Timed message due",
+      "description": "Fires when the next timed message is due to be posted.",
+      "type": "eventbus",
+      "event": "timers.message_due",
+      "sentence": "A timed message is due",
+      "taxonomy": [
+        "chat.timers"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "message",
+            "type": "string",
+            "description": "The timed message to post."
+          },
+          {
+            "path": "index",
+            "type": "number",
+            "description": "Which message in the rotation it is, starting at 0."
+          }
+        ]
+      }
     }
   ]
 }

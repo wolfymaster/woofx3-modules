@@ -54,3 +54,6 @@ That's it! Points start adding up as soon as your chat starts talking.
 - A viewer who has never chatted can still get bonus points, such as for a
   follow. Their points wait for them the first time they say hi in chat.
 - Points can't go below zero.
+- Answers to points commands are sent by a **Send chat message** step in the
+  "Loyalty Points: say announcements in chat" workflow, so you can reword or
+  remove them.

@@ -45,3 +45,8 @@ Only you and your moderators can use these. Viewers only need `!join`.
 - One giveaway runs at a time.
 - Turn on **Say when someone enters** to thank each viewer in chat. In a busy
   chat, leave it off to keep things tidy.
+- Chat replies are sent by a **Send chat message** step, so you can reword or
+  remove them in the workflows this module adds.
+- If you start, draw or end a giveaway from your own automation, add a
+  **Send chat message** step after it to keep the announcement. Those actions
+  no longer post to chat on their own.
