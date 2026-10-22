@@ -39,6 +39,7 @@ var DEFAULT_OBS_SOURCE = "Spam Battle Winner";
 var DEFAULT_OBS_DELAY_SECONDS = 8;
 var EVENT_STARTED = "spam_battle.started";
 var EVENT_ENDED = "spam_battle.ended";
+var EVENT_ANNOUNCED = "spam_battle.announced";
 var SESSION = { clearOnSessionEnd: true };
 
 // Chat words that are also somebody's Twitch login, skipped before asking
@@ -88,15 +89,13 @@ function handle_chat_message(ctx) {
 function handleCommand(ctx, words, isMod) {
     var sub = (words[1] || "").toLowerCase();
     if (!isMod || sub === "") {
-        say(ctx, statusLine(ctx));
-        return { command: "spambattle", counted: "" };
+        return announce(ctx, statusLine(ctx), { command: "spambattle", counted: "" });
     }
     switch (sub) {
         case "start": {
             var length = words[2] ? parseDuration(words[2]) : null;
             if (words[2] && (length === null || length < 5000)) {
-                say(ctx, "Try !spambattle start 2m, 90s or 1m30s.");
-                return { command: "spambattle start", counted: "" };
+                return announce(ctx, "Try !spambattle start 2m, 90s or 1m30s.", { command: "spambattle start", counted: "" });
             }
             return respond(ctx, startBattle(ctx, length), { command: "spambattle start", counted: "" });
         }
@@ -105,11 +104,9 @@ function handleCommand(ctx, words, isMod) {
             return respond(ctx, finishNow(ctx), { command: "spambattle end", counted: "" });
         case "cancel":
             cancelBattle(ctx);
-            say(ctx, "The Spam Battle was called off. No winner this time.");
-            return { command: "spambattle cancel", counted: "" };
+            return announce(ctx, "The Spam Battle was called off. No winner this time.", { command: "spambattle cancel", counted: "" });
         default:
-            say(ctx, "Spam Battle commands: start, end, cancel.");
-            return { command: "spambattle", counted: "" };
+            return announce(ctx, "Spam Battle commands: start, end, cancel.", { command: "spambattle", counted: "" });
     }
 }
 
@@ -257,7 +254,7 @@ function startBattle(ctx, lengthMs) {
     return opened;
 }
 
-// Writes a fresh live battle and tells chat. Like every lifecycle step here,
+// Writes a fresh live battle and announces it. Like every lifecycle step here,
 // returns { value, events } for an entry point to hand to respond().
 function openBattle(ctx, lengthMs) {
     ctx.schedule.cancel("show_winner", "winner");
@@ -270,19 +267,16 @@ function openBattle(ctx, lengthMs) {
     fresh.startedAt = Date.now();
     ctx.storage.set("battle", JSON.stringify(fresh), SESSION);
 
-    if (fresh.callout) {
-        say(ctx, fresh.callout);
+    // The started event stays first: startBattle fills in its length.
+    var events = [{ type: EVENT_STARTED, data: { seconds: Math.round(fresh.lengthMs / 1000), prize: fresh.prize } }];
+    var call = [fresh.callout, fresh.prize].filter(function (line) { return line !== ""; }).join(" ");
+    if (call !== "") {
+        events.push(announcement(call));
     }
-    if (fresh.prize) {
-        say(ctx, fresh.prize);
-    }
-    return {
-        value: { round: fresh.round },
-        events: [{ type: EVENT_STARTED, data: { seconds: Math.round(fresh.lengthMs / 1000), prize: fresh.prize } }]
-    };
+    return { value: { round: fresh.round }, events: events };
 }
 
-// Ends a live battle: crowns the leader, tells chat, fires the ended trigger
+// Ends a live battle: crowns the leader, announces it, fires the ended trigger
 // and arms the OBS reveal. A battle that already ended is left alone, so the
 // timer.ended that follows a moderator's !spambattle end does nothing.
 function finishBattle(ctx) {
@@ -307,14 +301,15 @@ function finishBattle(ctx) {
 
     var battle = outcome.battle;
     var w = battle.winner;
+    var line;
     if (w) {
-        say(ctx, "Time's up! " + w.name + " wins the Spam Battle with " + w.percent + "% of the vote! " + channelUrl(w.login));
+        line = "Time's up! " + w.name + " wins the Spam Battle with " + w.percent + "% of the vote! " + channelUrl(w.login);
         if (toggle(ctx, "showInObs", true)) {
             var delay = setting(ctx, "obsDelaySeconds", DEFAULT_OBS_DELAY_SECONDS);
             ctx.schedule.at("show_winner", "winner", Date.now() + delay * 1000, { round: battle.round });
         }
     } else {
-        say(ctx, "Time's up! Nobody spammed a streamer this time.");
+        line = "Time's up! Nobody spammed a streamer this time.";
     }
     return {
         value: { winnerLogin: w ? w.login : "", ended: true },
@@ -330,7 +325,7 @@ function finishBattle(ctx) {
                 totalVotes: battle.total,
                 prize: battle.prize
             }
-        }]
+        }, announcement(line)]
     };
 }
 
@@ -340,7 +335,7 @@ function finishNow(ctx) {
     var timer = linkedTimer(ctx);
     var finished = finishBattle(ctx);
     if (!finished.value.ended) {
-        say(ctx, "There's no Spam Battle running. Start one with !spambattle start.");
+        finished.events.push(announcement("There's no Spam Battle running. Start one with !spambattle start."));
     }
     if (timer) {
         runTimer(ctx, timer, "pause");
@@ -561,13 +556,42 @@ function parseDuration(text) {
 // ---------------------------------------------------------------------------
 
 // The run's result: `extra` merged over a lifecycle step's value, with its
-// events published alongside when there are any.
-function respond(ctx, outcome, extra) {
-    var value = {};
-    [outcome.value, extra].forEach(function (o) {
-        Object.keys(o || {}).forEach(function (k) { value[k] = o[k]; });
+// events published alongside when there are any. What the run announced is
+// also its message, for steps that follow it.
+function respond(ctx, lifecycle, extra) {
+    var fields = {};
+    [lifecycle.value, extra].forEach(function (o) {
+        Object.keys(o || {}).forEach(function (k) { fields[k] = o[k]; });
     });
-    return outcome.events.length ? ctx.result(value, outcome.events) : value;
+    var said = lifecycle.events.filter(function (e) { return e.type === EVENT_ANNOUNCED; });
+    var value = said.length ? succeed(ctx, said[0].data.message, fields) : fields;
+    return lifecycle.events.length ? ctx.result(value, lifecycle.events) : value;
+}
+
+// Chat is spoken by the module's "say announcements in chat" workflow, which
+// posts the message of each announced event, so the streamer can reword it or
+// switch it off. Only runs with something to say publish one: a Send chat
+// message step straight after the handler would fail on every silent chat
+// message.
+function announce(ctx, text, fields) {
+    return ctx.result(succeed(ctx, text, fields), [announcement(text)]);
+}
+
+function announcement(text) {
+    return { type: EVENT_ANNOUNCED, data: { message: text } };
+}
+
+// ctx.success where the engine has it; older engines only have ctx.response,
+// which takes the same fields assigned onto its result.
+function succeed(ctx, message, fields) {
+    if (typeof ctx.success === "function") {
+        return ctx.success(message, fields);
+    }
+    var reply = ctx.response(true, message);
+    Object.keys(fields || {}).forEach(function (key) {
+        reply[key] = fields[key];
+    });
+    return reply;
 }
 
 function channelUrl(login) {
@@ -621,13 +645,6 @@ function toggle(ctx, id, fallback) {
         return fallback;
     }
     return v === true || v === "true";
-}
-
-function say(ctx, text) {
-    if (!ctx.chat || typeof ctx.chat.sendMessage !== "function") {
-        throw new Error("ctx.chat.sendMessage is not available on this engine.");
-    }
-    ctx.chat.sendMessage(text);
 }
 
 function parseJson(raw) {

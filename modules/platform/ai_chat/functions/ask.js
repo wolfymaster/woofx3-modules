@@ -12,8 +12,19 @@ function ask(ctx) {
   var cfg = readConfig(ctx);
   var reply = askModel(ctx, cfg, prompt, cfg.maxChars);
 
-  var result = ctx.response(true, reply);
-  result.reply = reply;
+  return succeed(ctx, reply, { reply: reply });
+}
+
+// ctx.success where the engine has it; older engines only have ctx.response,
+// which takes the same fields assigned onto its result.
+function succeed(ctx, message, fields) {
+  if (typeof ctx.success === "function") {
+    return ctx.success(message, fields);
+  }
+  var result = ctx.response(true, message);
+  Object.keys(fields).forEach(function (key) {
+    result[key] = fields[key];
+  });
   return result;
 }
 
@@ -161,10 +172,9 @@ function takeCooldown(ctx, cfg, chatter) {
   return true;
 }
 
-// Posts the answer tagged to the viewer, fitted inside chat's limit.
-function answerInChat(ctx, cfg, chatter, question) {
+// The answer tagged to the viewer, fitted inside chat's limit.
+function answerForChat(ctx, cfg, chatter, question) {
   var tag = chatter ? "@" + chatter + " " : "";
   var reply = askModel(ctx, cfg, question, Math.min(cfg.maxChars, CHAT_LIMIT - tag.length));
-  ctx.chat.sendMessage(tag + reply);
-  return reply;
+  return { reply: reply, line: tag + reply };
 }

@@ -2,7 +2,7 @@
   "id": "woofx3_stream_credits",
   "name": "Stream Credits",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "overlay",
   "description": "End-of-stream credits for your scene: everyone who cheered bits or gifted subs, every channel that raided, and everyone who chatted, each list fading in and out in turn.",
   "taxonomy": [
@@ -76,11 +76,34 @@
       "taxonomy": [ "overlay.credits" ]
     }
   ],
+  "triggers": [
+    {
+      "id": "announced",
+      "name": "Stream Credits announced",
+      "description": "Fires when Stream Credits has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "stream_credits.announced",
+      "sentence": "Stream Credits has something to say",
+      "taxonomy": [ "overlay.credits" ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
+    }
+  ],
   "workflows": [
     { "id": "credit-cheers", "name": "Stream Credits: cheers", "trigger": "channel.cheer", "steps": [ { "id": "credit", "action": "record_cheer" } ] },
     { "id": "credit-gifts", "name": "Stream Credits: gift subs", "trigger": "channel.subscriptionGift", "steps": [ { "id": "credit", "action": "record_gift" } ] },
     { "id": "credit-raids", "name": "Stream Credits: raids", "trigger": "channel.raid", "steps": [ { "id": "credit", "action": "record_raid" } ] },
-    { "id": "credit-chatters", "name": "Stream Credits: chatters", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] }
+    { "id": "credit-chatters", "name": "Stream Credits: chatters", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] },
+    {
+      "id": "say-announcements",
+      "name": "Stream Credits: say announcements in chat",
+      "trigger": "announced",
+      "steps": [ { "id": "say", "action": "woofx3:action:chat.reply", "parameters": { "message": "${trigger.data.message}" } } ],
+      "taxonomy": [ "overlay.credits" ]
+    }
   ],
   "widgets": [
     {

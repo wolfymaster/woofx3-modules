@@ -2,7 +2,7 @@
   "id": "woofx3_spam_battle",
   "name": "Spam Battle",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "category": "overlay",
   "description": "A timed chat battle: chat spams the name of their favourite streamer, the overlay races the top names against each other with their share of the vote, and when the timer runs out it crowns the winner and loads their Twitch channel in a browser source on the live OBS scene.",
   "taxonomy": [
@@ -182,6 +182,20 @@
           { "path": "prize", "type": "string", "description": "Empty when none is set." }
         ]
       }
+    },
+    {
+      "id": "announced",
+      "name": "Spam Battle announced",
+      "description": "Fires when Spam Battle has a line for chat, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "spam_battle.announced",
+      "sentence": "Spam Battle has something to say",
+      "taxonomy": [ "overlay.battle" ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat." }
+        ]
+      }
     }
   ],
   "deadlines": [
@@ -195,7 +209,14 @@
   "workflows": [
     { "id": "count-votes", "name": "Spam Battle: count votes", "trigger": "user.message", "steps": [ { "id": "chat", "action": "handle_chat" } ] },
     { "id": "timer-started", "name": "Spam Battle: timer started", "trigger": "timer.started", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
-    { "id": "timer-ended", "name": "Spam Battle: time's up", "trigger": "timer.ended", "steps": [ { "id": "follow", "action": "sync_timer" } ] }
+    { "id": "timer-ended", "name": "Spam Battle: time's up", "trigger": "timer.ended", "steps": [ { "id": "follow", "action": "sync_timer" } ] },
+    {
+      "id": "say-announcements",
+      "name": "Spam Battle: say announcements in chat",
+      "trigger": "announced",
+      "steps": [ { "id": "say", "action": "woofx3:action:chat.reply", "parameters": { "message": "${trigger.data.message}" } } ],
+      "taxonomy": [ "overlay.battle" ]
+    }
   ],
   "widgets": [
     {

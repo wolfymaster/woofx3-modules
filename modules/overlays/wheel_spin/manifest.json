@@ -2,7 +2,7 @@
   "id": "woofx3_wheel_spin",
   "name": "Wheel Spin",
   "author": "WolfyMaster LLC",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "category": "overlay",
   "description": "Prize wheels for your scene. Make as many wheels as you like, fill each with entries, spin one from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
   "taxonomy": [
@@ -156,6 +156,30 @@
           { "path": "count", "type": "number", "description": "Entries left on the wheel." }
         ]
       }
+    },
+    {
+      "id": "announced",
+      "name": "Wheel result announced",
+      "description": "Fires when a wheel that announces its result has stopped, with the line for chat. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "wheel_spin.announced",
+      "sentence": "a wheel announces its result",
+      "taxonomy": [ "overlay.wheel" ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat.", "example": "The wheel landed on Pizza night!" },
+          { "path": "target", "type": "string", "description": "The wheel, by canonical id." }
+        ]
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "id": "say-announcements",
+      "name": "Wheel Spin: say results in chat",
+      "trigger": "announced",
+      "steps": [ { "id": "say", "action": "woofx3:action:chat.reply", "parameters": { "message": "${trigger.data.message}" } } ],
+      "taxonomy": [ "overlay.wheel" ]
     }
   ],
   "deadlines": [

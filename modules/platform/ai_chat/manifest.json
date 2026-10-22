@@ -2,7 +2,7 @@
   "id": "woofx3_ai_chat",
   "name": "AI Chat",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "platform",
   "description": "An AI helper for chat. Viewers ask it questions with !ask, it can answer when someone @mentions the bot, and workflows can ask it to write text such as a raid welcome. Uses the streamer's own Anthropic or OpenAI API key.",
   "taxonomy": [
@@ -122,7 +122,7 @@
     {
       "id": "ai.answer_chat_question",
       "name": "Answer chat question with AI",
-      "description": "Runs from a chat command: answers the text after the command in chat, tagging the viewer. Each viewer waits out the module's cooldown between questions.",
+      "description": "Runs from a chat command: answers the text after the command, tagging the viewer, and the module's workflow says it in chat. Each viewer waits out the module's cooldown between questions.",
       "type": "function",
       "function": "answerChatQuestion",
       "returns": {
@@ -130,12 +130,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True when an answer was posted in chat."
+            "description": "True when an answer was given for chat."
           },
           {
             "path": "reply",
             "type": "string",
-            "description": "The answer posted in chat. Absent when nothing was posted."
+            "description": "The AI's answer. Absent when nothing was answered."
           }
         ]
       },
@@ -146,7 +146,7 @@
     {
       "id": "ai.answer_mention",
       "name": "Answer chat mention with AI",
-      "description": "Runs on a chat message: when the message @mentions the bot and Answer @mentions is on, answers it in chat. Otherwise does nothing.",
+      "description": "Runs on a chat message: when the message @mentions the bot and Answer @mentions is on, answers it, and the module's workflow says it in chat. Otherwise does nothing.",
       "type": "function",
       "function": "answerMention",
       "returns": {
@@ -154,18 +154,34 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True when an answer was posted in chat."
+            "description": "True when an answer was given for chat."
           },
           {
             "path": "reply",
             "type": "string",
-            "description": "The answer posted in chat. Absent when nothing was posted."
+            "description": "The AI's answer. Absent when nothing was answered."
           }
         ]
       },
       "taxonomy": [
         "platform.ai"
       ]
+    }
+  ],
+  "triggers": [
+    {
+      "id": "answered",
+      "name": "AI answered in chat",
+      "description": "Fires when the AI has an answer for chat, from !ask or an @mention, with the line. The module's own workflow says it in chat.",
+      "type": "eventbus",
+      "event": "ai_chat.answered",
+      "sentence": "the AI answers a viewer",
+      "taxonomy": [ "platform.ai" ],
+      "emits": {
+        "fields": [
+          { "path": "message", "type": "string", "description": "What to say in chat, tagging the viewer." }
+        ]
+      }
     }
   ],
   "workflows": [
@@ -180,6 +196,13 @@
           "action": "ai.answer_mention"
         }
       ]
+    },
+    {
+      "id": "say-answers",
+      "name": "AI Chat: say answers in chat",
+      "trigger": "answered",
+      "steps": [ { "id": "say", "action": "woofx3:action:chat.reply", "parameters": { "message": "${trigger.data.message}" } } ],
+      "taxonomy": [ "platform.ai" ]
     }
   ],
   "commands": [
