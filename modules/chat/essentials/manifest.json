@@ -2,7 +2,7 @@
   "id": "woofx3_chat_essentials",
   "name": "Chat Essentials",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "category": "chat",
   "description": "The everyday chat commands: !uptime, !lurk, !unlurk, !8ball, !roll, !coinflip, !quote, plus !addquote and !delquote for mods.",
   "taxonomy": [
@@ -73,11 +73,18 @@
       "entryPoint": "quote"
     },
     {
-      "id": "manageQuotes",
-      "name": "Manage quotes",
+      "id": "addQuote",
+      "name": "Add a quote",
       "runtime": "js",
       "path": "functions/quotes.js",
-      "entryPoint": "manageQuotes"
+      "entryPoint": "addQuoteCommand"
+    },
+    {
+      "id": "deleteQuote",
+      "name": "Delete a quote",
+      "runtime": "js",
+      "path": "functions/quotes.js",
+      "entryPoint": "deleteQuoteCommand"
     }
   ],
   "actions": [
@@ -364,20 +371,48 @@
       ]
     },
     {
-      "id": "manage_quotes",
-      "name": "Handle quote commands",
-      "description": "Reads a chat message and runs !addquote or !delquote when a mod or the broadcaster typed it. Ignores every other message.",
+      "id": "add_quote",
+      "name": "Add a quote",
+      "description": "Saves the text after the command as a new quote.",
       "type": "function",
-      "function": "manageQuotes",
+      "function": "addQuote",
       "taxonomy": [
         "function.chat"
       ],
       "returns": {
         "fields": [
           {
-            "path": "handled",
+            "path": "ok",
             "type": "boolean",
-            "description": "Whether the message was a quote command."
+            "description": "False when the quote couldn't be changed."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What was said in chat, for a later step to reuse."
+          },
+          {
+            "path": "number",
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "id": "delete_quote",
+      "name": "Delete a quote",
+      "description": "Deletes the quote numbered after the command.",
+      "type": "function",
+      "function": "deleteQuote",
+      "taxonomy": [
+        "function.chat"
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "ok",
+            "type": "boolean",
+            "description": "False when the quote couldn't be changed."
           },
           {
             "path": "message",
@@ -476,6 +511,32 @@
           "action": "quote"
         }
       ]
+    },
+    {
+      "id": "addquote",
+      "name": "Add quote",
+      "pattern": "!addquote",
+      "type": "prefix",
+      "requiredRole": "moderator",
+      "actions": [
+        {
+          "id": "run",
+          "action": "add_quote"
+        }
+      ]
+    },
+    {
+      "id": "delquote",
+      "name": "Delete quote",
+      "pattern": "!delquote",
+      "type": "prefix",
+      "requiredRole": "moderator",
+      "actions": [
+        {
+          "id": "run",
+          "action": "delete_quote"
+        }
+      ]
     }
   ],
   "workflows": [
@@ -498,17 +559,6 @@
         {
           "id": "clear",
           "action": "clear_stream_start"
-        }
-      ]
-    },
-    {
-      "id": "quote-commands",
-      "name": "Let mods add and delete quotes",
-      "trigger": "user.message",
-      "steps": [
-        {
-          "id": "manage",
-          "action": "manage_quotes"
         }
       ]
     }
