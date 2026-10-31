@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
@@ -55,7 +55,7 @@
       "description": "Twitch EventSub: channel.chat.message",
       "type": "eventbus",
       "event": "user.message",
-      "sentence": "Someone posts a chat message",
+      "sentence": "Someone posts a chat message containing {message}",
       "taxonomy": [
         "platform.twitch",
         "alert.chat"
@@ -127,7 +127,22 @@
             "description": "tier1, tier2 or tier3. Absent when not subscribed or unresolved."
           }
         ]
-      }
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "message",
+          "label": "Message text",
+          "type": "text",
+          "required": true,
+          "placeholder": "e.g. hello",
+          "eventPath": "message",
+          "operator": "contains",
+          "anyText": "anything",
+          "missingText": "some text",
+          "description": "Only fire when the message contains this text."
+        }
+      ]
     },
     {
       "id": "channel_subscribe",

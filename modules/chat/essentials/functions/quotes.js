@@ -37,33 +37,16 @@ function quote(ctx) {
     return result;
 }
 
-// Runs on every chat message, from the bundled workflow on user.message: the
-// chat-message event is the only one that says whether the chatter is a mod,
-// and a manifest command's requiredRole is not enforced. Anything that isn't
-// !addquote or !delquote is ignored straight away.
 /** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
-function manageQuotes(ctx) {
+function addQuoteCommand(ctx) {
     var data = (ctx.event && ctx.event.data) || {};
-    var message = typeof data.message === "string" ? data.message.trim() : "";
-    var match = message.match(/^!(addquote|delquote)(?:\s+([\s\S]*))?$/i);
-    if (!match) {
-        return { ok: true, handled: false };
-    }
+    return addQuote(ctx, String(data.text || "").trim(), data.chatter || "");
+}
 
-    var command = match[1].toLowerCase();
-    var argument = (match[2] || "").trim();
-    var membership = data.membership || {};
-    if (membership.isModerator !== true && membership.isBroadcaster !== true) {
-        var denied = reply(ctx, false, "Sorry " + (data.chatterName || "friend") + ", only mods can change quotes.");
-        denied.handled = true;
-        return denied;
-    }
-
-    var result = command === "addquote"
-        ? addQuote(ctx, argument, data.chatterName || "")
-        : deleteQuote(ctx, argument);
-    result.handled = true;
-    return result;
+/** @param {import("@woofx3/module-sdk/function-ctx").Ctx} ctx */
+function deleteQuoteCommand(ctx) {
+    var data = (ctx.event && ctx.event.data) || {};
+    return deleteQuote(ctx, String(data.text || "").trim());
 }
 
 function addQuote(ctx, text, addedBy) {
