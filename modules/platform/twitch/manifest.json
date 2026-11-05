@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "category": "platform",
   "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
   "permissions": [
@@ -183,6 +183,12 @@
             "path": "isGift",
             "type": "boolean",
             "description": "Whether someone else gifted this subscription."
+          },
+          {
+            "path": "isCommunityGift",
+            "type": "boolean",
+            "description": "Whether this gifted sub is one of a community gift, which also arrives whole on Channel subscription gift.",
+            "example": false
           }
         ]
       },
@@ -231,6 +237,20 @@
           "eventPath": "isGift",
           "operator": "eq",
           "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
+        },
+        {
+          "id": "isCommunityGift",
+          "label": "Community gifts",
+          "type": "select",
+          "options": [
+            { "value": "", "label": "Any subscription" },
+            { "value": "false", "label": "Not part of a community gift" },
+            { "value": "true", "label": "Only community gift recipients" }
+          ],
+          "defaultValue": "",
+          "eventPath": "isCommunityGift",
+          "operator": "eq",
+          "description": "A sub gifted to one named viewer arrives only here. Each recipient of a community gift also arrives here, besides the whole gift on Channel subscription gift, so an alert for single gifts should skip community gift recipients."
         }
       ]
     },
@@ -1305,7 +1325,8 @@
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "example": "generous_gifter"
           },
           {
             "path": "broadcasterId",
@@ -1655,7 +1676,8 @@
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "example": "generous_gifter"
           },
           {
             "path": "broadcasterId",
