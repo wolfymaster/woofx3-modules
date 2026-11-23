@@ -19,15 +19,15 @@ big celebration, and their channel pops up right on your stream.
 - **Crown the winner.** When time runs out, the winner's picture and name
   spin in under a crown, with confetti everywhere.
 - **Show off the winner's channel.** A few seconds later, the winner's Twitch
-  channel loads right in your OBS scene, so you can check them out together.
+  channel loads right on your stream, so you can check them out together.
 - **Keep it fair.** Only real streamers count. Everyday chat words like "lol"
   or "gg" don't get on the board.
 
 ## Getting started
 
 1. Install the Twitch module first, so Spam Battle can read chat.
-2. Install the OBS module and connect it, if you want the winner's channel to
-   show up in OBS.
+2. Connect your streaming software, if you want the winner's channel to show
+   up on your stream.
 3. Add Spam Battle to a scene. It stays hidden until a battle starts.
 4. Type **!spambattle start** in chat. Let the spam begin!
 
@@ -54,7 +54,7 @@ use a timer you already have? Pick it in the Spam Battle settings instead.
 - Choose how long the winner stays on screen.
 - Pick your two battle colors and the size.
 - Choose how long the celebration plays before the winner's channel shows up
-  in OBS, or turn that part off.
+  on your stream, or turn that part off.
 
 ## Good to know
 
