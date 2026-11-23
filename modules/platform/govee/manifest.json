@@ -2,7 +2,7 @@
   "id": "woofx3_govee",
   "name": "Govee",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "platform",
   "description": "Turn your Govee lights on or off, change their color, or set their brightness during your stream.",
   "taxonomy": [
