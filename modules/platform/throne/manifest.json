@@ -2,7 +2,7 @@
   "id": "woofx3_throne",
   "name": "Throne Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "category": "platform",
   "description": "React when someone buys a gift, chips in, or fully funds a gift on your Throne wishlist.",
   "functions": [
