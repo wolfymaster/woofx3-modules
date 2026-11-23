@@ -2,7 +2,7 @@
   "id": "woofx3_dadjoke",
   "name": "Dad Jokes",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "chat",
   "description": "Chat can type !dadjoke to hear a random dad joke, without hearing the same one twice in a row.",
   "taxonomy": [
