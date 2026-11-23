@@ -4,14 +4,14 @@
   "author": "WolfyMaster LLC",
   "version": "0.2.0",
   "category": "platform",
-  "description": "Receives Buy Me a Coffee webhooks and fires triggers when someone buys you a coffee, joins a membership, or cancels one.",
+  "description": "Know when someone buys you a coffee, joins your membership, or cancels it, and react on stream.",
   "taxonomy": [
     "platform.buymeacoffee"
   ],
   "functions": [
     {
       "id": "handle_bmc_webhook",
-      "name": "Handle Buy Me a Coffee Webhook",
+      "name": "Receive Buy Me a Coffee events",
       "runtime": "js",
       "path": "functions/handle_bmc_webhook.js",
       "entryPoint": "handle_bmc_webhook"
@@ -20,8 +20,8 @@
   "settings": [
     {
       "id": "signingSecret",
-      "label": "Buy Me a Coffee signing secret",
-      "description": "Shown when you create the webhook in Buy Me a Coffee. Requests not signed with it are refused.",
+      "label": "Buy Me a Coffee secret",
+      "description": "Buy Me a Coffee shows it when you set up the connection.",
       "type": "secret",
       "required": true
     }
@@ -29,15 +29,15 @@
   "triggers": [
     {
       "id": "bmc_webhook",
-      "name": "Buy Me a Coffee webhook",
-      "description": "Paste this URL into Buy Me a Coffee's webhook settings. Every request is checked against your signing secret before anything fires.",
+      "name": "Buy Me a Coffee link",
+      "description": "The link you paste into Buy Me a Coffee so it can tell woofx3 about new support.",
       "type": "webhook",
       "handler": "handle_bmc_webhook"
     },
     {
       "id": "donation",
-      "name": "Buy Me a Coffee support",
-      "description": "Fires when someone buys you a coffee.",
+      "name": "Someone buys you a coffee",
+      "description": "When someone buys you a coffee.",
       "type": "eventbus",
       "event": "buymeacoffee.donation",
       "sentence": "Someone buys you a coffee",
@@ -55,41 +55,41 @@
           {
             "path": "eventId",
             "type": "string",
-            "description": "Buy Me a Coffee's id for this delivery."
+            "description": "Buy Me a Coffee's reference for this event."
           },
           {
             "path": "supporterName",
             "type": "string",
-            "description": "Who paid, as they chose to show it.",
+            "description": "Who supported you, as they chose to show it.",
             "example": "Alex"
           },
           {
             "path": "message",
             "type": "string",
-            "description": "The supporter's note. Empty when they left none or hid it."
+            "description": "The supporter's note. Blank if they left none or hid it."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "In the currency's main unit: 15 is 15.00.",
+            "description": "The amount, like 15 for 15.00.",
             "example": 15
           },
           {
             "path": "amountDisplay",
             "type": "string",
-            "description": "The amount with two decimals and no currency symbol.",
+            "description": "The amount with two decimals, like 15.00.",
             "example": "15.00"
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True for a test event sent from the Buy Me a Coffee dashboard."
+            "description": "True for a test sent from Buy Me a Coffee."
           },
           {
             "path": "coffeeCount",
@@ -102,8 +102,8 @@
     },
     {
       "id": "membership_started",
-      "name": "Buy Me a Coffee membership started",
-      "description": "Fires when someone joins one of your memberships.",
+      "name": "Someone joins your membership",
+      "description": "When someone joins one of your memberships.",
       "type": "eventbus",
       "event": "buymeacoffee.membership.started",
       "sentence": "Someone joins your Buy Me a Coffee membership",
@@ -121,41 +121,41 @@
           {
             "path": "eventId",
             "type": "string",
-            "description": "Buy Me a Coffee's id for this delivery."
+            "description": "Buy Me a Coffee's reference for this event."
           },
           {
             "path": "supporterName",
             "type": "string",
-            "description": "Who paid, as they chose to show it.",
+            "description": "Who supported you, as they chose to show it.",
             "example": "Alex"
           },
           {
             "path": "message",
             "type": "string",
-            "description": "The supporter's note. Empty when they left none or hid it."
+            "description": "The supporter's note. Blank if they left none or hid it."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "In the currency's main unit: 15 is 15.00.",
+            "description": "The amount, like 15 for 15.00.",
             "example": 15
           },
           {
             "path": "amountDisplay",
             "type": "string",
-            "description": "The amount with two decimals and no currency symbol.",
+            "description": "The amount with two decimals, like 15.00.",
             "example": "15.00"
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True for a test event sent from the Buy Me a Coffee dashboard."
+            "description": "True for a test sent from Buy Me a Coffee."
           },
           {
             "path": "levelName",
@@ -166,7 +166,7 @@
           {
             "path": "interval",
             "type": "string",
-            "description": "month or year.",
+            "description": "Month or year.",
             "example": "month"
           }
         ]
@@ -174,26 +174,26 @@
     },
     {
       "id": "membership_cancelled",
-      "name": "Buy Me a Coffee membership cancelled",
-      "description": "Fires when someone cancels one of your memberships.",
+      "name": "Someone cancels their membership",
+      "description": "When someone cancels one of your memberships.",
       "type": "eventbus",
       "event": "buymeacoffee.membership.cancelled",
-      "sentence": "Someone cancels your Buy Me a Coffee membership",
+      "sentence": "Someone cancels their Buy Me a Coffee membership",
       "taxonomy": [
         "platform.buymeacoffee"
       ],
       "emits": {
-        "summary": "{supporterName} cancelled {levelName}",
+        "summary": "{supporterName} canceled {levelName}",
         "fields": [
           {
             "path": "eventId",
             "type": "string",
-            "description": "Buy Me a Coffee's id for this delivery."
+            "description": "Buy Me a Coffee's reference for this event."
           },
           {
             "path": "supporterName",
             "type": "string",
-            "description": "Who cancelled.",
+            "description": "Who canceled.",
             "example": "Alex"
           },
           {
@@ -205,7 +205,7 @@
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True for a test event sent from the Buy Me a Coffee dashboard."
+            "description": "True for a test sent from Buy Me a Coffee."
           }
         ]
       }
