@@ -4,12 +4,12 @@ Let your chat pick the music! Viewers type **!sr** and a song name, and the
 song jumps right into your Spotify queue. Your stream feels more like a party
 when everyone gets a say in the soundtrack.
 
-## What it can do
+## What you can do
 
 - **Song requests from chat.** A viewer types `!sr` and a song name, like
   `!sr Mr. Brightside`. You get the best match on Spotify. Viewers can also
   paste a Spotify song link to get exactly the song they want.
-- **Instant replies in chat.** Your stream tells the viewer which song and
+- **Instant replies in chat.** Chat tells the viewer which song and
   artist were added, so they know their request made it. If a song can't be
   found, they'll know that too.
 - **Now Playing overlay.** Show the song that's playing right now on your
@@ -27,7 +27,7 @@ when everyone gets a say in the soundtrack.
 - Run a "viewers pick the playlist" stream, where chat builds the whole
   soundtrack together.
 
-## Getting started
+## Setting up
 
 1. Open this module's settings and press **Authorize Spotify**.
 2. Sign in to Spotify and allow access.
@@ -35,4 +35,4 @@ when everyone gets a say in the soundtrack.
 
 ## Good to know
 
-Adding songs to a Spotify queue needs a **Spotify Premium** account.
+Adding songs to a Spotify queue needs **Spotify Premium**.

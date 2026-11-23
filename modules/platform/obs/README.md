@@ -1,55 +1,43 @@
 # OBS
 
 Let your stream run OBS for you! Switch scenes, pop things on and off the
-screen, and mute your mic without ever reaching for your mouse. Your stream can
-do it the moment something happens, so you can keep your eyes on your game and
-your chat.
+screen, and mute your mic without reaching for your mouse. It all happens the
+moment something happens, so you can keep your eyes on your game and your chat.
 
-## What it can do
+## What you can do
 
-- **Switch scenes.** Jump to any scene, like your "Be Right Back" screen or a
-  big celebration scene.
+- **Switch scenes.** Jump to any scene, like "Be Right Back" or a big
+  celebration scene.
 - **Show, hide or toggle things on screen.** Make a webcam, image, video or
   overlay appear or disappear, or flip it to whichever it isn't right now.
 - **Mute or unmute audio.** Turn your microphone, game sound or music on and
   off.
-- **Show a web page.** Put any website on screen, like a friend's channel or
-  your latest video. If the browser source isn't there yet, it's added for
-  you.
+- **Show a web page.** Put any website on screen, like a friend's channel. If
+  the browser source isn't there yet, it's added for you.
 
-When you set these up, just pick your scenes, sources and audio from a list.
-No typing names by hand!
+Pick your scenes, sources and audio from a list. No typing names by hand!
 
 ## Ideas to try
 
 - When someone raids, switch to a special welcome scene.
-- When a viewer redeems a channel point reward, show a funny image on screen.
-- When an ad break starts, switch to your break scene and mute your mic. When
-  it ends, switch back.
+- When a viewer redeems a reward, show a funny image on screen.
+- When an ad break starts, switch to your break scene and mute your mic.
 - When you go live, start on your "Starting Soon" scene.
-- When a giveaway ends, show the winner's channel on screen.
 - Make a chat command that toggles your webcam on and off.
 
-## Getting started
+## Setting up
 
 1. Open OBS (version 28 or newer).
-2. Go to **Tools → WebSocket Server Settings** and turn on the WebSocket
-   server.
-3. Click **Show Connect Info** there and note the server port and password.
-4. In WoofX3, open the OBS module's settings and enter the OBS address, the
-   port and the password.
+2. Go to **Tools → WebSocket Server Settings** and turn on the server.
+3. Click **Show Connect Info** and note the port and password.
+4. In this module's settings, enter the address, port and password.
 
-Using the WoofX3 companion app on the computer that runs OBS? Then you can
-skip step 4. The companion fills in the address, port and password for you.
-If not, just type them in by hand.
+Using the woofx3 desktop app on the computer that runs OBS? It fills these in
+for you, so skip step 4.
 
-You can open OBS before or after WoofX3. WoofX3 connects as soon as OBS is
-running.
+You can open OBS before or after woofx3. It connects as soon as OBS is running.
 
 ## Good to know
 
-Your stream picks scenes and sources by their names in OBS. If you rename a
-scene or source, update anything that uses it so it keeps working.
-
-Toggling a source needs an up-to-date WoofX3. On an older one, Toggle shows
-the source instead.
+Scenes and sources are picked by their names in OBS. If you rename one, update
+anything that uses it.

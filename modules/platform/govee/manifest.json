@@ -2,19 +2,19 @@
   "id": "woofx3_govee",
   "name": "Govee",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "platform",
-  "description": "Workflow actions that control Govee smart lights through the Govee cloud: turn a light on or off, set its colour, and set its brightness. Uses the streamer's Govee API key.",
+  "description": "Turn your Govee lights on or off, change their color, or set their brightness during your stream.",
   "taxonomy": [
     "platform.govee"
   ],
   "settings": [
     {
       "id": "apiKey",
-      "label": "Govee API key",
+      "label": "Govee key",
       "type": "secret",
       "required": true,
-      "description": "The API key Govee emails you after you ask for one in the Govee Home app."
+      "description": "The key Govee emails you after you ask for one in the Govee Home app."
     }
   ],
   "functions": [
@@ -27,7 +27,7 @@
     },
     {
       "id": "setColor",
-      "name": "Set light colour",
+      "name": "Set light color",
       "runtime": "js",
       "path": "functions/setColor.js",
       "entryPoint": "setColor"
@@ -53,14 +53,14 @@
       "name": "Turn Govee light on or off",
       "type": "function",
       "function": "setPower",
-      "description": "Turn a Govee light on or off. The step fails, with the reason, when Govee refuses the change or can't reach the light.",
+      "description": "Turn a Govee light on or off. The step fails if Govee can't reach the light.",
       "schema": [
         {
           "id": "device",
           "label": "Light",
           "type": "select",
           "required": true,
-          "description": "The Govee light to change.",
+          "description": "Which light to change.",
           "source": {
             "kind": "internal",
             "request": {
@@ -78,7 +78,7 @@
           "label": "On",
           "type": "toggle",
           "defaultValue": true,
-          "description": "On turns the light on; off turns it off."
+          "description": "On turns the light on. Off turns it off."
         }
       ],
       "returns": {
@@ -86,7 +86,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once Govee accepted the change. A change Govee refused fails the step instead, with the reason."
+            "description": "True once Govee accepted the change."
           }
         ]
       },
@@ -96,17 +96,17 @@
     },
     {
       "id": "govee.set_color",
-      "name": "Set Govee light colour",
+      "name": "Set Govee light color",
       "type": "function",
       "function": "setColor",
-      "description": "Set a Govee light to a colour. The step fails, with the reason, when Govee refuses the change or can't reach the light.",
+      "description": "Change a Govee light to a color. The step fails if Govee can't reach the light.",
       "schema": [
         {
           "id": "device",
           "label": "Light",
           "type": "select",
           "required": true,
-          "description": "The Govee light to change.",
+          "description": "Which light to change.",
           "source": {
             "kind": "internal",
             "request": {
@@ -121,7 +121,7 @@
         },
         {
           "id": "color",
-          "label": "Colour",
+          "label": "Color",
           "type": "color",
           "required": true,
           "defaultValue": "#a970ff"
@@ -132,7 +132,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once Govee accepted the change. A change Govee refused fails the step instead, with the reason."
+            "description": "True once Govee accepted the change."
           }
         ]
       },
@@ -145,14 +145,14 @@
       "name": "Set Govee light brightness",
       "type": "function",
       "function": "setBrightness",
-      "description": "Set how bright a Govee light is. The step fails, with the reason, when Govee refuses the change or can't reach the light.",
+      "description": "Set how bright a Govee light is. The step fails if Govee can't reach the light.",
       "schema": [
         {
           "id": "device",
           "label": "Light",
           "type": "select",
           "required": true,
-          "description": "The Govee light to change.",
+          "description": "Which light to change.",
           "source": {
             "kind": "internal",
             "request": {
@@ -181,7 +181,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once Govee accepted the change. A change Govee refused fails the step instead, with the reason."
+            "description": "True once Govee accepted the change."
           }
         ]
       },

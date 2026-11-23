@@ -2,9 +2,9 @@
   "id": "woofx3_obs",
   "name": "OBS",
   "author": "WolfyMaster LLC",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "category": "platform",
-  "description": "Workflow actions that control OBS: switch the program scene, show, hide or toggle a source, mute or unmute an audio input, and load a web page in a browser source. The engine holds the OBS WebSocket connection; this module reaches it through ctx.obs.",
+  "description": "Switch OBS scenes, show or hide sources, mute audio, and put a web page on screen.",
   "taxonomy": [
     "platform.obs"
   ],
@@ -15,23 +15,23 @@
     {
       "id": "host",
       "label": "OBS address",
-      "description": "The computer running OBS. The WoofX3 companion fills this in when OBS runs on your PC.",
+      "description": "The computer running OBS. The desktop app fills this in for you.",
       "type": "text",
       "defaultValue": "127.0.0.1",
       "required": true
     },
     {
       "id": "port",
-      "label": "WebSocket port",
-      "description": "The Server Port in OBS under Tools → WebSocket Server Settings (4455 unless you changed it).",
+      "label": "OBS port",
+      "description": "The server port from OBS (4455 unless you changed it).",
       "type": "number",
       "defaultValue": "4455",
       "required": true
     },
     {
       "id": "password",
-      "label": "WebSocket password",
-      "description": "The Server Password in OBS under Tools → WebSocket Server Settings. Leave it empty if authentication is turned off.",
+      "label": "OBS password",
+      "description": "The server password from OBS. Leave it empty if you turned the password off.",
       "type": "secret",
       "required": false
     }
@@ -39,7 +39,7 @@
   "local": [
     {
       "id": "obs",
-      "name": "OBS WebSocket",
+      "name": "OBS connection",
       "protocol": "websocket",
       "hostSetting": "host",
       "portSetting": "port",
@@ -103,8 +103,8 @@
   "actions": [
     {
       "id": "obs.switch_scene",
-      "name": "Switch OBS scene",
-      "description": "Make a scene the live program scene in OBS. The step fails, with the reason, when OBS is not connected or has no scene by that name.",
+      "name": "Switch scene",
+      "description": "Switch to a scene in OBS.",
       "type": "function",
       "function": "switchScene",
       "schema": [
@@ -114,7 +114,7 @@
           "type": "text",
           "required": true,
           "placeholder": "BRB",
-          "description": "The scene's name exactly as OBS shows it.",
+          "description": "The scene name, exactly as it appears in OBS.",
           "source": {
             "kind": "internal",
             "request": {
@@ -133,7 +133,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+            "description": "True once OBS made the change."
           }
         ]
       },
@@ -143,8 +143,8 @@
     },
     {
       "id": "obs.set_source_visibility",
-      "name": "Set OBS source visibility",
-      "description": "Show, hide or toggle a source in an OBS scene. The step fails, with the reason, when OBS is not connected or the source is not in that scene.",
+      "name": "Show or hide a source",
+      "description": "Show, hide or toggle a source in a scene.",
       "type": "function",
       "function": "setSourceVisibility",
       "schema": [
@@ -154,7 +154,7 @@
           "type": "text",
           "required": true,
           "placeholder": "Confetti",
-          "description": "The source's name exactly as OBS shows it.",
+          "description": "The source name, exactly as it appears in OBS.",
           "source": {
             "kind": "internal",
             "request": {
@@ -186,14 +186,14 @@
               "label": "Toggle"
             }
           ],
-          "description": "Visible shows the source, Hidden hides it, and Toggle flips whichever it is when the step runs."
+          "description": "Toggle flips it to whichever it isn't right now."
         },
         {
           "id": "sceneName",
           "label": "Scene",
           "type": "text",
           "placeholder": "Current scene",
-          "description": "The scene the source is in. Leave blank for whichever scene is live when the step runs.",
+          "description": "The scene the source is in. Leave blank for the current scene.",
           "source": {
             "kind": "internal",
             "request": {
@@ -212,7 +212,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+            "description": "True once OBS made the change."
           }
         ]
       },
@@ -222,18 +222,18 @@
     },
     {
       "id": "obs.set_input_mute",
-      "name": "Mute or unmute OBS audio",
-      "description": "Mute or unmute an audio input in OBS, such as a microphone or desktop audio. The step fails, with the reason, when OBS is not connected or has no input by that name.",
+      "name": "Mute or unmute audio",
+      "description": "Mute or unmute audio in OBS, like your microphone or desktop sound.",
       "type": "function",
       "function": "setInputMute",
       "schema": [
         {
           "id": "inputName",
-          "label": "Audio input",
+          "label": "Audio",
           "type": "text",
           "required": true,
           "placeholder": "Mic/Aux",
-          "description": "The input's name exactly as OBS's audio mixer shows it.",
+          "description": "The audio name, exactly as it appears in the OBS mixer.",
           "source": {
             "kind": "internal",
             "request": {
@@ -251,7 +251,7 @@
           "label": "Muted",
           "type": "toggle",
           "defaultValue": true,
-          "description": "On mutes the input; off unmutes it."
+          "description": "On mutes it. Off unmutes it."
         }
       ],
       "returns": {
@@ -259,7 +259,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+            "description": "True once OBS made the change."
           }
         ]
       },
@@ -269,8 +269,8 @@
     },
     {
       "id": "obs.show_browser_source",
-      "name": "Show a web page in OBS",
-      "description": "Load a web page in a browser source and show it. The source is added to the scene the first time and reused after that. The step fails, with the reason, when OBS is not connected or a source with that name is something other than a browser source.",
+      "name": "Show a web page",
+      "description": "Put a web page on screen. The browser source is added for you the first time.",
       "type": "function",
       "function": "showBrowserSource",
       "schema": [
@@ -280,7 +280,7 @@
           "type": "text",
           "required": true,
           "placeholder": "https://www.twitch.tv/wolfymaster",
-          "description": "The address to load, starting with https:// or http://."
+          "description": "The web address, starting with https://"
         },
         {
           "id": "sourceName",
@@ -288,14 +288,14 @@
           "type": "text",
           "required": true,
           "placeholder": "Web page",
-          "description": "The browser source's name. If OBS has none by that name, one is made."
+          "description": "The browser source name. It's added if it doesn't exist."
         },
         {
           "id": "sceneName",
           "label": "Scene",
           "type": "text",
           "placeholder": "Current scene",
-          "description": "The scene to show it in. Leave blank for whichever scene is live when the step runs.",
+          "description": "The scene to show it in. Leave blank for the current scene.",
           "source": {
             "kind": "internal",
             "request": {
@@ -314,7 +314,7 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "True once OBS has applied the change. A step OBS refused fails instead, with the reason."
+            "description": "True once OBS made the change."
           }
         ]
       },

@@ -25,7 +25,7 @@ seeing that.
 1. Install the Twitch module first, so the credits hear about cheers, gift
    subs, raids and chat.
 2. Add Stream Credits to your "ending" scene.
-3. Pick your titles, colours and size. Add a headline like "Thanks for
+3. Pick your titles, colors and size. Add a headline like "Thanks for
    watching!" if you want one.
 4. Stream as usual. The names fill in by themselves.
 
@@ -36,7 +36,7 @@ seeing that.
 - Turn any list on or off.
 - Show or hide the bits, gift subs and raid sizes under each name.
 - Choose how long each list stays up and how fast long lists scroll.
-- Pick your accent colour and text colour, and turn the dark panel behind
+- Pick your accent color and text color, and turn the dark panel behind
   the credits on or off.
 
 ## Good to know

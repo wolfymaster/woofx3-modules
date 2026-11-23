@@ -5,9 +5,9 @@ buys you a gift or chips in toward one, your stream can throw a party with
 alerts, sounds and a big thank-you. Your supporters get the spotlight they
 deserve, and you never miss a chance to say thanks.
 
-## React to your supporters
+## What you can do
 
-Choose what your stream does when:
+Choose what happens on stream when:
 
 - **Someone buys you a gift.** Show what they bought, a picture of it, the
   price and their message.
@@ -26,9 +26,9 @@ a gift is a surprise, your stream knows that too, so you can keep the secret.
 - When a gift gets fully funded, switch to a celebration scene so everyone who
   helped can cheer together.
 
-## Getting started
+## Setting up
 
-1. Install this module in WoofX3 and copy its webhook link.
+1. Install this module in woofx3 and copy its link.
 2. In Throne, open the **webhook integration** settings.
 3. Paste the link and save.
 

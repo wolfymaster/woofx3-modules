@@ -2,44 +2,44 @@
   "id": "woofx3_points",
   "name": "Loyalty Points",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "chat",
   "taxonomy": [
     "chat.loyalty"
   ],
-  "description": "A channel currency viewers earn by chatting. Chat commands: !points [user] (or !<currency name>), !give <user> <amount>, !gamble <amount|half|all>, !leaderboard / !top, and for moderators !addpoints / !removepoints <user> <amount>. Workflow actions give or read a viewer's balance, e.g. a bonus on follow or raid. Commands are read from chat messages rather than registered as commands, because only a chat message says whether the sender is a moderator.",
+  "description": "Viewers earn your own channel currency by chatting, then share it, gamble it or climb the leaderboard.",
   "settings": [
     {
       "id": "currencyName",
       "label": "Currency name",
-      "description": "What your points are called in chat, like \"bones\" or \"coins\". Viewers can also check their balance with ! plus this name.",
+      "description": "What your points are called, like \"bones\" or \"coins\".",
       "type": "text",
       "defaultValue": "points"
     },
     {
       "id": "pointsPerMessage",
       "label": "Points per chat message",
-      "description": "How many points a viewer earns for chatting. Set to 0 to turn off earning from chat.",
+      "description": "Set to 0 to stop earning from chat.",
       "type": "number",
       "defaultValue": "5"
     },
     {
       "id": "messageCooldownSeconds",
       "label": "Seconds between chat rewards",
-      "description": "A viewer earns chat points at most once in this many seconds, so spamming doesn't pay.",
+      "description": "A viewer earns at most once in this time, so spamming doesn't pay.",
       "type": "number",
       "defaultValue": "60"
     },
     {
       "id": "subscriberMultiplier",
-      "label": "Subscriber multiplier",
-      "description": "Subscribers earn this many times the normal chat reward.",
+      "label": "Subscriber bonus",
+      "description": "Subscribers earn this many times the normal amount.",
       "type": "number",
       "defaultValue": "2"
     },
     {
       "id": "gambleEnabled",
-      "label": "Allow !gamble",
+      "label": "Allow gambling",
       "description": "Let viewers bet their points on a coin flip.",
       "type": "toggle",
       "defaultValue": "true"
@@ -47,7 +47,7 @@
     {
       "id": "gambleCooldownSeconds",
       "label": "Seconds between gambles",
-      "description": "How long a viewer waits between gambles.",
+      "description": "How long a viewer waits between bets.",
       "type": "number",
       "defaultValue": "30"
     }
@@ -78,14 +78,14 @@
   "actions": [
     {
       "id": "points.handle_chat",
-      "name": "Earn points and answer points commands",
-      "description": "Awards chat points to the sender of a chat message and answers any points command in it. The module's own \"Points from chat\" workflow runs this on every chat message; there is no need to add it anywhere else.",
+      "name": "Award chat points and answer points commands",
+      "description": "Awards points for chatting and answers points commands. Runs by itself, so you never need to add it.",
       "type": "function",
       "function": "handle_chat_message",
       "returns": {
         "fields": [
-          { "path": "earned", "type": "number", "description": "Points this message earned. 0 while the chatter is on cooldown." },
-          { "path": "command", "type": "string", "description": "The points command the message ran, such as \"gamble\". Empty when it ran none." }
+          { "path": "earned", "type": "number", "description": "Points this message earned. 0 while the viewer is waiting." },
+          { "path": "command", "type": "string", "description": "The points command used, such as \"gamble\". Empty when none." }
         ]
       },
       "taxonomy": [
@@ -95,7 +95,7 @@
     {
       "id": "points.give",
       "name": "Give points to a viewer",
-      "description": "Add points to a viewer's balance, or remove them with a negative amount (a balance never goes below 0). A viewer who has never chatted still gets them: they are waiting for them the first time they chat.",
+      "description": "Gives a viewer points, or takes them away with a negative number. Points never go below 0.",
       "type": "function",
       "function": "give_points",
       "schema": [
@@ -105,7 +105,7 @@
           "type": "text",
           "required": true,
           "placeholder": "${trigger.data.userName}",
-          "description": "The viewer's name, or their Twitch user id."
+          "description": "The viewer's name."
         },
         {
           "id": "amount",
@@ -113,21 +113,21 @@
           "type": "number",
           "required": true,
           "defaultValue": 100,
-          "description": "How many points to give. A negative number takes points away."
+          "description": "A negative number takes points away."
         },
         {
           "id": "reason",
           "label": "Reason",
           "type": "text",
           "placeholder": "follow bonus",
-          "description": "Shown on the Points changed trigger, for workflows that react to it."
+          "description": "Passed along when points change, for triggers that react to it."
         }
       ],
       "returns": {
         "fields": [
           { "path": "user", "type": "string", "description": "The viewer's name." },
-          { "path": "points", "type": "number", "description": "Their balance after the change." },
-          { "path": "delta", "type": "number", "description": "The change actually applied, which is smaller than asked when a removal hit 0." }
+          { "path": "points", "type": "number", "description": "Their points after the change." },
+          { "path": "delta", "type": "number", "description": "How much it really changed by. Less than asked if points ran out." }
         ]
       },
       "taxonomy": [
@@ -137,7 +137,7 @@
     {
       "id": "points.get",
       "name": "Get a viewer's points",
-      "description": "Look up how many points a viewer has.",
+      "description": "Looks up how many points a viewer has.",
       "type": "function",
       "function": "get_points",
       "schema": [
@@ -147,13 +147,13 @@
           "type": "text",
           "required": true,
           "placeholder": "${trigger.data.userName}",
-          "description": "The viewer's name, or their Twitch user id."
+          "description": "The viewer's name."
         }
       ],
       "returns": {
         "fields": [
           { "path": "user", "type": "string", "description": "The viewer's name." },
-          { "path": "points", "type": "number", "description": "Their balance. 0 for a viewer with no points." }
+          { "path": "points", "type": "number", "description": "Their points. 0 if they have none." }
         ]
       },
       "taxonomy": [
@@ -165,7 +165,7 @@
     {
       "id": "points_changed",
       "name": "Points changed",
-      "description": "Fires whenever a viewer's balance changes: chatting, gambling, giving, or a workflow or moderator adjusting it.",
+      "description": "A viewer's points go up or down: chatting, gambling, giving or a mod change.",
       "type": "eventbus",
       "event": "points.changed",
       "sentence": "A viewer's points change",
@@ -175,8 +175,8 @@
       "emits": {
         "fields": [
           { "path": "user", "type": "string", "description": "The viewer's name." },
-          { "path": "points", "type": "number", "description": "Their balance after the change." },
-          { "path": "delta", "type": "number", "description": "How much it changed by; negative for a loss.", "example": 50 },
+          { "path": "points", "type": "number", "description": "Their points after the change." },
+          { "path": "delta", "type": "number", "description": "How much it changed by. Negative for a loss.", "example": 50 },
           { "path": "reason", "type": "string", "description": "What changed it: chat, gamble, give, gift from <name>, refund, carried over, added by mod, removed by mod, or a workflow's reason.", "example": "gamble" }
         ]
       }

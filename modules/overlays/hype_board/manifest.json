@@ -2,9 +2,9 @@
   "id": "woofx3_hype_board",
   "name": "Hype Board",
   "author": "WolfyMaster LLC",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "category": "overlay",
-  "description": "An on-stream board for bits, subs and tips: who cheered, gifted and tipped the most, running totals, a goal with milestones, and a subathon timer that grows with every sub, cheer and tip. Ships three themes, and the board's own settings choose which parts show.",
+  "description": "Shows your top supporters, a goal with milestones and a subathon timer that grows with every sub, cheer and tip.",
   "taxonomy": [
     "overlay.support"
   ],
@@ -93,7 +93,7 @@
     {
       "id": "record_cheer",
       "name": "Count a cheer on the Hype Board",
-      "description": "Adds a cheer's bits to the totals, the top cheerer and the subathon timer. The module's own workflow runs this on every cheer.",
+      "description": "Adds a cheer's bits to the totals, the top cheerer and the subathon timer. Runs by itself on every cheer.",
       "type": "function",
       "function": "record_cheer",
       "returns": { "fields": [ { "path": "bits", "type": "number", "description": "Bits counted this stream (or since the last reset)." } ] },
@@ -111,7 +111,7 @@
     {
       "id": "record_gift",
       "name": "Count gift subs on the Hype Board",
-      "description": "Adds a gifter's subs to the totals, the top gifter and the subathon timer. The module's own workflow runs this on every gift.",
+      "description": "Adds a gifter's subs to the totals, the top gifter and the subathon timer. Runs by itself on every gift.",
       "type": "function",
       "function": "record_gift",
       "returns": { "fields": [ { "path": "subs", "type": "number" } ] },
@@ -141,7 +141,7 @@
     {
       "id": "handle_chat",
       "name": "Answer Hype Board chat commands",
-      "description": "Answers !subathon for everyone and lets moderators run the timer and !resetboard. The module's own workflow runs this on every chat message.",
+      "description": "Answers !subathon for everyone and lets moderators run the timer and !resetboard. Runs by itself on every chat message.",
       "type": "function",
       "function": "handle_chat_message",
       "returns": { "fields": [ { "path": "command", "type": "string" } ] },

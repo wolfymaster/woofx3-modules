@@ -2,9 +2,9 @@
   "id": "woofx3_dadjoke",
   "name": "Dad Jokes",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "chat",
-  "description": "Adds !dadjoke, which says a random dad joke in chat from a built-in list of 500. Jokes told recently are skipped so chat doesn't hear repeats.",
+  "description": "Chat can type !dadjoke to hear a random dad joke, without hearing the same one twice in a row.",
   "taxonomy": [
     "function.chat"
   ],
@@ -36,7 +36,7 @@
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "joke",
