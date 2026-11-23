@@ -4,7 +4,7 @@
   "author": "WolfyMaster LLC",
   "version": "0.1.1",
   "category": "platform",
-  "description": "Workflow actions that control LIFX smart lights through the LIFX cloud: turn them on or off, set colour and brightness, and flash them for alerts. Uses the streamer's LIFX personal access token.",
+  "description": "Turn your LIFX lights on or off, change their color, and flash them for alerts.",
   "taxonomy": [
     "platform.lifx"
   ],
@@ -14,7 +14,7 @@
       "label": "LIFX token",
       "type": "secret",
       "required": true,
-      "description": "Your personal access token from cloud.lifx.com, under Settings."
+      "description": "Your LIFX personal access token."
     }
   ],
   "functions": [
@@ -43,10 +43,10 @@
   "actions": [
     {
       "id": "lifx.set_state",
-      "name": "Set LIFX lights",
+      "name": "Set lights",
       "type": "function",
       "function": "setState",
-      "description": "Turn LIFX lights on or off and set their colour and brightness. Anything left blank stays as it is. The step fails, with the reason, when LIFX refuses the change.",
+      "description": "Turn lights on or off and set their color and brightness. Anything left blank stays as it is.",
       "schema": [
         {
           "id": "selector",
@@ -55,7 +55,7 @@
           "required": true,
           "defaultValue": "all",
           "placeholder": "all",
-          "description": "Which lights to change: all of them, a group, or one light.",
+          "description": "All lights, a group, or one light.",
           "source": {
             "kind": "internal",
             "request": {
@@ -90,9 +90,9 @@
         },
         {
           "id": "color",
-          "label": "Colour",
+          "label": "Color",
           "type": "color",
-          "description": "Leave blank to keep the current colour."
+          "description": "Leave blank to keep the current color."
         },
         {
           "id": "brightness",
@@ -135,10 +135,10 @@
     },
     {
       "id": "lifx.flash",
-      "name": "Flash LIFX lights",
+      "name": "Flash lights",
       "type": "function",
       "function": "flash",
-      "description": "Flash LIFX lights in a colour a few times, then return them to how they were. Great for alerts. The step fails, with the reason, when LIFX refuses the effect.",
+      "description": "Flash lights in a color a few times, then return them to how they were. Great for alerts.",
       "schema": [
         {
           "id": "selector",
@@ -147,7 +147,7 @@
           "required": true,
           "defaultValue": "all",
           "placeholder": "all",
-          "description": "Which lights to change: all of them, a group, or one light.",
+          "description": "All lights, a group, or one light.",
           "source": {
             "kind": "internal",
             "request": {
@@ -162,7 +162,7 @@
         },
         {
           "id": "color",
-          "label": "Colour",
+          "label": "Color",
           "type": "color",
           "required": true,
           "defaultValue": "#a970ff"
@@ -185,7 +185,7 @@
         },
         {
           "id": "cycles",
-          "label": "Flashes",
+          "label": "Number of flashes",
           "type": "number",
           "min": 1,
           "max": 50,
