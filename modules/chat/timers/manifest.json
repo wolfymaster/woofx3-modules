@@ -2,7 +2,7 @@
   "id": "woofx3_timed_messages",
   "name": "Timed Messages",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "chat",
   "description": "Posts your reminders in chat on a timer while you're live, but only when chat is active.",
   "taxonomy": [
