@@ -4,7 +4,7 @@
   "author": "WolfyMaster LLC",
   "version": "0.2.0",
   "category": "chat",
-  "description": "The everyday chat commands: !uptime, !lurk, !unlurk, !8ball, !roll, !coinflip, !quote, plus !addquote and !delquote for mods.",
+  "description": "Everyday chat commands: uptime, lurk, 8-ball, dice, coin flip and saved quotes.",
   "taxonomy": [
     "function.chat"
   ],
@@ -102,12 +102,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "live",
@@ -124,7 +124,7 @@
     {
       "id": "lurk",
       "name": "Announce lurk",
-      "description": "Thanks a viewer in chat for lurking. Uses the Lurk message setting.",
+      "description": "Thanks a viewer in chat for lurking.",
       "type": "function",
       "function": "lurk",
       "taxonomy": [
@@ -136,7 +136,7 @@
           "label": "Viewer",
           "type": "text",
           "placeholder": "${trigger.data.chatter}",
-          "description": "Leave blank to use whoever typed the command."
+          "description": "Leave blank for whoever typed the command."
         }
       ],
       "returns": {
@@ -144,12 +144,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "user",
@@ -161,7 +161,7 @@
     {
       "id": "unlurk",
       "name": "Welcome back from lurk",
-      "description": "Welcomes a lurker back in chat. Uses the Welcome back message setting.",
+      "description": "Welcomes a lurker back in chat.",
       "type": "function",
       "function": "unlurk",
       "taxonomy": [
@@ -173,7 +173,7 @@
           "label": "Viewer",
           "type": "text",
           "placeholder": "${trigger.data.chatter}",
-          "description": "Leave blank to use whoever typed the command."
+          "description": "Leave blank for whoever typed the command."
         }
       ],
       "returns": {
@@ -181,12 +181,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "user",
@@ -209,7 +209,7 @@
           "id": "question",
           "label": "Question",
           "type": "text",
-          "description": "Leave blank to use the text after the command."
+          "description": "Leave blank to use what they typed after the command."
         }
       ],
       "returns": {
@@ -217,12 +217,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "answer",
@@ -234,7 +234,7 @@
     {
       "id": "roll",
       "name": "Roll dice",
-      "description": "Rolls dice and says the result in chat. Accepts 20, d20 or 3d6; up to 20 dice with 1000 sides.",
+      "description": "Rolls dice and says the result in chat. Try 20, d20 or 3d6.",
       "type": "function",
       "function": "roll",
       "taxonomy": [
@@ -246,7 +246,7 @@
           "label": "Dice",
           "type": "text",
           "placeholder": "1d6",
-          "description": "Leave blank to use the text after the command, or 1d6."
+          "description": "Leave blank to use what they typed, or one 6-sided die."
         }
       ],
       "returns": {
@@ -254,12 +254,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "total",
@@ -286,12 +286,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "side",
@@ -316,7 +316,7 @@
           "id": "number",
           "label": "Quote number",
           "type": "text",
-          "description": "Leave blank to use the text after the command, or pick at random."
+          "description": "Leave blank to use what they typed, or pick one at random."
         }
       ],
       "returns": {
@@ -324,12 +324,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the request couldn't be answered, such as a bad dice roll."
+            "description": "False when the request couldn't be answered."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "number",
@@ -345,7 +345,7 @@
     {
       "id": "record_stream_start",
       "name": "Remember stream start",
-      "description": "Stores when the stream went live, for !uptime. Runs by itself when the stream goes live.",
+      "description": "Remembers when you went live, for !uptime. Runs by itself.",
       "type": "function",
       "function": "recordStreamStart",
       "taxonomy": [
@@ -363,7 +363,7 @@
     {
       "id": "clear_stream_start",
       "name": "Forget stream start",
-      "description": "Marks the stream offline, for !uptime. Runs by itself when the stream ends.",
+      "description": "Forgets the start time when the stream ends. Runs by itself.",
       "type": "function",
       "function": "clearStreamStart",
       "taxonomy": [
@@ -373,7 +373,7 @@
     {
       "id": "add_quote",
       "name": "Add a quote",
-      "description": "Saves the text after the command as a new quote.",
+      "description": "Saves what was typed after the command as a new quote.",
       "type": "function",
       "function": "addQuote",
       "taxonomy": [
@@ -384,12 +384,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the quote couldn't be changed."
+            "description": "False when the quote couldn't be saved or deleted."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "number",
@@ -401,7 +401,7 @@
     {
       "id": "delete_quote",
       "name": "Delete a quote",
-      "description": "Deletes the quote numbered after the command.",
+      "description": "Deletes the quote whose number was typed after the command.",
       "type": "function",
       "function": "deleteQuote",
       "taxonomy": [
@@ -412,12 +412,12 @@
           {
             "path": "ok",
             "type": "boolean",
-            "description": "False when the quote couldn't be changed."
+            "description": "False when the quote couldn't be saved or deleted."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What was said in chat, for a later step to reuse."
+            "description": "What was said in chat."
           },
           {
             "path": "number",
@@ -542,7 +542,7 @@
   "workflows": [
     {
       "id": "track-stream-start",
-      "name": "Remember when the stream goes live",
+      "name": "Remember when you go live",
       "trigger": "stream.online",
       "steps": [
         {
@@ -553,7 +553,7 @@
     },
     {
       "id": "track-stream-end",
-      "name": "Remember when the stream ends",
+      "name": "Forget the start time when the stream ends",
       "trigger": "stream.offline",
       "steps": [
         {
@@ -568,19 +568,19 @@
       "id": "lurkMessage",
       "label": "Lurk message",
       "type": "text",
-      "description": "What the bot says for !lurk. {user} becomes the viewer's name. Leave blank for the built-in message."
+      "description": "Use {user} for the viewer's name. Leave blank for the default."
     },
     {
       "id": "unlurkMessage",
       "label": "Welcome back message",
       "type": "text",
-      "description": "What the bot says for !unlurk. {user} becomes the viewer's name. Leave blank for the built-in message."
+      "description": "Use {user} for the viewer's name. Leave blank for the default."
     },
     {
       "id": "eightBallAnswers",
       "label": "8-ball answers",
       "type": "text",
-      "description": "Your own 8-ball answers, separated by | (for example: Yes!|No way|Ask chat). Leave blank for the classic answers."
+      "description": "Separate answers with | (like Yes!|No way|Ask chat). Leave blank for the classics."
     }
   ]
 }
