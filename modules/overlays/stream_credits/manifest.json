@@ -2,7 +2,7 @@
   "id": "woofx3_stream_credits",
   "name": "Stream Credits",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "overlay",
   "description": "End-of-stream credits thanking everyone who cheered, gifted subs, raided or chatted.",
   "taxonomy": [
