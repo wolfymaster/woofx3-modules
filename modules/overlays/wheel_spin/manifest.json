@@ -4,7 +4,7 @@
   "author": "WolfyMaster LLC",
   "version": "0.4.0",
   "category": "overlay",
-  "description": "Prize wheels for your scene. Make as many wheels as you like, fill each with entries, spin one from a workflow, button or stream deck, and watch it land on a winner. Picked entries can stay on the wheel or come off it.",
+  "description": "Prize wheels for your stream. Fill them with entries, spin one and watch it land on a winner.",
   "taxonomy": [
     "overlay.wheel"
   ],
@@ -12,14 +12,14 @@
     {
       "kind": "wheel",
       "name": "Wheel",
-      "description": "A prize wheel of entries you type in, or that actions add to and take from, spun by actions and shown by overlays: giveaway wheels, game pickers.",
+      "description": "A prize wheel for giveaways and game picks. Type in the entries, or let your steps add and remove them.",
       "icon": "FerrisWheel",
       "display": { "summary": "spin.item" },
       "schema": [
         {
           "id": "items",
           "label": "Entries",
-          "description": "Everything on the wheel. Add the same entry more than once for a bigger chance to win. Actions and chat can add to this list too.",
+          "description": "Everything on the wheel. Add the same entry more than once for a bigger chance to win. Steps can add to this list too.",
           "type": "list",
           "itemFields": [ { "id": "label", "label": "Entry", "type": "text", "required": true } ]
         },
@@ -150,7 +150,7 @@
       ],
       "emits": {
         "fields": [
-          { "path": "target", "type": "string", "description": "The wheel, by canonical id." },
+          { "path": "target", "type": "string", "description": "Which wheel it was." },
           { "path": "item", "type": "string", "description": "What the wheel landed on.", "example": "Pizza night" },
           { "path": "removed", "type": "boolean", "description": "Whether it was taken off the wheel." },
           { "path": "count", "type": "number", "description": "Entries left on the wheel." }
@@ -180,11 +180,11 @@
         { "id": "title", "label": "Title", "type": "text", "placeholder": "Spin the wheel!", "description": "Shown above the wheel. Leave empty for none." },
         { "id": "hideWhenIdle", "label": "Only show while spinning", "type": "toggle", "defaultValue": false, "description": "Hide the wheel until it spins, and again after the winner is shown." },
         { "id": "winnerSeconds", "label": "Seconds to show the winner", "type": "number", "min": 0, "defaultValue": 8, "description": "0 keeps the winner up until the next spin." },
-        { "id": "color1", "label": "Slice colour 1", "type": "color", "defaultValue": "#3369e8" },
-        { "id": "color2", "label": "Slice colour 2", "type": "color", "defaultValue": "#d50f25" },
-        { "id": "color3", "label": "Slice colour 3", "type": "color", "defaultValue": "#eeb211" },
-        { "id": "color4", "label": "Slice colour 4", "type": "color", "defaultValue": "#009925" },
-        { "id": "accent", "label": "Pointer colour", "type": "color", "defaultValue": "#ffffff" },
+        { "id": "color1", "label": "Slice color 1", "type": "color", "defaultValue": "#3369e8" },
+        { "id": "color2", "label": "Slice color 2", "type": "color", "defaultValue": "#d50f25" },
+        { "id": "color3", "label": "Slice color 3", "type": "color", "defaultValue": "#eeb211" },
+        { "id": "color4", "label": "Slice color 4", "type": "color", "defaultValue": "#009925" },
+        { "id": "accent", "label": "Pointer color", "type": "color", "defaultValue": "#ffffff" },
         { "id": "scale", "label": "Size", "type": "range", "min": 50, "max": 200, "unit": "%", "defaultValue": 100 }
       ]
     }
