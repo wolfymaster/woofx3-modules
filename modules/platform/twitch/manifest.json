@@ -37,7 +37,7 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "The follower's Twitch user id.",
+            "description": "The follower's Twitch ID.",
             "identity": "viewer",
             "displayName": "userName"
           },
@@ -69,62 +69,69 @@
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "displayName": "chatterName"
           },
           {
             "path": "chatterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who sent it."
           },
           {
             "path": "message",
-            "type": "string"
+            "type": "string",
+            "description": "What they typed."
           },
           {
             "path": "isPaid",
             "type": "boolean",
-            "description": "Whether the message carried bits."
+            "description": "True if the message included bits."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "Bits cheered in the message. 0 when none."
+            "description": "Bits cheered in the message, or 0."
           },
           {
             "path": "channelId",
             "type": "string",
-            "description": "The channel in a shared chat session the message came from. Absent otherwise."
+            "description": "The ID of the channel the message came from when you share chat. Empty otherwise."
           },
           {
             "path": "channelName",
             "type": "string",
-            "description": "The channel in a shared chat session the message came from. Absent otherwise."
+            "description": "The name of the channel the message came from when you share chat. Empty otherwise."
           },
           {
             "path": "membership.isBroadcaster",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if it's you."
           },
           {
             "path": "membership.isModerator",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're a moderator."
           },
           {
             "path": "membership.isSubscriber",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're subscribed."
           },
           {
             "path": "membership.isVip",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're a VIP."
           },
           {
             "path": "membership.isFollower",
             "type": "boolean",
-            "description": "Absent when the lookup did not resolve in time."
+            "description": "True if they follow you. Empty if it couldn't be checked in time."
           },
           {
             "path": "membership.subscriberTier",
             "type": "string",
-            "description": "tier1, tier2 or tier3. Absent when not subscribed or unresolved."
+            "description": "tier1, tier2 or tier3. Empty if they aren't subscribed."
           }
         ]
       },
@@ -164,30 +171,30 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "Who now holds the sub: the recipient of a gifted sub.",
+            "description": "The Twitch ID of who the sub is for. For a gift, the person who got it.",
             "identity": "viewer",
             "displayName": "userName"
           },
           {
             "path": "userName",
             "type": "string",
-            "description": "Who now holds the sub: the recipient of a gifted sub."
+            "description": "Who the sub is for. For a gift, the person who got it."
           },
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "isGift",
             "type": "boolean",
-            "description": "Whether someone else gifted this subscription."
+            "description": "True if someone else gifted this sub."
           },
           {
             "path": "isCommunityGift",
             "type": "boolean",
-            "description": "Whether this sub is part of a community gift.",
+            "description": "True if it came from a community gift.",
             "example": false
           }
         ]
@@ -236,7 +243,7 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs\". Count one or the other, not both."
+          "description": "A gift of many subs counts once for each person who got one here, and once as a whole on \"Someone gifts subs\". Pick one."
         },
         {
           "id": "isCommunityGift",
@@ -250,7 +257,7 @@
           "defaultValue": "",
           "eventPath": "isCommunityGift",
           "operator": "eq",
-          "description": "A sub gifted to one viewer shows up here. Community gift recipients show up here too, so skip them for single-gift alerts."
+          "description": "Single gifts show up here, and so does each person who gets a community gift. Skip community gifts for single-gift alerts."
         }
       ]
     },
@@ -274,65 +281,70 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "Who now holds the sub: the recipient of a gifted sub.",
+            "description": "The Twitch ID of who the sub is for. For a gift, the person who got it.",
             "identity": "viewer",
             "displayName": "userName"
           },
           {
             "path": "userName",
             "type": "string",
-            "description": "Who now holds the sub: the recipient of a gifted sub."
+            "description": "Who the sub is for. For a gift, the person who got it."
           },
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "isGift",
             "type": "boolean",
-            "description": "Whether someone else gifted this subscription."
+            "description": "True if someone else gifted this sub."
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "description": "Their Twitch ID."
           },
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       },
@@ -380,7 +392,7 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs in Shared Chat\". Count one or the other, not both."
+          "description": "A gift of many subs counts once for each person who got one here, and once as a whole on \"Someone gifts subs in Shared Chat\". Pick one."
         }
       ]
     },
@@ -401,18 +413,20 @@
           {
             "path": "gifterId",
             "type": "string",
+            "description": "The gifter's Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "isAnonymous",
             "displayName": "gifterName"
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who gifted."
           },
           {
             "path": "isAnonymous",
             "type": "boolean",
-            "description": "Whether the gifter hid their name."
+            "description": "True if the gifter hid their name."
           },
           {
             "path": "amount",
@@ -423,7 +437,7 @@
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           }
         ]
@@ -489,18 +503,20 @@
           {
             "path": "gifterId",
             "type": "string",
+            "description": "The gifter's Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "isAnonymous",
             "displayName": "gifterName"
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who gifted."
           },
           {
             "path": "isAnonymous",
             "type": "boolean",
-            "description": "Whether the gifter hid their name."
+            "description": "True if the gifter hid their name."
           },
           {
             "path": "amount",
@@ -511,48 +527,53 @@
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "description": "Their Twitch ID."
           },
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       },
@@ -620,7 +641,7 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "Absent when the cheer is anonymous.",
+            "description": "Who cheered, as a Twitch ID. Empty when anonymous.",
             "identity": "viewer",
             "anonymousWhen": "isAnonymous",
             "displayName": "userName"
@@ -628,21 +649,23 @@
           {
             "path": "userName",
             "type": "string",
-            "description": "Absent when the cheer is anonymous."
+            "description": "Who cheered. Empty when anonymous."
           },
           {
             "path": "isAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they cheered anonymously."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "Bits cheered.",
+            "description": "How many bits.",
             "example": 100
           },
           {
             "path": "message",
-            "type": "string"
+            "type": "string",
+            "description": "What they typed."
           }
         ]
       },
@@ -677,7 +700,7 @@
       "description": "A Hype Train starts on your channel.",
       "type": "eventbus",
       "event": "channel.hypetrain",
-      "sentence": "A hype train starts",
+      "sentence": "A Hype Train starts",
       "taxonomy": [
         "platform.twitch",
         "alert.hypetrain"
@@ -698,11 +721,13 @@
         "fields": [
           {
             "path": "broadcasterUserId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterUserName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "startedAt",
@@ -732,6 +757,7 @@
           {
             "path": "userId",
             "type": "string",
+            "description": "Who redeemed it, as a Twitch ID.",
             "identity": "viewer",
             "displayName": "userName"
           },
@@ -742,20 +768,23 @@
           },
           {
             "path": "rewardId",
-            "type": "string"
+            "type": "string",
+            "description": "The reward's ID."
           },
           {
             "path": "rewardTitle",
-            "type": "string"
+            "type": "string",
+            "description": "The reward's name."
           },
           {
             "path": "redeemId",
-            "type": "string"
+            "type": "string",
+            "description": "This redemption's ID."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "What the viewer typed, for a reward that asks for input."
+            "description": "What they typed, if the reward asks for input."
           }
         ]
       },
@@ -800,11 +829,13 @@
         "fields": [
           {
             "path": "broadcasterUserId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterUserName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           }
         ]
       }
@@ -826,6 +857,7 @@
           {
             "path": "fromBroadcasterUserId",
             "type": "string",
+            "description": "The raiding channel's Twitch ID.",
             "identity": "viewer",
             "displayName": "fromBroadcasterUserName"
           },
@@ -883,6 +915,7 @@
           {
             "path": "fromBroadcasterUserId",
             "type": "string",
+            "description": "The raiding channel's Twitch ID.",
             "identity": "viewer",
             "displayName": "fromBroadcasterUserName"
           },
@@ -899,43 +932,48 @@
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "description": "Their Twitch ID."
           },
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       },
@@ -984,17 +1022,18 @@
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "isPrime",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if it's a Prime sub."
           },
           {
             "path": "durationMonths",
             "type": "number",
-            "description": "How many months the resub pays for."
+            "description": "How many months were paid for."
           },
           {
             "path": "cumulativeMonths",
@@ -1005,36 +1044,42 @@
           {
             "path": "streakMonths",
             "type": "number",
-            "description": "Consecutive months subscribed. Absent when the chatter hides it."
+            "description": "Months in a row. Empty if they hide it."
           },
           {
             "path": "isGift",
             "type": "boolean",
-            "description": "Whether someone else gifted this subscription."
+            "description": "True if someone else gifted this sub."
           },
           {
             "path": "gifterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if the gifter is anonymous."
           },
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "description": "The gifter's Twitch ID."
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who gifted."
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1042,20 +1087,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       },
@@ -1100,7 +1147,7 @@
           ],
           "anyText": "any number of months",
           "missingText": "a number of months",
-          "description": "Only fire when the viewer's total months subscribed is at least, or exactly, this many."
+          "description": "Only fire when their total months subscribed is at least, or exactly, this many."
         },
         {
           "id": "isGift",
@@ -1123,7 +1170,7 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs\". Count one or the other, not both."
+          "description": "A gift of many subs counts once for each person who got one here, and once as a whole on \"Someone gifts subs\". Pick one."
         }
       ]
     },
@@ -1149,17 +1196,18 @@
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "isPrime",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if it's a Prime sub."
           },
           {
             "path": "durationMonths",
             "type": "number",
-            "description": "How many months the resub pays for."
+            "description": "How many months were paid for."
           },
           {
             "path": "cumulativeMonths",
@@ -1170,36 +1218,42 @@
           {
             "path": "streakMonths",
             "type": "number",
-            "description": "Consecutive months subscribed. Absent when the chatter hides it."
+            "description": "Months in a row. Empty if they hide it."
           },
           {
             "path": "isGift",
             "type": "boolean",
-            "description": "Whether someone else gifted this subscription."
+            "description": "True if someone else gifted this sub."
           },
           {
             "path": "gifterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if the gifter is anonymous."
           },
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "description": "The gifter's Twitch ID."
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who gifted."
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1207,30 +1261,32 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       },
@@ -1274,7 +1330,7 @@
           ],
           "anyText": "any number of months",
           "missingText": "a number of months",
-          "description": "Only fire when the viewer's total months subscribed is at least, or exactly, this many."
+          "description": "Only fire when their total months subscribed is at least, or exactly, this many."
         },
         {
           "id": "isGift",
@@ -1297,7 +1353,7 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs in Shared Chat\". Count one or the other, not both."
+          "description": "A gift of many subs counts once for each person who got one here, and once as a whole on \"Someone gifts subs in Shared Chat\". Pick one."
         }
       ]
     },
@@ -1317,28 +1373,34 @@
         "fields": [
           {
             "path": "isGifterAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if the gifter is anonymous."
           },
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "description": "The gifter's Twitch ID."
           },
           {
             "path": "gifterName",
             "type": "string",
+            "description": "Who gifted.",
             "example": "generous_gifter"
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1346,20 +1408,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       }
@@ -1380,27 +1444,33 @@
         "fields": [
           {
             "path": "isGifterAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if the gifter is anonymous."
           },
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "description": "The gifter's Twitch ID."
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who gifted."
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1408,30 +1478,32 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       }
@@ -1453,20 +1525,23 @@
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1474,20 +1549,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       },
@@ -1533,20 +1610,23 @@
           {
             "path": "tier",
             "type": "string",
-            "description": "1000, 2000 or 3000 for Tier 1, 2 or 3.",
+            "description": "Tier 1, 2 or 3, as 1000, 2000 or 3000.",
             "example": "1000"
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1554,30 +1634,32 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       },
@@ -1621,33 +1703,38 @@
         "fields": [
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "description": "Their Twitch ID."
           },
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       }
@@ -1668,28 +1755,34 @@
         "fields": [
           {
             "path": "isGifterAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if the gifter is anonymous."
           },
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "description": "The gifter's Twitch ID."
           },
           {
             "path": "gifterName",
             "type": "string",
+            "description": "Who gifted.",
             "example": "generous_gifter"
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1697,20 +1790,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       }
@@ -1731,27 +1826,33 @@
         "fields": [
           {
             "path": "isGifterAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if the gifter is anonymous."
           },
           {
             "path": "gifterId",
-            "type": "string"
+            "type": "string",
+            "description": "The gifter's Twitch ID."
           },
           {
             "path": "gifterName",
-            "type": "string"
+            "type": "string",
+            "description": "Who gifted."
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -1759,30 +1860,32 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       }
@@ -1811,33 +1914,38 @@
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "description": "Their Twitch ID."
           },
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       },
@@ -1899,43 +2007,48 @@
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
-            "type": "string"
+            "type": "string",
+            "description": "Their Twitch ID."
           },
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           },
           {
             "path": "sourceBroadcasterId",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The ID of the channel where this happened in Shared Chat."
           },
           {
             "path": "sourceBroadcasterName",
             "type": "string",
-            "description": "The channel in the shared chat session where this happened."
+            "description": "The channel where this happened in Shared Chat."
           }
         ]
       },
@@ -1988,31 +2101,35 @@
         "fields": [
           {
             "path": "charityName",
-            "type": "string"
+            "type": "string",
+            "description": "The charity's name."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "The donation in whole currency units: 5.5 is 5.50.",
+            "description": "The amount donated, like 5.5 for 5.50.",
             "example": 5
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "Currency code, like USD.",
+            "description": "The currency, like USD.",
             "example": "USD"
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -2020,20 +2137,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       },
@@ -2055,7 +2174,7 @@
           ],
           "anyText": "any amount",
           "missingText": "an amount",
-          "description": "Only fire when the donation is at least, or exactly, this amount, in the currency's major unit (e.g. dollars, not cents).",
+          "description": "Only fire when the donation is at least, or exactly, this amount, in dollars rather than cents.",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"charityName\": \"Direct Relief\",\n  \"amount\": 25.5,\n  \"currency\": \"USD\"\n}"
         }
       ]
@@ -2080,20 +2199,23 @@
           {
             "path": "newTier",
             "type": "number",
-            "description": "The bits badge tier reached.",
+            "description": "The new Bits badge tier.",
             "example": 1000
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -2101,20 +2223,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       },
@@ -2137,7 +2261,7 @@
           ],
           "anyText": "any tier",
           "missingText": "a tier",
-          "description": "Only fire when the newly reached bits badge tier is at least, or exactly, this value.",
+          "description": "Only fire when the new Bits badge is at least, or exactly, this many bits.",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"newTier\": 1000\n}"
         }
       ]
@@ -2162,23 +2286,27 @@
           {
             "path": "streakCount",
             "type": "number",
-            "description": "Consecutive streams watched."
+            "description": "Streams in a row."
           },
           {
             "path": "channelPointsAwarded",
-            "type": "number"
+            "type": "number",
+            "description": "Channel points they earned."
           },
           {
             "path": "broadcasterId",
-            "type": "string"
+            "type": "string",
+            "description": "Your Twitch ID."
           },
           {
             "path": "broadcasterName",
-            "type": "string"
+            "type": "string",
+            "description": "Your channel name."
           },
           {
             "path": "chatterId",
             "type": "string",
+            "description": "Their Twitch ID.",
             "identity": "viewer",
             "anonymousWhen": "chatterIsAnonymous",
             "displayName": "chatterName"
@@ -2186,20 +2314,22 @@
           {
             "path": "chatterName",
             "type": "string",
-            "description": "Who the chat notice is about."
+            "description": "Who it's about."
           },
           {
             "path": "chatterIsAnonymous",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True if they're anonymous."
           },
           {
             "path": "messageId",
-            "type": "string"
+            "type": "string",
+            "description": "The chat message's ID."
           },
           {
             "path": "messageText",
             "type": "string",
-            "description": "The message the chatter added. Empty when they added none."
+            "description": "What they added. Empty if nothing."
           }
         ]
       },
@@ -2222,7 +2352,7 @@
           ],
           "anyText": "any length",
           "missingText": "some number of streams",
-          "description": "Only fire when the watch streak is at least, or exactly, this many consecutive broadcasts.",
+          "description": "Only fire when the watch streak is at least, or exactly, this many streams in a row.",
           "examplePayload": "{\n  \"broadcasterId\": \"123456\",\n  \"broadcasterName\": \"streamer\",\n  \"chatterId\": \"78910\",\n  \"chatterName\": \"viewer42\",\n  \"streakCount\": 5,\n  \"channelPointsAwarded\": 500\n}"
         }
       ]
@@ -2255,7 +2385,7 @@
           {
             "path": "durationSeconds",
             "type": "number",
-            "description": "Length of the break.",
+            "description": "How long the break is, in seconds.",
             "example": 90
           }
         ]
@@ -2278,7 +2408,7 @@
           {
             "path": "durationSeconds",
             "type": "number",
-            "description": "Length of the break.",
+            "description": "How long the break is, in seconds.",
             "example": 90
           },
           {
@@ -2288,12 +2418,13 @@
           },
           {
             "path": "startedAt",
-            "type": "string"
+            "type": "string",
+            "description": "When the ad break started."
           },
           {
             "path": "endsAt",
             "type": "string",
-            "description": "When the break is expected to end."
+            "description": "When the break should end."
           }
         ]
       }
@@ -2315,19 +2446,23 @@
           {
             "path": "durationSeconds",
             "type": "number",
+            "description": "How long the break is, in seconds.",
             "example": 90
           },
           {
             "path": "isAutomatic",
-            "type": "boolean"
+            "type": "boolean",
+            "description": "False when the ad was started by hand."
           },
           {
             "path": "startedAt",
-            "type": "string"
+            "type": "string",
+            "description": "When it started."
           },
           {
             "path": "endedAt",
-            "type": "string"
+            "type": "string",
+            "description": "When the break ended."
           }
         ]
       }
@@ -2433,27 +2568,27 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "The Twitch user id of the channel being shouted out."
+            "description": "The Twitch ID of the channel that got the shoutout."
           },
           {
             "path": "queued",
             "type": "boolean",
-            "description": "Whether the shoutout joined the shoutout queue. False only when it was sent right away because there is no queue."
+            "description": "True if the shoutout waited in the queue."
           },
           {
             "path": "position",
             "type": "number",
-            "description": "The shoutout's place in the queue, starting at 1. 0 when it was sent right away."
+            "description": "Its place in the queue, starting at 1. 0 if it was sent right away."
           },
           {
             "path": "alreadyQueued",
             "type": "boolean",
-            "description": "Whether that channel was already waiting in the queue, so it kept its place instead of being added twice."
+            "description": "True if that channel was already waiting, so it kept its place."
           },
           {
             "path": "skipped",
             "type": "boolean",
-            "description": "Whether the shoutout was skipped because of Twitch's rate limit. Only when it was sent right away instead of queued."
+            "description": "True if the shoutout was skipped because Twitch said to wait."
           }
         ]
       }
@@ -2480,37 +2615,37 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "The user's Twitch user id."
+            "description": "Their Twitch ID."
           },
           {
             "path": "userName",
             "type": "string",
-            "description": "The username that was looked up, trimmed, without the @ and in lowercase. The login when a user id was given."
+            "description": "The name you looked up."
           },
           {
             "path": "login",
             "type": "string",
-            "description": "The user's login name, all lowercase."
+            "description": "Their login name, in lowercase."
           },
           {
             "path": "displayName",
             "type": "string",
-            "description": "The user's name as Twitch shows it."
+            "description": "Their name as Twitch shows it."
           },
           {
             "path": "description",
             "type": "string",
-            "description": "The user's channel bio."
+            "description": "Their channel bio."
           },
           {
             "path": "profileImageUrl",
             "type": "string",
-            "description": "A link to the user's profile picture."
+            "description": "A link to their profile picture."
           },
           {
             "path": "broadcasterType",
             "type": "string",
-            "description": "\"partner\", \"affiliate\", or empty for neither."
+            "description": "partner, affiliate, or empty for neither."
           },
           {
             "path": "createdAt",
@@ -2520,52 +2655,52 @@
           {
             "path": "title",
             "type": "string",
-            "description": "The channel's title, kept from their last stream while offline."
+            "description": "Their channel title, from their last stream while offline."
           },
           {
             "path": "categoryId",
             "type": "string",
-            "description": "The id of the channel's category."
+            "description": "The ID of their category."
           },
           {
             "path": "categoryName",
             "type": "string",
-            "description": "The game or category they are streaming, or last streamed while offline. Empty when none is set."
+            "description": "The game or category they're streaming, or last streamed. Empty if none."
           },
           {
             "path": "tags",
             "type": "array",
-            "description": "The channel's tags."
+            "description": "Their channel tags."
           },
           {
             "path": "language",
             "type": "string",
-            "description": "The channel's language, as a two-letter code."
+            "description": "Their channel language, as a two-letter code."
           },
           {
             "path": "isLive",
             "type": "boolean",
-            "description": "Whether the user is live right now."
+            "description": "True if they're live right now."
           },
           {
             "path": "streamTitle",
             "type": "string",
-            "description": "The live stream's title. Empty while offline."
+            "description": "Their stream title. Empty while offline."
           },
           {
             "path": "streamCategoryName",
             "type": "string",
-            "description": "The live stream's category. Empty while offline."
+            "description": "Their stream category. Empty while offline."
           },
           {
             "path": "viewerCount",
             "type": "number",
-            "description": "How many people are watching the live stream. 0 while offline."
+            "description": "How many people are watching. 0 while offline."
           },
           {
             "path": "streamStartedAt",
             "type": "string",
-            "description": "When the live stream started. Empty while offline."
+            "description": "When their stream started. Empty while offline."
           }
         ]
       }
@@ -2581,7 +2716,7 @@
           {
             "path": "id",
             "type": "string",
-            "description": "The clip's id."
+            "description": "The clip's ID."
           },
           {
             "path": "url",
@@ -2612,7 +2747,7 @@
           {
             "path": "id",
             "type": "string",
-            "description": "The marker's id."
+            "description": "The marker's ID."
           },
           {
             "path": "createdAt",
@@ -2667,22 +2802,22 @@
           {
             "path": "title",
             "type": "string",
-            "description": "The title that was set. Absent when unchanged."
+            "description": "The new title. Empty when unchanged."
           },
           {
             "path": "categoryId",
             "type": "string",
-            "description": "The id of the category that was set. Absent when unchanged."
+            "description": "The ID of the new category. Empty when unchanged."
           },
           {
             "path": "categoryName",
             "type": "string",
-            "description": "The name of the category the text resolved to. Absent when unchanged."
+            "description": "The new category's name. Empty when unchanged."
           },
           {
             "path": "tags",
             "type": "array",
-            "description": "The tags that were set. Absent when unchanged."
+            "description": "The new tags. Empty when unchanged."
           }
         ]
       }
@@ -2725,7 +2860,7 @@
           {
             "path": "userId",
             "type": "string",
-            "description": "The Twitch user id of the chatter who was timed out."
+            "description": "The Twitch ID of the chatter who was timed out."
           },
           {
             "path": "durationSeconds",
