@@ -1,14 +1,13 @@
 # Twitch
 
 Make your stream react to everything that happens on Twitch! When someone
-follows, subs, cheers or raids, your stream can jump into action with alerts,
-sounds, chat messages and more. You can also let your stream do Twitch jobs for
-you, like making clips or giving shoutouts, so you can stay focused on your
-viewers.
+follows, subs, cheers or raids, you can set off alerts, sounds, chat messages
+and more. woofx3 can also do Twitch jobs for you, like making clips or giving
+shoutouts, so you can stay focused on your viewers.
 
-## React to your community
+## What you can do
 
-Pick any of these moments and choose what your stream does when it happens.
+Pick a moment and choose what happens when it comes up.
 
 **Support and celebrations**
 - Someone follows
@@ -39,26 +38,21 @@ Pick any of these moments and choose what your stream does when it happens.
 **Shared Chat**
 
 Streaming with friends in Shared Chat? Subs, gifts, raids and announcements
-that happen in your partners' channels can set off your stream too. That way
-you can cheer for your friends' viewers right alongside your own.
+that happen in your partners' channels can set things off too, so you can
+cheer for their viewers alongside your own.
 
-## Let your stream do the work
+### Jobs woofx3 can do for you
 
-Your stream can take care of these Twitch jobs for you, right when they're
-needed.
-
-- **Send a chat message.** Thank a new follower or welcome a raid, all on its
-  own.
-- **Give a shoutout.** Share another streamer's channel with your viewers, just
-  like the shoutout button. Twitch only allows one shoutout every two minutes,
-  so every shoutout waits its turn in your shoutout queue. If three raids land
-  at once, every raider still gets their shoutout. You can see the line, and
-  change it, in the shoutout queue on your dashboard.
+- **Send a chat message.** Thank a new follower or welcome a raid.
+- **Give a shoutout.** Share another streamer's channel with your viewers.
+  Twitch allows one shoutout every two minutes, so each one waits its turn. If
+  three raids land at once, every raider still gets theirs. See the line in
+  the shoutout queue on your dashboard.
 - **Look up a streamer.** Find out who someone is, what game they played
-  last, and whether they're live right now. Then use it in your next step,
-  like a shoutout message that tells chat what the raider was playing.
-- **Make a clip.** Grab the last few moments of your stream the second
-  something amazing happens.
+  last, and whether they're live. Use it in your next step, like a shoutout
+  that tells chat what the raider was playing.
+- **Make a clip.** Grab the last few moments the second something
+  amazing happens.
 - **Place a stream marker.** Mark a moment so you can find it again in your
   video later. Great for highlights!
 - **Change your stream info.** Update your title, category or tags. Change just
@@ -69,9 +63,8 @@ needed.
 ## Ideas to try
 
 - When you get raided, give the raider a shoutout and a warm welcome in chat.
-- When someone raids, look them up and post "Thanks for the raid! Go check
-  them out, they were just playing Minecraft!" with the game they really
-  played.
+- When someone raids, look them up and thank them in chat, naming the game
+  they were just playing.
 - Make a clip every time a Hype Train starts, so you never miss the big
   moments.
 - Before an ad break, post a heads-up in chat. When it ends, welcome everyone
@@ -79,11 +72,11 @@ needed.
 - When you switch to a new game, change your title and category at the same
   time.
 
-## Getting started
+## Setting up
 
-Link your Twitch account to WoofX3, and you're ready to go!
+Link your Twitch account to woofx3, and you're ready to go!
 
 ## Settings
 
-- **Ad break heads-up (seconds)**: how long before an ad break the "ad break
-  is coming up soon" trigger fires. It starts at 60 seconds.
+- **Ad break heads-up**: how many seconds before an ad break you get a
+  heads-up. It starts at 60.

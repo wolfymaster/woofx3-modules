@@ -4,7 +4,7 @@
   "author": "WolfyMaster LLC",
   "version": "0.16.0",
   "category": "platform",
-  "description": "Twitch EventSub subscription types as eventbus triggers. Trigger IDs are the NATS subject each event publishes on (see shared/common/typescript/cloudevents/Twitch/events.ts EventType). See https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/",
+  "description": "React to follows, subs, cheers, raids and more on Twitch, and run Twitch jobs like clips and shoutouts.",
   "permissions": [
     "twitch.moderation",
     "twitch.channel"
@@ -12,8 +12,8 @@
   "settings": [
     {
       "id": "adBreakLeadSeconds",
-      "label": "Ad break heads-up (seconds)",
-      "description": "How many seconds before an ad break the \"ad break is coming up soon\" trigger fires.",
+      "label": "Ad break heads-up",
+      "description": "Seconds before an ad break to give you a heads-up.",
       "type": "number",
       "defaultValue": "60",
       "required": true
@@ -22,8 +22,8 @@
   "triggers": [
     {
       "id": "channel_follow",
-      "name": "Channel follow",
-      "description": "Twitch EventSub: channel.follow",
+      "name": "Someone follows",
+      "description": "Someone follows your channel.",
       "type": "eventbus",
       "event": "channel.follow",
       "sentence": "Someone follows",
@@ -51,8 +51,8 @@
     },
     {
       "id": "user_message",
-      "name": "Channel chat message",
-      "description": "Twitch EventSub: channel.chat.message",
+      "name": "Someone sends a chat message",
+      "description": "Someone sends a message in your chat.",
       "type": "eventbus",
       "event": "user.message",
       "sentence": "Someone posts a chat message containing {message}",
@@ -146,8 +146,8 @@
     },
     {
       "id": "channel_subscribe",
-      "name": "Channel subscribe",
-      "description": "Twitch EventSub: channel.subscribe",
+      "name": "Someone subscribes",
+      "description": "Someone subscribes to your channel.",
       "type": "eventbus",
       "event": "channel.subscribe",
       "sentence": "Someone subscribes at {tier}",
@@ -187,7 +187,7 @@
           {
             "path": "isCommunityGift",
             "type": "boolean",
-            "description": "Whether this gifted sub is one of a community gift, which also arrives whole on Channel subscription gift.",
+            "description": "Whether this sub is part of a community gift.",
             "example": false
           }
         ]
@@ -236,7 +236,7 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
+          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs\". Count one or the other, not both."
         },
         {
           "id": "isCommunityGift",
@@ -250,14 +250,14 @@
           "defaultValue": "",
           "eventPath": "isCommunityGift",
           "operator": "eq",
-          "description": "A sub gifted to one named viewer arrives only here. Each recipient of a community gift also arrives here, besides the whole gift on Channel subscription gift, so an alert for single gifts should skip community gift recipients."
+          "description": "A sub gifted to one viewer shows up here. Community gift recipients show up here too, so skip them for single-gift alerts."
         }
       ]
     },
     {
       "id": "channel_shared_subscribe",
-      "name": "Channel subscribe (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_sub, shared_chat_sub_gift) — fires when the sub happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "name": "Someone subscribes in Shared Chat",
+      "description": "Someone subscribes in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedSubscribe",
       "sentence": "Someone subscribes at {tier} in another channel's shared chat",
@@ -380,14 +380,14 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel shared subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
+          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs in Shared Chat\". Count one or the other, not both."
         }
       ]
     },
     {
       "id": "channel_subscription_gift",
-      "name": "Channel subscription gift",
-      "description": "Twitch EventSub: channel.subscription.gift",
+      "name": "Someone gifts subs",
+      "description": "Someone gifts subs to your community.",
       "type": "eventbus",
       "event": "channel.subscriptionGift",
       "sentence": "Someone gifts {minQuantity} at {tier}",
@@ -474,8 +474,8 @@
     },
     {
       "id": "channel_shared_subscription_gift",
-      "name": "Channel subscription gift (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_community_sub_gift) — fires when the gift happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "name": "Someone gifts subs in Shared Chat",
+      "description": "Someone gifts subs in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedSubscriptionGift",
       "sentence": "Someone gifts {minQuantity} at {tier} in another channel's shared chat",
@@ -602,8 +602,8 @@
     },
     {
       "id": "channel_cheer",
-      "name": "Channel cheer",
-      "description": "Twitch EventSub: channel.cheer",
+      "name": "Someone cheers bits",
+      "description": "Someone cheers Bits in your chat.",
       "type": "eventbus",
       "event": "channel.cheer",
       "sentence": "Someone cheers {amount}",
@@ -666,15 +666,15 @@
           "anyText": "any amount of bits",
           "missingText": "an amount of bits",
           "description": "Only fire when the cheer is at least, or exactly, this amount.",
-          "hint": "Compares against the cheer amount on the Twitch channel.cheer event payload (see wolfy_profile workflows).",
+          "hint": "The cheer must be at least this many Bits.",
           "examplePayload": "{\n  \"amount\": 1000,\n  \"isAnonymous\": false,\n  \"userName\": \"viewer42\",\n  \"userId\": \"123456\",\n  \"message\": \"Cheer1000 woof\"\n}"
         }
       ]
     },
     {
       "id": "channel_hypetrain",
-      "name": "Hype train begin",
-      "description": "Twitch EventSub: channel.hype_train.begin",
+      "name": "A Hype Train starts",
+      "description": "A Hype Train starts on your channel.",
       "type": "eventbus",
       "event": "channel.hypetrain",
       "sentence": "A hype train starts",
@@ -685,8 +685,8 @@
     },
     {
       "id": "stream_online",
-      "name": "Stream online",
-      "description": "Twitch EventSub: stream.online",
+      "name": "You go live",
+      "description": "Your stream goes live.",
       "type": "eventbus",
       "event": "stream.online",
       "sentence": "The stream goes live",
@@ -707,15 +707,15 @@
           {
             "path": "startedAt",
             "type": "string",
-            "description": "When the stream started, as an ISO 8601 timestamp."
+            "description": "When the stream started."
           }
         ]
       }
     },
     {
       "id": "channelpoints_redeem",
-      "name": "Channel point redemption",
-      "description": "Twitch EventSub: channel.channel_points_custom_reward_redemption.add",
+      "name": "Someone redeems a channel point reward",
+      "description": "Someone redeems a channel point reward.",
       "type": "eventbus",
       "event": "channelpoints.redeem",
       "sentence": "{rewardId} is redeemed",
@@ -778,7 +778,7 @@
           },
           "required": true,
           "description": "Only fire when the redemption matches this reward.",
-          "hint": "Options are loaded live from every custom channel-point reward configured on the broadcaster's channel via twitchapi.listChannelPointRewards. If the list is empty, create a custom reward in the Twitch creator dashboard.",
+          "hint": "Pick from your custom channel point rewards. If the list is empty, create one in your Twitch creator dashboard.",
           "eventPath": "rewardId",
           "operator": "eq",
           "examplePayload": "{\n  \"redeemId\": \"...\",\n  \"rewardId\": \"...\",\n  \"rewardTitle\": \"...\",\n  \"userId\": \"...\",\n  \"userName\": \"...\",\n  \"message\": \"\"\n}"
@@ -787,8 +787,8 @@
     },
     {
       "id": "stream_offline",
-      "name": "Stream offline",
-      "description": "Twitch EventSub: stream.offline",
+      "name": "You go offline",
+      "description": "Your stream ends.",
       "type": "eventbus",
       "event": "stream.offline",
       "sentence": "The stream ends",
@@ -811,8 +811,8 @@
     },
     {
       "id": "channel_raid",
-      "name": "Channel raid",
-      "description": "Twitch EventSub: channel.raid",
+      "name": "Someone raids you",
+      "description": "Another channel raids yours.",
       "type": "eventbus",
       "event": "channel.raid",
       "sentence": "Someone raids with {minViewers}",
@@ -868,8 +868,8 @@
     },
     {
       "id": "channel_shared_raid",
-      "name": "Channel raid (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_raid) — fires when the raid happens in another participant's channel during a shared chat session. sourceBroadcasterId names that channel.",
+      "name": "Someone raids in Shared Chat",
+      "description": "A raid happens in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedRaid",
       "sentence": "Someone raids with {minViewers} in another channel's shared chat",
@@ -964,8 +964,8 @@
     },
     {
       "id": "channel_resub",
-      "name": "Channel resub",
-      "description": "Twitch EventSub: channel.chat.notification (resub)",
+      "name": "Someone resubscribes",
+      "description": "Someone renews their subscription.",
       "type": "eventbus",
       "event": "channel.resub",
       "sentence": "Someone resubscribes at {tier} for {months}",
@@ -1123,14 +1123,14 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
+          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs\". Count one or the other, not both."
         }
       ]
     },
     {
       "id": "channel_shared_resub",
-      "name": "Channel resub (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_resub) — fires when the resub is announced in another broadcaster's chat during a shared chat session.",
+      "name": "Someone resubscribes in Shared Chat",
+      "description": "Someone renews in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedResub",
       "sentence": "Someone resubscribes at {tier} for {months} in another channel's shared chat",
@@ -1297,14 +1297,14 @@
           "defaultValue": "",
           "eventPath": "isGift",
           "operator": "eq",
-          "description": "A gift bomb reports every sub twice: once here for each recipient, and once on Channel shared subscription gift for the whole bundle. A workflow that totals subs should count one or the other, not both."
+          "description": "A gift bomb is counted twice: once for each recipient here, and once as a whole on \"Someone gifts subs in Shared Chat\". Count one or the other, not both."
         }
       ]
     },
     {
       "id": "channel_gift_paid_upgrade",
-      "name": "Gift sub upgraded to paid",
-      "description": "Twitch EventSub: channel.chat.notification (gift_paid_upgrade) — a user upgraded their gifted sub to a paid one.",
+      "name": "Someone upgrades a gifted sub",
+      "description": "Someone upgrades a gifted sub to a paid one.",
       "type": "eventbus",
       "event": "channel.giftPaidUpgrade",
       "sentence": "Someone keeps the sub they were gifted",
@@ -1366,8 +1366,8 @@
     },
     {
       "id": "channel_shared_gift_paid_upgrade",
-      "name": "Gift sub upgraded to paid (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_gift_paid_upgrade)",
+      "name": "Someone upgrades a gifted sub in Shared Chat",
+      "description": "Someone upgrades a gifted sub in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedGiftPaidUpgrade",
       "sentence": "Someone keeps the sub they were gifted in another channel's shared chat",
@@ -1438,8 +1438,8 @@
     },
     {
       "id": "channel_prime_paid_upgrade",
-      "name": "Prime sub upgraded to paid",
-      "description": "Twitch EventSub: channel.chat.notification (prime_paid_upgrade) — a user upgraded their Prime sub to a paid one.",
+      "name": "Someone upgrades a Prime sub",
+      "description": "Someone upgrades a Prime sub to a paid one.",
       "type": "eventbus",
       "event": "channel.primePaidUpgrade",
       "sentence": "Someone turns a Prime sub into {tier}",
@@ -1518,8 +1518,8 @@
     },
     {
       "id": "channel_shared_prime_paid_upgrade",
-      "name": "Prime sub upgraded to paid (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_prime_paid_upgrade)",
+      "name": "Someone upgrades a Prime sub in Shared Chat",
+      "description": "Someone upgrades a Prime sub in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedPrimePaidUpgrade",
       "sentence": "Someone turns a Prime sub into {tier} in another channel's shared chat",
@@ -1608,8 +1608,8 @@
     },
     {
       "id": "channel_unraid",
-      "name": "Raid cancelled (unraid)",
-      "description": "Twitch EventSub: channel.chat.notification (unraid) — the broadcaster cancelled an outgoing raid.",
+      "name": "You cancel a raid",
+      "description": "You cancel a raid you started.",
       "type": "eventbus",
       "event": "channel.unraid",
       "sentence": "A raid is called off",
@@ -1654,8 +1654,8 @@
     },
     {
       "id": "channel_pay_it_forward",
-      "name": "Gift sub paid forward",
-      "description": "Twitch EventSub: channel.chat.notification (pay_it_forward) — a recipient of a gifted sub paid it forward by gifting another sub.",
+      "name": "Someone pays a gifted sub forward",
+      "description": "Someone who got a gifted sub gifts one to someone else.",
       "type": "eventbus",
       "event": "channel.payItForward",
       "sentence": "Someone passes a gifted sub on",
@@ -1717,8 +1717,8 @@
     },
     {
       "id": "channel_shared_pay_it_forward",
-      "name": "Gift sub paid forward (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_pay_it_forward)",
+      "name": "Someone pays a gifted sub forward in Shared Chat",
+      "description": "A gifted sub is paid forward in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedPayItForward",
       "sentence": "Someone passes a gifted sub on in another channel's shared chat",
@@ -1789,8 +1789,8 @@
     },
     {
       "id": "channel_announcement",
-      "name": "Chat announcement",
-      "description": "Twitch EventSub: channel.chat.notification (announcement)",
+      "name": "A chat announcement is posted",
+      "description": "An announcement is posted in your chat.",
       "type": "eventbus",
       "event": "channel.announcement",
       "sentence": "An announcement goes out in {color}",
@@ -1877,8 +1877,8 @@
     },
     {
       "id": "channel_shared_announcement",
-      "name": "Chat announcement (shared chat)",
-      "description": "Twitch EventSub: channel.chat.notification (shared_chat_announcement)",
+      "name": "A chat announcement is posted in Shared Chat",
+      "description": "An announcement is posted in another channel while you share chat.",
       "type": "eventbus",
       "event": "channel.sharedAnnouncement",
       "sentence": "An announcement goes out in {color} in another channel's shared chat",
@@ -1974,8 +1974,8 @@
     },
     {
       "id": "channel_charity_donation",
-      "name": "Charity donation",
-      "description": "Twitch EventSub: channel.chat.notification (charity_donation)",
+      "name": "Someone donates to your charity drive",
+      "description": "Someone donates to your charity campaign.",
       "type": "eventbus",
       "event": "channel.charityDonation",
       "sentence": "Someone donates {minAmount} to charity",
@@ -1999,7 +1999,7 @@
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
@@ -2062,8 +2062,8 @@
     },
     {
       "id": "channel_bits_badge_tier",
-      "name": "New bits badge tier reached",
-      "description": "Twitch EventSub: channel.chat.notification (bits_badge_tier)",
+      "name": "Someone reaches a new Bits badge",
+      "description": "Someone earns a new Bits badge.",
       "type": "eventbus",
       "event": "channel.bitsBadgeTier",
       "sentence": "Someone earns the bits badge for {minTier}",
@@ -2144,8 +2144,8 @@
     },
     {
       "id": "channel_watch_streak",
-      "name": "Watch streak milestone",
-      "description": "Twitch EventSub: channel.chat.notification (watch_streak)",
+      "name": "A viewer hits a watch streak",
+      "description": "A viewer shares a watch streak.",
       "type": "eventbus",
       "event": "channel.watchStreak",
       "sentence": "Someone reaches a watch streak of {minStreakCount}",
@@ -2229,8 +2229,8 @@
     },
     {
       "id": "channel_ad_break_upcoming",
-      "name": "Ad break upcoming",
-      "description": "An ad break is scheduled soon. Published by the engine from the ad schedule, at the configured lead times.",
+      "name": "An ad break is coming up",
+      "description": "An ad break is coming up soon.",
       "type": "eventbus",
       "event": "channel.ad_break.upcoming",
       "sentence": "An ad break is about to start",
@@ -2244,7 +2244,7 @@
           {
             "path": "nextAdAt",
             "type": "string",
-            "description": "When the ad is scheduled (ISO-8601)."
+            "description": "When the ad is scheduled."
           },
           {
             "path": "secondsUntil",
@@ -2263,8 +2263,8 @@
     },
     {
       "id": "channel_ad_break_begin",
-      "name": "Ad break started",
-      "description": "Twitch EventSub: channel.ad_break.begin",
+      "name": "An ad break starts",
+      "description": "An ad break starts.",
       "type": "eventbus",
       "event": "channel.ad_break.begin",
       "sentence": "An ad break starts",
@@ -2300,8 +2300,8 @@
     },
     {
       "id": "channel_ad_break_end",
-      "name": "Ad break ended",
-      "description": "Published when an ad break is due to end. Twitch sends no end event; the engine times it from the start event.",
+      "name": "An ad break ends",
+      "description": "An ad break ends.",
       "type": "eventbus",
       "event": "channel.ad_break.end",
       "sentence": "An ad break ends",
@@ -2388,7 +2388,7 @@
     {
       "id": "twitch.chat.send",
       "name": "Send chat message",
-      "description": "Publish a message to Twitch chat on the broadcaster channel.",
+      "description": "Send a message to your Twitch chat.",
       "type": "function",
       "function": "sendChatMessage",
       "schema": [
@@ -2398,15 +2398,15 @@
           "type": "text",
           "required": true,
           "placeholder": "What should the bot say?",
-          "description": "Plain text. Twitch chat enforces a 500-character limit.",
-          "hint": "Supports template substitution from the trigger event (e.g. {user.name})."
+          "description": "Up to 500 characters.",
+          "hint": "Can use details from the trigger."
         }
       ]
     },
     {
       "id": "twitch.shoutout",
-      "name": "Shoutout",
-      "description": "Send a Twitch shoutout for another channel, the same one the /shoutout chat command sends. Twitch allows one shoutout every 2 minutes, so it joins the dashboard's shoutout queue and is sent in turn; someone already waiting keeps their place.",
+      "name": "Give a shoutout",
+      "description": "Give another channel a shoutout. Twitch allows one every 2 minutes, so shoutouts wait their turn in your shoutout queue.",
       "type": "function",
       "function": "shoutout",
       "schema": [
@@ -2415,17 +2415,17 @@
           "label": "Channel",
           "type": "text",
           "required": true,
-          "placeholder": "Channel name or user id",
-          "description": "The channel to shout out. A leading @ and extra spaces are removed. A numeric user id is used as-is; anything else is resolved as a login name.",
-          "hint": "Supports template substitution, so a raid trigger can pass its raider straight through."
+          "placeholder": "Channel name",
+          "description": "The channel to shout out.",
+          "hint": "Can use details from the trigger, like the raider."
         },
         {
           "id": "skipIfRateLimited",
-          "label": "Skip when rate limited",
+          "label": "Skip if Twitch says wait",
           "type": "toggle",
           "defaultValue": false,
-          "description": "Only used when shoutouts can't wait in the shoutout queue and are sent right away: succeed without a shoutout instead of failing the step when Twitch's shoutout rate limit is hit.",
-          "hint": "Queued shoutouts are never dropped, so this rarely matters. The step's skipped output says whether it happened."
+          "description": "Skip the shoutout instead of failing when Twitch makes you wait.",
+          "hint": "Queued shoutouts are never dropped, so this rarely matters."
         }
       ],
       "returns": {
@@ -2460,8 +2460,8 @@
     },
     {
       "id": "twitch.user_info",
-      "name": "User info",
-      "description": "Look up a Twitch user: their profile, the category they last streamed, and their live stream if they are live. Every field is available to later steps in the workflow.",
+      "name": "Look up a user",
+      "description": "Find out who someone is, what they last played, and whether they're live. Use it in later steps.",
       "type": "function",
       "function": "getUserInfo",
       "schema": [
@@ -2470,9 +2470,9 @@
           "label": "User",
           "type": "text",
           "required": true,
-          "placeholder": "Username or user id",
-          "description": "The user to look up. A leading @ and extra spaces are removed. A numeric user id is used as-is; anything else is resolved as a login name.",
-          "hint": "Supports template substitution, so a raid trigger can pass its raider straight through."
+          "placeholder": "Username",
+          "description": "The user to look up.",
+          "hint": "Can use details from the trigger, like the raider."
         }
       ],
       "returns": {
@@ -2515,7 +2515,7 @@
           {
             "path": "createdAt",
             "type": "string",
-            "description": "When the account was created, as an ISO 8601 timestamp."
+            "description": "When the account was created."
           },
           {
             "path": "title",
@@ -2565,15 +2565,15 @@
           {
             "path": "streamStartedAt",
             "type": "string",
-            "description": "When the live stream started, as an ISO 8601 timestamp. Empty while offline."
+            "description": "When the live stream started. Empty while offline."
           }
         ]
       }
     },
     {
       "id": "twitch.clip",
-      "name": "Create clip",
-      "description": "Clip the last moments of the live stream, the same as the Clip button on Twitch.",
+      "name": "Make a clip",
+      "description": "Clip the last moments of your stream.",
       "type": "function",
       "function": "clip",
       "returns": {
@@ -2586,7 +2586,7 @@
           {
             "path": "url",
             "type": "string",
-            "description": "Where the clip can be viewed and edited."
+            "description": "The link to view and edit the clip."
           }
         ]
       }
@@ -2594,7 +2594,7 @@
     {
       "id": "twitch.marker",
       "name": "Place stream marker",
-      "description": "Drop a stream marker at the current point of the live stream, to find the moment again in the VOD.",
+      "description": "Mark this moment in your stream so you can find it later.",
       "type": "function",
       "function": "createMarker",
       "schema": [
@@ -2603,8 +2603,8 @@
           "label": "Description",
           "type": "text",
           "placeholder": "What happened?",
-          "description": "Optional note shown next to the marker in the VOD. Twitch allows up to 140 characters.",
-          "hint": "Supports template substitution, e.g. a hype train's level. Twitch only places markers while the stream is live."
+          "description": "Optional note, up to 140 characters.",
+          "hint": "Can use details from the trigger. Markers only work while you're live."
         }
       ],
       "returns": {
@@ -2617,7 +2617,7 @@
           {
             "path": "createdAt",
             "type": "string",
-            "description": "When the marker was created, as an ISO 8601 timestamp."
+            "description": "When the marker was created."
           },
           {
             "path": "description",
@@ -2635,7 +2635,7 @@
     {
       "id": "twitch.update_stream",
       "name": "Update stream info",
-      "description": "Change the stream's title, category or tags. Blank fields are left as they are.",
+      "description": "Change your title, category or tags. Anything left blank stays as it is.",
       "type": "function",
       "function": "updateStream",
       "schema": [
@@ -2644,22 +2644,22 @@
           "label": "Title",
           "type": "text",
           "placeholder": "Leave blank to keep the current title",
-          "description": "The new stream title. Twitch allows up to 140 characters.",
-          "hint": "Supports template substitution, so a chat command can pass what the chatter typed."
+          "description": "Up to 140 characters.",
+          "hint": "Can use details from the trigger, like what the chatter typed."
         },
         {
           "id": "category",
           "label": "Category",
           "type": "text",
           "placeholder": "e.g. Just Chatting",
-          "description": "A game or category name. The closest match on Twitch is used: an exact name wins, otherwise the most relevant search result."
+          "description": "A game or category name. The closest match is used."
         },
         {
           "id": "tags",
           "label": "Tags",
           "type": "text",
           "placeholder": "e.g. English, Chill, Speedrun",
-          "description": "Comma-separated. Replaces all of the stream's tags. Twitch allows up to 10 tags of letters and numbers, 25 characters each."
+          "description": "Separate with commas. Replaces your current tags. Up to 10 tags, 25 letters or numbers each."
         }
       ],
       "returns": {
@@ -2689,8 +2689,8 @@
     },
     {
       "id": "twitch.timeout",
-      "name": "Time out chatter",
-      "description": "Time a chatter out of Twitch chat, the same as the /timeout chat command.",
+      "name": "Time out a chatter",
+      "description": "Give a chatter a break from chat.",
       "type": "function",
       "function": "timeout",
       "schema": [
@@ -2699,9 +2699,9 @@
           "label": "Chatter",
           "type": "text",
           "required": true,
-          "placeholder": "Chatter name or user id",
-          "description": "The chatter to time out. A numeric user id is used as-is; anything else is resolved as a login name.",
-          "hint": "Supports template substitution, so a chat trigger can pass its chatter's id straight through."
+          "placeholder": "Chatter name",
+          "description": "The chatter to time out.",
+          "hint": "Can use details from the trigger, like the chatter."
         },
         {
           "id": "durationSeconds",
@@ -2710,14 +2710,14 @@
           "required": true,
           "defaultValue": 600,
           "unit": "seconds",
-          "description": "How long the timeout lasts. Twitch allows 1 second to 2 weeks."
+          "description": "From 1 second to 2 weeks."
         },
         {
           "id": "reason",
           "label": "Reason",
           "type": "text",
           "placeholder": "Optional",
-          "description": "Shown to the chatter and in the moderation log."
+          "description": "Shown to the chatter and your moderators."
         }
       ],
       "returns": {
