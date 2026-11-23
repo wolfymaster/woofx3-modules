@@ -4,14 +4,14 @@
   "author": "WolfyMaster LLC",
   "version": "0.2.0",
   "category": "platform",
-  "description": "Receives Fourthwall webhooks and fires triggers when someone donates, orders merch, buys gifts for your community, or joins a membership.",
+  "description": "Know when someone donates, orders merch, buys gifts for your community, or joins your membership.",
   "taxonomy": [
     "platform.fourthwall"
   ],
   "functions": [
     {
       "id": "handle_fourthwall_webhook",
-      "name": "Handle Fourthwall Webhook",
+      "name": "Receive Fourthwall events",
       "runtime": "js",
       "path": "functions/handle_fourthwall_webhook.js",
       "entryPoint": "handle_fourthwall_webhook"
@@ -20,8 +20,8 @@
   "settings": [
     {
       "id": "webhookSecret",
-      "label": "Fourthwall webhook secret",
-      "description": "Found in Fourthwall under Settings, For developers. Requests not signed with it are refused.",
+      "label": "Fourthwall secret",
+      "description": "Find it in Fourthwall under Settings, then For developers.",
       "type": "secret",
       "required": true
     }
@@ -29,15 +29,15 @@
   "triggers": [
     {
       "id": "fourthwall_webhook",
-      "name": "Fourthwall webhook",
-      "description": "Paste this URL into Fourthwall's webhook settings. Every request is checked against your webhook secret before anything fires.",
+      "name": "Fourthwall link",
+      "description": "The link you paste into Fourthwall so it can tell woofx3 about donations, orders and members.",
       "type": "webhook",
       "handler": "handle_fourthwall_webhook"
     },
     {
       "id": "donation",
-      "name": "Fourthwall donation",
-      "description": "Fires when someone donates through your Fourthwall shop.",
+      "name": "Someone donates on Fourthwall",
+      "description": "When someone donates through your Fourthwall shop.",
       "type": "eventbus",
       "event": "fourthwall.donation",
       "sentence": "Someone donates on Fourthwall",
@@ -54,48 +54,48 @@
           {
             "path": "eventId",
             "type": "string",
-            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+            "description": "Fourthwall's reference for this event."
           },
           {
             "path": "username",
             "type": "string",
-            "description": "Who paid, as they chose to show it. Empty when they gave none."
+            "description": "Who paid, as they chose to show it. Blank if they gave none."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "The buyer's message. Empty when they left none."
+            "description": "The buyer's message. Blank if they left none."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "In the currency's main unit: 10 is 10.00.",
+            "description": "The amount, like 10 for 10.00.",
             "example": 10
           },
           {
             "path": "amountDisplay",
             "type": "string",
-            "description": "The amount with two decimals and no currency symbol.",
+            "description": "The amount with two decimals, like 10.00.",
             "example": "10.00"
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True when Fourthwall marks the event as test data."
+            "description": "True for a test from Fourthwall."
           }
         ]
       }
     },
     {
       "id": "order_placed",
-      "name": "Fourthwall order placed",
-      "description": "Fires when someone buys merch from your Fourthwall shop.",
+      "name": "Someone orders your merch",
+      "description": "When someone buys merch from your Fourthwall shop.",
       "type": "eventbus",
       "event": "fourthwall.order.placed",
       "sentence": "Someone orders your merch",
@@ -113,40 +113,40 @@
           {
             "path": "eventId",
             "type": "string",
-            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+            "description": "Fourthwall's reference for this event."
           },
           {
             "path": "username",
             "type": "string",
-            "description": "Who paid, as they chose to show it. Empty when they gave none."
+            "description": "Who paid, as they chose to show it. Blank if they gave none."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "The buyer's message. Empty when they left none."
+            "description": "The buyer's message. Blank if they left none."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "In the currency's main unit: 10 is 10.00.",
+            "description": "The amount, like 10 for 10.00.",
             "example": 10
           },
           {
             "path": "amountDisplay",
             "type": "string",
-            "description": "The amount with two decimals and no currency symbol.",
+            "description": "The amount with two decimals, like 10.00.",
             "example": "10.00"
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True when Fourthwall marks the event as test data."
+            "description": "True for a test from Fourthwall."
           },
           {
             "path": "itemCount",
@@ -165,8 +165,8 @@
     },
     {
       "id": "gift_purchase",
-      "name": "Fourthwall gift purchase",
-      "description": "Fires when someone buys items to be given away to your community.",
+      "name": "Someone buys gifts for your community",
+      "description": "When someone buys items to give away to your community.",
       "type": "eventbus",
       "event": "fourthwall.gift.purchased",
       "sentence": "Someone buys gifts for your community",
@@ -184,40 +184,40 @@
           {
             "path": "eventId",
             "type": "string",
-            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+            "description": "Fourthwall's reference for this event."
           },
           {
             "path": "username",
             "type": "string",
-            "description": "Who paid, as they chose to show it. Empty when they gave none."
+            "description": "Who paid, as they chose to show it. Blank if they gave none."
           },
           {
             "path": "message",
             "type": "string",
-            "description": "The buyer's message. Empty when they left none."
+            "description": "The buyer's message. Blank if they left none."
           },
           {
             "path": "amount",
             "type": "number",
-            "description": "In the currency's main unit: 10 is 10.00.",
+            "description": "The amount, like 10 for 10.00.",
             "example": 10
           },
           {
             "path": "amountDisplay",
             "type": "string",
-            "description": "The amount with two decimals and no currency symbol.",
+            "description": "The amount with two decimals, like 10.00.",
             "example": "10.00"
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True when Fourthwall marks the event as test data."
+            "description": "True for a test from Fourthwall."
           },
           {
             "path": "quantity",
@@ -236,8 +236,8 @@
     },
     {
       "id": "subscription_purchased",
-      "name": "Fourthwall membership purchased",
-      "description": "Fires when someone joins your Fourthwall membership.",
+      "name": "Someone joins your membership",
+      "description": "When someone joins your Fourthwall membership.",
       "type": "eventbus",
       "event": "fourthwall.subscription.purchased",
       "sentence": "Someone joins your Fourthwall membership",
@@ -254,7 +254,7 @@
           {
             "path": "eventId",
             "type": "string",
-            "description": "Fourthwall's id for this event. A retried delivery carries the same id."
+            "description": "Fourthwall's reference for this event."
           },
           {
             "path": "username",
@@ -264,31 +264,31 @@
           {
             "path": "amount",
             "type": "number",
-            "description": "What they pay each period, in the currency's main unit.",
+            "description": "What they pay each month or year.",
             "example": 5
           },
           {
             "path": "amountDisplay",
             "type": "string",
-            "description": "The amount with two decimals and no currency symbol.",
+            "description": "The amount with two decimals, like 10.00.",
             "example": "5.00"
           },
           {
             "path": "currency",
             "type": "string",
-            "description": "ISO 4217 code.",
+            "description": "Currency code, like USD.",
             "example": "USD"
           },
           {
             "path": "interval",
             "type": "string",
-            "description": "MONTHLY or ANNUAL.",
+            "description": "Monthly or annual.",
             "example": "MONTHLY"
           },
           {
             "path": "isTest",
             "type": "boolean",
-            "description": "True when Fourthwall marks the event as test data."
+            "description": "True for a test from Fourthwall."
           }
         ]
       }
