@@ -2,7 +2,7 @@
   "id": "woofx3_giveaways",
   "name": "Giveaways",
   "author": "WolfyMaster LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "category": "chat",
   "description": "Run giveaways in chat: viewers type a word to enter and you or your mods draw a winner.",
   "taxonomy": [
