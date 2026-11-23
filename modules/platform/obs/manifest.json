@@ -2,7 +2,7 @@
   "id": "woofx3_obs",
   "name": "OBS",
   "author": "WolfyMaster LLC",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "category": "platform",
   "description": "Switch OBS scenes, show or hide sources, mute audio, and put a web page on screen.",
   "taxonomy": [
