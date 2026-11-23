@@ -2,7 +2,7 @@
   "id": "woofx3_spotify",
   "name": "Spotify Song Request",
   "author": "WolfyMaster LLC",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "category": "platform",
   "description": "Let viewers add songs to your Spotify queue with !sr, and show what's playing.",
   "functions": [
