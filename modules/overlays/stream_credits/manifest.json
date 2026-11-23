@@ -4,7 +4,7 @@
   "author": "WolfyMaster LLC",
   "version": "0.1.0",
   "category": "overlay",
-  "description": "End-of-stream credits for your scene: everyone who cheered bits or gifted subs, every channel that raided, and everyone who chatted, each list fading in and out in turn.",
+  "description": "End-of-stream credits thanking everyone who cheered, gifted subs, raided or chatted.",
   "taxonomy": [
     "overlay.credits"
   ],
@@ -28,7 +28,7 @@
     {
       "id": "record_cheer",
       "name": "Add a cheer to the Stream Credits",
-      "description": "Adds the cheerer and their bits to the supporters list. The module's own workflow runs this on every cheer.",
+      "description": "Adds the cheerer and their bits to the supporters list. Runs by itself on every cheer.",
       "type": "function",
       "function": "record_cheer",
       "returns": { "fields": [ { "path": "supporters", "type": "number", "description": "Supporters in the credits this stream." } ] },
@@ -37,7 +37,7 @@
     {
       "id": "record_gift",
       "name": "Add gift subs to the Stream Credits",
-      "description": "Adds the gifter and their gift subs to the supporters list. The module's own workflow runs this on every gift.",
+      "description": "Adds the gifter and their gift subs to the supporters list. Runs by itself on every gift.",
       "type": "function",
       "function": "record_gift",
       "returns": { "fields": [ { "path": "supporters", "type": "number", "description": "Supporters in the credits this stream." } ] },
@@ -46,7 +46,7 @@
     {
       "id": "record_raid",
       "name": "Add a raid to the Stream Credits",
-      "description": "Adds the raiding channel and its viewers to the raiders list. The module's own workflow runs this on every raid.",
+      "description": "Adds the raiding channel and its viewers to the raiders list. Runs by itself on every raid.",
       "type": "function",
       "function": "record_raid",
       "returns": { "fields": [ { "path": "raiders", "type": "number", "description": "Raiders in the credits this stream." } ] },
@@ -55,7 +55,7 @@
     {
       "id": "handle_chat",
       "name": "Add chatters to the Stream Credits",
-      "description": "Adds each chatter the first time they speak, and lets moderators clear the credits with !resetcredits. The module's own workflow runs this on every chat message.",
+      "description": "Adds each chatter the first time they speak, and lets moderators clear the credits with !resetcredits. Runs by itself on every chat message.",
       "type": "function",
       "function": "handle_chat_message",
       "returns": {
@@ -102,8 +102,8 @@
         { "id": "showAmounts", "label": "Show amounts", "type": "toggle", "defaultValue": true, "description": "Bits, gift subs and raid sizes under each name." },
         { "id": "secondsPerList", "label": "Seconds per list", "type": "number", "min": 3, "defaultValue": 8, "description": "Long lists stay up longer, until they finish scrolling." },
         { "id": "scrollSpeed", "label": "Scroll speed", "type": "range", "min": 20, "max": 200, "unit": "px/s", "defaultValue": 60 },
-        { "id": "accent", "label": "Accent colour", "type": "color", "defaultValue": "#ffcc4d" },
-        { "id": "textColor", "label": "Text colour", "type": "color", "defaultValue": "#ffffff" },
+        { "id": "accent", "label": "Accent color", "type": "color", "defaultValue": "#ffcc4d" },
+        { "id": "textColor", "label": "Text color", "type": "color", "defaultValue": "#ffffff" },
         { "id": "showPanel", "label": "Dark panel behind the credits", "type": "toggle", "defaultValue": true },
         { "id": "scale", "label": "Size", "type": "range", "min": 50, "max": 200, "unit": "%", "defaultValue": 100 }
       ]
