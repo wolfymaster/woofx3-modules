@@ -4,25 +4,25 @@
   "author": "WolfyMaster LLC",
   "version": "0.4.2",
   "category": "platform",
-  "description": "Adds the !sr chat command to queue songs on Spotify. Accepts a song name or a Spotify track URL.",
+  "description": "Let viewers add songs to your Spotify queue with !sr, and show what's playing.",
   "functions": [
     {
       "id": "song_request",
-      "name": "Song Request",
+      "name": "Song request",
       "runtime": "js",
       "path": "functions/song_request.js",
       "entryPoint": "song_request"
     },
     {
       "id": "poll_current_track",
-      "name": "Poll Current Track",
+      "name": "Check current song",
       "runtime": "js",
       "path": "functions/poll_current_track.js",
       "entryPoint": "poll_current_track"
     },
     {
       "id": "get_devices",
-      "name": "Get Devices",
+      "name": "List devices",
       "runtime": "js",
       "path": "functions/get_devices.js",
       "entryPoint": "get_devices"
@@ -32,17 +32,17 @@
     {
       "id": "song_request",
       "name": "Queue song request",
-      "description": "Searches Spotify for the given query and adds the top result to the playback queue.",
+      "description": "Find the song a viewer asked for and add it to your Spotify queue.",
       "type": "function",
       "function": "song_request",
       "schema": [
         {
           "id": "deviceId",
-          "label": "Playback Device",
+          "label": "Speaker",
           "type": "select",
           "required": false,
           "defaultValue": "",
-          "description": "Spotify device to queue songs on. Leave blank to use the currently active device.",
+          "description": "Leave blank to use whatever Spotify is playing on now.",
           "source": {
             "kind": "internal",
             "request": {
@@ -61,12 +61,12 @@
           {
             "path": "song",
             "type": "string",
-            "description": "The name of the song that was queued. Absent when nothing was queued."
+            "description": "The song that was added."
           },
           {
             "path": "artist",
             "type": "string",
-            "description": "The song's primary artist. Absent when nothing was queued."
+            "description": "The song's artist."
           }
         ]
       }
@@ -75,8 +75,8 @@
   "triggers": [
     {
       "id": "sr_command",
-      "name": "Song request command",
-      "description": "Fires when a viewer uses !sr in chat.",
+      "name": "Someone uses !sr",
+      "description": "A viewer asks for a song in chat.",
       "type": "eventbus",
       "event": "chat.command.sr",
       "category": "chat"
@@ -85,7 +85,7 @@
   "commands": [
     {
       "id": "sr",
-      "name": "Song Request",
+      "name": "Song request",
       "pattern": "!sr",
       "type": "prefix",
       "actions": [
@@ -101,14 +101,14 @@
       "id": "poll_now_playing",
       "function": "poll_current_track",
       "schedule": "*/30 * * * * *",
-      "description": "Polls Spotify every 30 seconds to update the currently playing track."
+      "description": "Keeps the Now Playing display up to date."
     }
   ],
   "settings": [
     {
       "id": "authorizeSpotify",
       "label": "Authorize Spotify",
-      "description": "Connect your Spotify account to enable song requests and playback control.",
+      "description": "Connect your Spotify account.",
       "type": "button",
       "action": {
         "kind": "integration",
@@ -117,8 +117,8 @@
     },
     {
       "id": "clientId",
-      "label": "Spotify Client ID",
-      "description": "Optional: use your own Spotify app's Client ID instead of the one woofx3 provides. Required when you run your own engine.",
+      "label": "Spotify app ID",
+      "description": "Optional. Use your own Spotify app instead of the one woofx3 provides.",
       "type": "text",
       "required": false
     }
@@ -143,7 +143,7 @@
     {
       "id": "now_playing",
       "name": "Now Playing",
-      "description": "Displays the currently playing Spotify track.",
+      "description": "Shows the song that's playing right now.",
       "entry": "widgets/now_playing/index.html",
       "assets": "widgets/now_playing",
       "alertTypes": [
