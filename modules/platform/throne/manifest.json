@@ -4,11 +4,11 @@
   "author": "WolfyMaster LLC",
   "version": "0.2.0",
   "category": "platform",
-  "description": "Receives Throne webhooks and fires triggers when someone buys a gift, makes a contribution, or completes a crowdfunded gift on your Throne wishlist.",
+  "description": "React when someone buys a gift, chips in, or fully funds a gift on your Throne wishlist.",
   "functions": [
     {
       "id": "handle_throne_webhook",
-      "name": "Handle Throne Webhook",
+      "name": "Handle Throne message",
       "runtime": "js",
       "path": "functions/handle_throne_webhook.js",
       "entryPoint": "handle_throne_webhook"
@@ -17,15 +17,15 @@
   "triggers": [
     {
       "id": "throne_webhook",
-      "name": "Throne webhook",
-      "description": "Paste this URL into Throne's webhook integration. Every request is checked against Throne's signing key before anything fires.",
+      "name": "Throne link",
+      "description": "Paste this link into Throne's webhook settings. Only real Throne messages count.",
       "type": "webhook",
       "handler": "handle_throne_webhook"
     },
     {
       "id": "gift_purchased",
-      "name": "Throne gift purchased",
-      "description": "Fires when someone buys a gift from your Throne wishlist.",
+      "name": "Someone buys you a gift",
+      "description": "Someone buys a gift from your Throne wishlist.",
       "type": "eventbus",
       "event": "throne.gift.purchased",
       "taxonomy": ["platform.throne", "alert.gift"],
@@ -33,23 +33,23 @@
         "summary": "{gifterUsername} sent {itemName}",
         "details": ["{priceDisplay}", "“{message}”"],
         "fields": [
-          { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
+          { "path": "eventId", "type": "string", "description": "Throne's id for this message. A resend carries the same id." },
           { "path": "creatorUsername", "type": "string", "description": "Your Throne username." },
           { "path": "gifterUsername", "type": "string", "description": "Who bought the gift. \"Anonymous\" when they hid their name.", "example": "Anonymous" },
           { "path": "message", "type": "string", "description": "The gifter's message. Empty when they left none." },
           { "path": "itemName", "type": "string", "example": "Mechanical Keyboard" },
           { "path": "itemThumbnailUrl", "type": "string" },
-          { "path": "price", "type": "number", "description": "In hundredths of the currency unit: 1099 is 10.99.", "example": 1099 },
-          { "path": "priceDisplay", "type": "string", "description": "The price with two decimals and no currency symbol.", "example": "10.99" },
-          { "path": "currency", "type": "string", "description": "ISO 4217 code.", "example": "USD" },
+          { "path": "price", "type": "number", "description": "The price in hundredths of the currency: 1099 is 10.99.", "example": 1099 },
+          { "path": "priceDisplay", "type": "string", "description": "The price with two decimals, like 10.99.", "example": "10.99" },
+          { "path": "currency", "type": "string", "description": "Currency code, like USD.", "example": "USD" },
           { "path": "isSurpriseGift", "type": "boolean" }
         ]
       }
     },
     {
       "id": "contribution_purchased",
-      "name": "Throne contribution purchased",
-      "description": "Fires when someone contributes toward an item on your Throne wishlist.",
+      "name": "Someone chips in toward a gift",
+      "description": "Someone contributes toward a gift on your wishlist.",
       "type": "eventbus",
       "event": "throne.contribution.purchased",
       "taxonomy": ["platform.throne", "alert.contribution"],
@@ -57,22 +57,22 @@
         "summary": "{gifterUsername} contributed {amountDisplay} to {itemName}",
         "details": ["“{message}”"],
         "fields": [
-          { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
+          { "path": "eventId", "type": "string", "description": "Throne's id for this message. A resend carries the same id." },
           { "path": "creatorUsername", "type": "string", "description": "Your Throne username." },
           { "path": "gifterUsername", "type": "string", "description": "Who contributed. \"Anonymous\" when they hid their name.", "example": "Anonymous" },
           { "path": "message", "type": "string", "description": "The contributor's message. Empty when they left none." },
           { "path": "itemName", "type": "string", "example": "Mechanical Keyboard" },
           { "path": "itemThumbnailUrl", "type": "string" },
-          { "path": "amount", "type": "number", "description": "In hundredths of the currency unit: 1099 is 10.99.", "example": 1099 },
-          { "path": "amountDisplay", "type": "string", "description": "The amount with two decimals and no currency symbol.", "example": "10.99" },
-          { "path": "currency", "type": "string", "description": "ISO 4217 code.", "example": "USD" }
+          { "path": "amount", "type": "number", "description": "The price in hundredths of the currency: 1099 is 10.99.", "example": 1099 },
+          { "path": "amountDisplay", "type": "string", "description": "The amount with two decimals, like 10.99.", "example": "10.99" },
+          { "path": "currency", "type": "string", "description": "Currency code, like USD.", "example": "USD" }
         ]
       }
     },
     {
       "id": "gift_crowdfunded",
-      "name": "Throne gift crowdfunded",
-      "description": "Fires when contributions fully fund an item on your Throne wishlist.",
+      "name": "A gift is fully funded",
+      "description": "Contributions fully pay for a gift on your wishlist.",
       "type": "eventbus",
       "event": "throne.gift.crowdfunded",
       "taxonomy": ["platform.throne", "alert.gift"],
@@ -80,13 +80,13 @@
         "summary": "{itemName} was fully crowdfunded",
         "details": ["{priceDisplay}"],
         "fields": [
-          { "path": "eventId", "type": "string", "description": "Throne's id for this delivery. A retried delivery carries the same id." },
+          { "path": "eventId", "type": "string", "description": "Throne's id for this message. A resend carries the same id." },
           { "path": "creatorUsername", "type": "string", "description": "Your Throne username." },
           { "path": "itemName", "type": "string", "example": "Mechanical Keyboard" },
           { "path": "itemThumbnailUrl", "type": "string" },
-          { "path": "price", "type": "number", "description": "In hundredths of the currency unit: 1099 is 10.99.", "example": 1099 },
-          { "path": "priceDisplay", "type": "string", "description": "The price with two decimals and no currency symbol.", "example": "10.99" },
-          { "path": "currency", "type": "string", "description": "ISO 4217 code.", "example": "USD" },
+          { "path": "price", "type": "number", "description": "The price in hundredths of the currency: 1099 is 10.99.", "example": 1099 },
+          { "path": "priceDisplay", "type": "string", "description": "The price with two decimals, like 10.99.", "example": "10.99" },
+          { "path": "currency", "type": "string", "description": "Currency code, like USD.", "example": "USD" },
           { "path": "isSurpriseGift", "type": "boolean" }
         ]
       }
