@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "category": "platform",
   "description": "React to follows, subs, cheers, raids and more on Twitch, and run Twitch jobs like clips and shoutouts.",
   "permissions": [
