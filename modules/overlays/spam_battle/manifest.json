@@ -2,7 +2,7 @@
   "id": "woofx3_spam_battle",
   "name": "Spam Battle",
   "author": "WolfyMaster LLC",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "category": "overlay",
   "description": "A timed chat battle: viewers spam their favorite streamer's name and the top names race on screen until a winner is crowned.",
   "taxonomy": [
