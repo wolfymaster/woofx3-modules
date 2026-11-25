@@ -1,0 +1,816 @@
+{
+  "id": "woofx3_kick",
+  "name": "Kick Platform",
+  "author": "WolfyMaster LLC",
+  "version": "0.1.0",
+  "category": "platform",
+  "description": "React to follows, subs, KICKs, rewards and chat on Kick, and run Kick jobs like timeouts and stream updates.",
+  "permissions": [
+    "kick.moderation",
+    "kick.channel"
+  ],
+  "triggers": [
+    {
+      "id": "channel_follow",
+      "platform": "kick",
+      "name": "Someone follows",
+      "description": "Someone follows your channel.",
+      "type": "eventbus",
+      "event": "channel.follow",
+      "sentence": "Someone follows",
+      "taxonomy": [
+        "platform.kick",
+        "alert.follow"
+      ],
+      "emits": {
+        "summary": "{userName} followed",
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "The follower's Kick ID.",
+            "identity": "viewer",
+            "displayName": "userName"
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who followed."
+          }
+        ]
+      }
+    },
+    {
+      "id": "user_message",
+      "platform": "kick",
+      "name": "Someone sends a chat message",
+      "description": "Someone sends a message in your chat.",
+      "type": "eventbus",
+      "event": "user.message",
+      "sentence": "Someone posts a chat message containing {message}",
+      "taxonomy": [
+        "platform.kick",
+        "alert.chat"
+      ],
+      "emits": {
+        "summary": "{chatterName} sent a chat message",
+        "details": [
+          "“{message}”"
+        ],
+        "fields": [
+          {
+            "path": "chatterId",
+            "type": "string",
+            "description": "Their Kick ID.",
+            "identity": "viewer",
+            "displayName": "chatterName"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who sent it."
+          },
+          {
+            "path": "chatterLogin",
+            "type": "string",
+            "description": "Their channel name in Kick links."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What they typed."
+          },
+          {
+            "path": "membership.isBroadcaster",
+            "type": "boolean",
+            "description": "True if it's you."
+          },
+          {
+            "path": "membership.isModerator",
+            "type": "boolean",
+            "description": "True if they're a moderator."
+          },
+          {
+            "path": "membership.isSubscriber",
+            "type": "boolean",
+            "description": "True if they're subscribed."
+          },
+          {
+            "path": "membership.isVip",
+            "type": "boolean",
+            "description": "True if they're a VIP."
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "message",
+          "label": "Message text",
+          "type": "text",
+          "required": true,
+          "placeholder": "e.g. hello",
+          "eventPath": "message",
+          "operator": "contains",
+          "anyText": "anything",
+          "missingText": "some text",
+          "description": "Only fire when the message contains this text."
+        }
+      ]
+    },
+    {
+      "id": "channel_subscribe",
+      "platform": "kick",
+      "name": "Someone subscribes",
+      "description": "Someone subscribes to your channel.",
+      "type": "eventbus",
+      "event": "channel.subscribe",
+      "sentence": "Someone subscribes",
+      "taxonomy": [
+        "platform.kick",
+        "alert.subscription"
+      ],
+      "emits": {
+        "summary": "{userName} subscribed",
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "The Kick ID of who the sub is for. For a gift, the person who got it.",
+            "identity": "viewer",
+            "displayName": "userName"
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who the sub is for. For a gift, the person who got it."
+          },
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "Always 1000: Kick has one subscription level.",
+            "example": "1000"
+          },
+          {
+            "path": "isGift",
+            "type": "boolean",
+            "description": "True if someone else gifted this sub."
+          },
+          {
+            "path": "isCommunityGift",
+            "type": "boolean",
+            "description": "True if it came from a community gift.",
+            "example": false
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "isGift",
+          "label": "Gifted subs",
+          "type": "select",
+          "options": [
+            {
+              "value": "",
+              "label": "Any subscription"
+            },
+            {
+              "value": "false",
+              "label": "Only subs the viewer bought"
+            },
+            {
+              "value": "true",
+              "label": "Only gifted subs"
+            }
+          ],
+          "defaultValue": "",
+          "eventPath": "isGift",
+          "operator": "eq",
+          "description": "A gift of many subs counts once for each person who got one here, and once as a whole on \"Someone gifts subs\". Pick one."
+        },
+        {
+          "id": "isCommunityGift",
+          "label": "Community gifts",
+          "type": "select",
+          "options": [
+            {
+              "value": "",
+              "label": "Any subscription"
+            },
+            {
+              "value": "false",
+              "label": "Not part of a community gift"
+            },
+            {
+              "value": "true",
+              "label": "Only community gift recipients"
+            }
+          ],
+          "defaultValue": "",
+          "eventPath": "isCommunityGift",
+          "operator": "eq",
+          "description": "Single gifts show up here, and so does each person who gets a community gift. Skip community gifts for single-gift alerts."
+        }
+      ]
+    },
+    {
+      "id": "channel_subscription_gift",
+      "platform": "kick",
+      "name": "Someone gifts subs",
+      "description": "Someone gifts subs to your community.",
+      "type": "eventbus",
+      "event": "channel.subscriptionGift",
+      "sentence": "Someone gifts {minQuantity}",
+      "taxonomy": [
+        "platform.kick",
+        "alert.subscription"
+      ],
+      "emits": {
+        "summary": "{gifterName} gifted {amount} subs",
+        "fields": [
+          {
+            "path": "gifterId",
+            "type": "string",
+            "description": "The gifter's Kick ID.",
+            "identity": "viewer",
+            "anonymousWhen": "isAnonymous",
+            "displayName": "gifterName"
+          },
+          {
+            "path": "gifterName",
+            "type": "string",
+            "description": "Who gifted."
+          },
+          {
+            "path": "isAnonymous",
+            "type": "boolean",
+            "description": "True if the gifter hid their name."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "How many subs were gifted.",
+            "example": 5
+          },
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "Always 1000: Kick has one subscription level.",
+            "example": "1000"
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "minQuantity",
+          "label": "Gift count",
+          "type": "number",
+          "unit": "subs",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 5",
+          "eventPath": "amount",
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of subs",
+          "missingText": "a number of subs",
+          "description": "Only fire when the gift is at least, or exactly, this many subs."
+        }
+      ]
+    },
+    {
+      "id": "channel_resub",
+      "platform": "kick",
+      "name": "Someone resubscribes",
+      "description": "Someone renews their subscription.",
+      "type": "eventbus",
+      "event": "channel.resub",
+      "sentence": "Someone resubscribes for {months}",
+      "taxonomy": [
+        "platform.kick",
+        "alert.subscription"
+      ],
+      "emits": {
+        "summary": "{chatterName} resubscribed for {cumulativeMonths} months",
+        "fields": [
+          {
+            "path": "tier",
+            "type": "string",
+            "description": "Always 1000: Kick has one subscription level.",
+            "example": "1000"
+          },
+          {
+            "path": "cumulativeMonths",
+            "type": "number",
+            "description": "Months subscribed, as Kick counts them.",
+            "example": 12
+          },
+          {
+            "path": "broadcasterId",
+            "type": "string",
+            "description": "Your Kick ID."
+          },
+          {
+            "path": "broadcasterName",
+            "type": "string",
+            "description": "Your channel name."
+          },
+          {
+            "path": "chatterId",
+            "type": "string",
+            "description": "Their Kick ID.",
+            "identity": "viewer",
+            "anonymousWhen": "chatterIsAnonymous",
+            "displayName": "chatterName"
+          },
+          {
+            "path": "chatterName",
+            "type": "string",
+            "description": "Who it's about."
+          },
+          {
+            "path": "chatterIsAnonymous",
+            "type": "boolean",
+            "description": "True if they're anonymous."
+          },
+          {
+            "path": "messageId",
+            "type": "string",
+            "description": "An ID for this resub."
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "months",
+          "label": "Months",
+          "type": "number",
+          "unit": "months",
+          "required": true,
+          "min": 1,
+          "defaultValue": 1,
+          "placeholder": "e.g. 12",
+          "eventPath": "cumulativeMonths",
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any number of months",
+          "missingText": "a number of months",
+          "description": "Only fire when their total months subscribed is at least, or exactly, this many."
+        }
+      ]
+    },
+    {
+      "id": "stream_online",
+      "platform": "kick",
+      "name": "You go live",
+      "description": "Your stream goes live.",
+      "type": "eventbus",
+      "event": "stream.online",
+      "sentence": "The stream goes live",
+      "taxonomy": [
+        "platform.kick",
+        "alert.stream"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "broadcasterUserId",
+            "type": "string",
+            "description": "Your Kick ID."
+          },
+          {
+            "path": "broadcasterUserName",
+            "type": "string",
+            "description": "Your channel name."
+          },
+          {
+            "path": "startedAt",
+            "type": "string",
+            "description": "When the stream started."
+          }
+        ]
+      }
+    },
+    {
+      "id": "stream_offline",
+      "platform": "kick",
+      "name": "You go offline",
+      "description": "Your stream ends.",
+      "type": "eventbus",
+      "event": "stream.offline",
+      "sentence": "The stream ends",
+      "taxonomy": [
+        "platform.kick",
+        "alert.stream"
+      ],
+      "emits": {
+        "fields": [
+          {
+            "path": "broadcasterUserId",
+            "type": "string",
+            "description": "Your Kick ID."
+          },
+          {
+            "path": "broadcasterUserName",
+            "type": "string",
+            "description": "Your channel name."
+          }
+        ]
+      }
+    },
+    {
+      "id": "channelpoints_redeem",
+      "platform": "kick",
+      "name": "Someone redeems a channel reward",
+      "description": "Someone redeems one of your channel rewards.",
+      "type": "eventbus",
+      "event": "channelpoints.redeem",
+      "sentence": "{rewardId} is redeemed",
+      "taxonomy": [
+        "platform.kick",
+        "alert.channelpoints"
+      ],
+      "emits": {
+        "summary": "{userName} redeemed {rewardTitle}",
+        "details": [
+          "“{message}”"
+        ],
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "Who redeemed it, as a Kick ID.",
+            "identity": "viewer",
+            "displayName": "userName"
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who redeemed the reward."
+          },
+          {
+            "path": "rewardId",
+            "type": "string",
+            "description": "The reward's ID."
+          },
+          {
+            "path": "rewardTitle",
+            "type": "string",
+            "description": "The reward's name."
+          },
+          {
+            "path": "redeemId",
+            "type": "string",
+            "description": "This redemption's ID."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What they typed, if the reward asks for input."
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "rewardId",
+          "label": "Reward",
+          "type": "select",
+          "source": {
+            "kind": "internal",
+            "request": {
+              "event": "kickapi",
+              "payload": {
+                "command": "listRewards",
+                "args": {}
+              }
+            },
+            "timeoutMs": 10000
+          },
+          "required": true,
+          "description": "Only fire when the redemption matches this reward.",
+          "hint": "Pick from your channel rewards. If the list is empty, create one in your Kick creator dashboard.",
+          "eventPath": "rewardId",
+          "operator": "eq",
+          "examplePayload": "{\n  \"redeemId\": \"...\",\n  \"rewardId\": \"...\",\n  \"rewardTitle\": \"...\",\n  \"userId\": \"...\",\n  \"userName\": \"...\",\n  \"message\": \"\"\n}"
+        }
+      ]
+    },
+    {
+      "id": "kicks_gifted",
+      "platform": "kick",
+      "name": "Someone gifts KICKs",
+      "description": "Someone sends KICKs in your chat.",
+      "type": "eventbus",
+      "event": "channel.kicks",
+      "sentence": "Someone gifts {amount}",
+      "taxonomy": [
+        "platform.kick",
+        "alert.kicks"
+      ],
+      "emits": {
+        "summary": "{userName} gifted {amount} KICKs",
+        "details": [
+          "“{message}”"
+        ],
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "Who sent them, as a Kick ID. Empty when anonymous.",
+            "identity": "viewer",
+            "anonymousWhen": "isAnonymous",
+            "displayName": "userName"
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "Who sent them. Empty when anonymous."
+          },
+          {
+            "path": "isAnonymous",
+            "type": "boolean",
+            "description": "True if they sent them anonymously."
+          },
+          {
+            "path": "amount",
+            "type": "number",
+            "description": "How many KICKs.",
+            "example": 100
+          },
+          {
+            "path": "giftName",
+            "type": "string",
+            "description": "The name of the gift."
+          },
+          {
+            "path": "giftType",
+            "type": "string",
+            "description": "The kind of gift."
+          },
+          {
+            "path": "giftTier",
+            "type": "string",
+            "description": "The gift's tier."
+          },
+          {
+            "path": "message",
+            "type": "string",
+            "description": "What they typed."
+          }
+        ]
+      },
+      "allowVariants": true,
+      "schema": [
+        {
+          "id": "amount",
+          "label": "KICKs",
+          "type": "number",
+          "unit": "KICKs",
+          "required": true,
+          "min": 1,
+          "defaultValue": 100,
+          "placeholder": "e.g. 100",
+          "eventPath": "amount",
+          "operator": "gte",
+          "operators": [
+            "gte",
+            "eq"
+          ],
+          "anyText": "any amount of KICKs",
+          "missingText": "an amount of KICKs",
+          "description": "Only fire when the gift is at least, or exactly, this many KICKs."
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "id": "kick.user_info",
+      "name": "Look up a Kick user",
+      "description": "Find out who someone is on Kick, what they last streamed, and whether they're live. Use it in later steps.",
+      "type": "function",
+      "function": "getUserInfo",
+      "schema": [
+        {
+          "id": "user",
+          "label": "User",
+          "type": "text",
+          "required": true,
+          "placeholder": "Kick ID or channel name",
+          "description": "The user to look up.",
+          "hint": "Can use details from the trigger, like the follower."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "Their Kick ID."
+          },
+          {
+            "path": "userName",
+            "type": "string",
+            "description": "The name you looked up."
+          },
+          {
+            "path": "login",
+            "type": "string",
+            "description": "Their channel name, as in their Kick link."
+          },
+          {
+            "path": "displayName",
+            "type": "string",
+            "description": "Their name as Kick shows it."
+          },
+          {
+            "path": "description",
+            "type": "string",
+            "description": "Their channel bio."
+          },
+          {
+            "path": "profileImageUrl",
+            "type": "string",
+            "description": "A link to their profile picture."
+          },
+          {
+            "path": "title",
+            "type": "string",
+            "description": "Their stream title."
+          },
+          {
+            "path": "categoryId",
+            "type": "string",
+            "description": "The ID of their category."
+          },
+          {
+            "path": "categoryName",
+            "type": "string",
+            "description": "The category they're streaming, or last streamed. Empty if none."
+          },
+          {
+            "path": "tags",
+            "type": "array",
+            "description": "Their stream tags."
+          },
+          {
+            "path": "language",
+            "type": "string",
+            "description": "Their stream language."
+          },
+          {
+            "path": "isLive",
+            "type": "boolean",
+            "description": "True if they're live right now."
+          },
+          {
+            "path": "viewerCount",
+            "type": "number",
+            "description": "How many people are watching. 0 while offline."
+          },
+          {
+            "path": "streamStartedAt",
+            "type": "string",
+            "description": "When their stream started. Empty while offline."
+          }
+        ]
+      }
+    },
+    {
+      "id": "kick.update_stream",
+      "name": "Update Kick stream info",
+      "description": "Change your Kick title, category or tags. Anything left blank stays as it is.",
+      "type": "function",
+      "function": "updateStream",
+      "schema": [
+        {
+          "id": "title",
+          "label": "Title",
+          "type": "text",
+          "placeholder": "Leave blank to keep the current title",
+          "hint": "Can use details from the trigger, like what the chatter typed."
+        },
+        {
+          "id": "category",
+          "label": "Category",
+          "type": "text",
+          "placeholder": "e.g. Just Chatting",
+          "description": "A category name. The closest match is used."
+        },
+        {
+          "id": "tags",
+          "label": "Tags",
+          "type": "text",
+          "placeholder": "e.g. English, Chill, Speedrun",
+          "description": "Separate with commas. Replaces your current tags. Up to 10 tags."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "title",
+            "type": "string",
+            "description": "The new title. Empty when unchanged."
+          },
+          {
+            "path": "categoryId",
+            "type": "string",
+            "description": "The ID of the new category. Empty when unchanged."
+          },
+          {
+            "path": "categoryName",
+            "type": "string",
+            "description": "The new category's name. Empty when unchanged."
+          },
+          {
+            "path": "tags",
+            "type": "array",
+            "description": "The new tags. Empty when unchanged."
+          }
+        ]
+      }
+    },
+    {
+      "id": "kick.timeout",
+      "name": "Time out a Kick chatter",
+      "description": "Give a chatter a break from your Kick chat.",
+      "type": "function",
+      "function": "timeout",
+      "schema": [
+        {
+          "id": "user",
+          "label": "Chatter",
+          "type": "text",
+          "required": true,
+          "placeholder": "Kick ID or channel name",
+          "description": "The chatter to time out.",
+          "hint": "Can use details from the trigger, like the chatter."
+        },
+        {
+          "id": "durationSeconds",
+          "label": "Duration",
+          "type": "number",
+          "required": true,
+          "defaultValue": 600,
+          "unit": "seconds",
+          "description": "From 1 minute to 7 days. Kick counts whole minutes, so it rounds up."
+        },
+        {
+          "id": "reason",
+          "label": "Reason",
+          "type": "text",
+          "placeholder": "Optional",
+          "description": "Shown to the chatter and your moderators. Up to 100 characters."
+        }
+      ],
+      "returns": {
+        "fields": [
+          {
+            "path": "userId",
+            "type": "string",
+            "description": "The Kick ID of the chatter who was timed out."
+          },
+          {
+            "path": "durationSeconds",
+            "type": "number",
+            "description": "How long the timeout lasts, in seconds, after rounding up to whole minutes."
+          }
+        ]
+      }
+    }
+  ],
+  "functions": [
+    {
+      "id": "getUserInfo",
+      "name": "Look up a Kick user",
+      "runtime": "js",
+      "path": "functions/getUserInfo.js",
+      "entryPoint": "getUserInfo"
+    },
+    {
+      "id": "updateStream",
+      "name": "Update Kick stream info",
+      "runtime": "js",
+      "path": "functions/updateStream.js",
+      "entryPoint": "updateStream"
+    },
+    {
+      "id": "timeout",
+      "name": "Time out a Kick chatter",
+      "runtime": "js",
+      "path": "functions/timeout.js",
+      "entryPoint": "timeout"
+    }
+  ]
+}
