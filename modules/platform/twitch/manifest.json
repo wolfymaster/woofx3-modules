@@ -2,7 +2,7 @@
   "id": "woofx3_twitch",
   "name": "Twitch Platform",
   "author": "WolfyMaster LLC",
-  "version": "0.16.1",
+  "version": "0.17.0",
   "category": "platform",
   "description": "React to follows, subs, cheers, raids and more on Twitch, and run Twitch jobs like clips and shoutouts.",
   "permissions": [
@@ -22,6 +22,7 @@
   "triggers": [
     {
       "id": "channel_follow",
+      "platform": "twitch",
       "name": "Someone follows",
       "description": "Someone follows your channel.",
       "type": "eventbus",
@@ -51,6 +52,7 @@
     },
     {
       "id": "user_message",
+      "platform": "twitch",
       "name": "Someone sends a chat message",
       "description": "Someone sends a message in your chat.",
       "type": "eventbus",
@@ -153,6 +155,7 @@
     },
     {
       "id": "channel_subscribe",
+      "platform": "twitch",
       "name": "Someone subscribes",
       "description": "Someone subscribes to your channel.",
       "type": "eventbus",
@@ -263,6 +266,7 @@
     },
     {
       "id": "channel_shared_subscribe",
+      "platform": "twitch",
       "name": "Someone subscribes in Shared Chat",
       "description": "Someone subscribes in another channel while you share chat.",
       "type": "eventbus",
@@ -398,6 +402,7 @@
     },
     {
       "id": "channel_subscription_gift",
+      "platform": "twitch",
       "name": "Someone gifts subs",
       "description": "Someone gifts subs to your community.",
       "type": "eventbus",
@@ -488,6 +493,7 @@
     },
     {
       "id": "channel_shared_subscription_gift",
+      "platform": "twitch",
       "name": "Someone gifts subs in Shared Chat",
       "description": "Someone gifts subs in another channel while you share chat.",
       "type": "eventbus",
@@ -623,6 +629,7 @@
     },
     {
       "id": "channel_cheer",
+      "platform": "twitch",
       "name": "Someone cheers bits",
       "description": "Someone cheers Bits in your chat.",
       "type": "eventbus",
@@ -696,6 +703,7 @@
     },
     {
       "id": "channel_hypetrain",
+      "platform": "twitch",
       "name": "A Hype Train starts",
       "description": "A Hype Train starts on your channel.",
       "type": "eventbus",
@@ -708,6 +716,7 @@
     },
     {
       "id": "stream_online",
+      "platform": "twitch",
       "name": "You go live",
       "description": "Your stream goes live.",
       "type": "eventbus",
@@ -739,6 +748,7 @@
     },
     {
       "id": "channelpoints_redeem",
+      "platform": "twitch",
       "name": "Someone redeems a channel point reward",
       "description": "Someone redeems a channel point reward.",
       "type": "eventbus",
@@ -816,6 +826,7 @@
     },
     {
       "id": "stream_offline",
+      "platform": "twitch",
       "name": "You go offline",
       "description": "Your stream ends.",
       "type": "eventbus",
@@ -842,6 +853,7 @@
     },
     {
       "id": "channel_raid",
+      "platform": "twitch",
       "name": "Someone raids you",
       "description": "Another channel raids yours.",
       "type": "eventbus",
@@ -900,6 +912,7 @@
     },
     {
       "id": "channel_shared_raid",
+      "platform": "twitch",
       "name": "Someone raids in Shared Chat",
       "description": "A raid happens in another channel while you share chat.",
       "type": "eventbus",
@@ -1002,6 +1015,7 @@
     },
     {
       "id": "channel_resub",
+      "platform": "twitch",
       "name": "Someone resubscribes",
       "description": "Someone renews their subscription.",
       "type": "eventbus",
@@ -1176,6 +1190,7 @@
     },
     {
       "id": "channel_shared_resub",
+      "platform": "twitch",
       "name": "Someone resubscribes in Shared Chat",
       "description": "Someone renews in another channel while you share chat.",
       "type": "eventbus",
@@ -1359,6 +1374,7 @@
     },
     {
       "id": "channel_gift_paid_upgrade",
+      "platform": "twitch",
       "name": "Someone upgrades a gifted sub",
       "description": "Someone upgrades a gifted sub to a paid one.",
       "type": "eventbus",
@@ -1430,6 +1446,7 @@
     },
     {
       "id": "channel_shared_gift_paid_upgrade",
+      "platform": "twitch",
       "name": "Someone upgrades a gifted sub in Shared Chat",
       "description": "Someone upgrades a gifted sub in another channel while you share chat.",
       "type": "eventbus",
@@ -1510,6 +1527,7 @@
     },
     {
       "id": "channel_prime_paid_upgrade",
+      "platform": "twitch",
       "name": "Someone upgrades a Prime sub",
       "description": "Someone upgrades a Prime sub to a paid one.",
       "type": "eventbus",
@@ -1595,6 +1613,7 @@
     },
     {
       "id": "channel_shared_prime_paid_upgrade",
+      "platform": "twitch",
       "name": "Someone upgrades a Prime sub in Shared Chat",
       "description": "Someone upgrades a Prime sub in another channel while you share chat.",
       "type": "eventbus",
@@ -1690,6 +1709,7 @@
     },
     {
       "id": "channel_unraid",
+      "platform": "twitch",
       "name": "You cancel a raid",
       "description": "You cancel a raid you started.",
       "type": "eventbus",
@@ -1741,6 +1761,7 @@
     },
     {
       "id": "channel_pay_it_forward",
+      "platform": "twitch",
       "name": "Someone pays a gifted sub forward",
       "description": "Someone who got a gifted sub gifts one to someone else.",
       "type": "eventbus",
@@ -1812,6 +1833,7 @@
     },
     {
       "id": "channel_shared_pay_it_forward",
+      "platform": "twitch",
       "name": "Someone pays a gifted sub forward in Shared Chat",
       "description": "A gifted sub is paid forward in another channel while you share chat.",
       "type": "eventbus",
@@ -1892,6 +1914,7 @@
     },
     {
       "id": "channel_announcement",
+      "platform": "twitch",
       "name": "A chat announcement is posted",
       "description": "An announcement is posted in your chat.",
       "type": "eventbus",
@@ -1985,6 +2008,7 @@
     },
     {
       "id": "channel_shared_announcement",
+      "platform": "twitch",
       "name": "A chat announcement is posted in Shared Chat",
       "description": "An announcement is posted in another channel while you share chat.",
       "type": "eventbus",
@@ -2087,6 +2111,7 @@
     },
     {
       "id": "channel_charity_donation",
+      "platform": "twitch",
       "name": "Someone donates to your charity drive",
       "description": "Someone donates to your charity campaign.",
       "type": "eventbus",
@@ -2181,6 +2206,7 @@
     },
     {
       "id": "channel_bits_badge_tier",
+      "platform": "twitch",
       "name": "Someone reaches a new Bits badge",
       "description": "Someone earns a new Bits badge.",
       "type": "eventbus",
@@ -2268,6 +2294,7 @@
     },
     {
       "id": "channel_watch_streak",
+      "platform": "twitch",
       "name": "A viewer hits a watch streak",
       "description": "A viewer shares a watch streak.",
       "type": "eventbus",
@@ -2359,6 +2386,7 @@
     },
     {
       "id": "channel_ad_break_upcoming",
+      "platform": "twitch",
       "name": "An ad break is coming up",
       "description": "An ad break is coming up soon.",
       "type": "eventbus",
@@ -2393,6 +2421,7 @@
     },
     {
       "id": "channel_ad_break_begin",
+      "platform": "twitch",
       "name": "An ad break starts",
       "description": "An ad break starts.",
       "type": "eventbus",
@@ -2431,6 +2460,7 @@
     },
     {
       "id": "channel_ad_break_end",
+      "platform": "twitch",
       "name": "An ad break ends",
       "description": "An ad break ends.",
       "type": "eventbus",
