@@ -35,8 +35,9 @@ Twitch alerts. Streaming on both at once? Set up an alert for each.
 - **Time out a chatter.** Give a rule breaker a break from chat. Kick counts
   timeouts in whole minutes, from one minute up to seven days.
 
-To post in your Kick chat, use the regular "Send chat message" step and pick
-Kick.
+To post in your Kick chat, use the built-in "Send chat message" step that
+comes with woofx3 (not the one in the Twitch module) and pick Kick as the
+platform.
 
 ## Ideas to try
 
